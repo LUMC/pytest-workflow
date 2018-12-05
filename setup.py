@@ -14,7 +14,7 @@ setup(
     author_email="sasc@lumc.nl",  # A placeholder for now
     long_description=long_description,
     license="AGPL-3.0",
-    keywords=["pytest", "workflow", "pipeline", "yaml"],
+    keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
     packages=["src/pytest-workflow"],
     url="https://github.com/LUMC/pytest-workflow",
