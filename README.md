@@ -1,2 +1,2 @@
 # pytest-workflow
-Configure workflow/pipeline tests using yaml files.
+Configure workflow/pipeline tests using YAML files.
