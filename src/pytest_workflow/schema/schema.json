@@ -4,6 +4,10 @@
   "description": "A YAML file describing a test for the pytest-workflow plugin",
   "type": "object",
   "properties": {
+    "name": {
+      "description": "Name of the test",
+      "type": "string"
+    },
     "command": {
       "description": "The command used to execute the workflow",
       "type": "string"
@@ -31,5 +35,5 @@
       }
     }
   },
-  "required": ["command", "results"]
+  "required": ["command", "results", "name"]
 }
