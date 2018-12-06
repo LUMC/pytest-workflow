@@ -16,7 +16,8 @@ setup(
     license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
-    packages=find_packages(),
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
         "Programming Language :: Python :: 3",

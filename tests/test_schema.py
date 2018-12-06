@@ -16,3 +16,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/
 
 # This file contains tests for the schema for the yaml file
+
+from pytest_workflow.schema import validate_schema
+
