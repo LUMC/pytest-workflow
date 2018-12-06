@@ -1,3 +1,4 @@
+name: "Some random valid test"
 command: "bla string"
 results:
   files:

@@ -16,9 +16,10 @@
 
 """Schema for the YAML files used by pytest-workflow"""
 
-import jsonschema
 import json
 from pathlib import Path
+
+import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 with SCHEMA.open() as schema:

@@ -19,7 +19,15 @@
 import pytest
 import yaml
 
+from .schema import validate_schema
+
 
 class YamlFile(pytest.File):
     def collect(self):
-        pass
+        yaml_content = yaml.load(self.fspath.open())
+        validate_schema(yaml_content)
+
+class WorkflowItem(pytest.Item):
+    def __init__(self, name, parent, spec):
+        super(WorkflowItem, self).__init__(name, parent)
+
