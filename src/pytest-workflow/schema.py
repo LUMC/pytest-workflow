@@ -15,3 +15,14 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """Schema for the YAML files used by pytest-workflow"""
+
+import jsonschema
+import json
+from pathlib import Path
+
+SCHEMA = Path(__file__).parent() / Path("schema") / Path("schema.json")
+with open(SCHEMA) as schema:
+    JSON_SCHEMA = json.load(schema)
+
+def validate_schema(instance):
+    jsonschema.validate(instance, JSON_SCHEMA)
