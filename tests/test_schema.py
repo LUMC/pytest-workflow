@@ -29,8 +29,8 @@ def valid_yamls():
     ]
 
 
-@pytest.mark.parametrize("yaml", valid_yamls())
-def test_validate_schema(yaml_file):
-    with open(yaml_file) as yaml_fh:
+@pytest.mark.parametrize("yaml_path", valid_yamls())
+def test_validate_schema(yaml_path):
+    with yaml_path.open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
 
