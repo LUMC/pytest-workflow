@@ -2,5 +2,33 @@
   "$schema": "https://json-schema.org/draft-07/schema",
   "title": "pytest-workflow YAML",
   "description": "A YAML file describing a test for the pytest-workflow plugin",
-  "type": "object"
+  "type": "object",
+  "properties": {
+    "command": {
+      "description": "The command used to execute the workflow",
+      "type": "string"
+    },
+    "results": {
+      "description": "A dictionary containing the results",
+      "type": "object",
+      "properties": {
+        "files": {
+          "description": "files produced by the workflow",
+          "type": "array",
+          "items": {
+            "type":"object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "contains": {
+
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "required": ["command"]
 }
