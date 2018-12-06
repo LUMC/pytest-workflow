@@ -18,7 +18,9 @@ setup(
     zip_safe=False,
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    include_package_data = True,
+    package_data = {
+        'pytest_workflow': ['schema/*.json']
+    },
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
         "Programming Language :: Python :: 3",
