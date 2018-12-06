@@ -13,7 +13,7 @@ setup(
     author="Leiden University Medical Center, various departments",
     author_email="sasc@lumc.nl",  # A placeholder for now
     long_description=long_description,
-    license="AGPL-3.0",
+    license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
     packages=find_packages(),
