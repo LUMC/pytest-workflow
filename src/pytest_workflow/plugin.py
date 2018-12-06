@@ -26,8 +26,8 @@ class YamlFile(pytest.File):
     def collect(self):
         yaml_content = yaml.load(self.fspath.open())
         validate_schema(yaml_content)
+        yield WorkflowItem(yaml_content.get("name"),self, yaml_content)
 
 class WorkflowItem(pytest.Item):
     def __init__(self, name, parent, spec):
         super(WorkflowItem, self).__init__(name, parent)
-
