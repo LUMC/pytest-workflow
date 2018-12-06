@@ -1,6 +1,6 @@
 #!/usr/bin/env/python3
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 with open("README.md", "r") as readme_file:
@@ -16,7 +16,7 @@ setup(
     license="AGPL-3.0",
     keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
-    packages=["src/pytest-workflow"],
+    packages=find_packages(),
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
         "Programming Language :: Python :: 3",
