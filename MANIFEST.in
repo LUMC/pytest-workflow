@@ -1,2 +1,2 @@
 include README.md
-include src/pytest-workflow/schema/*.json
+recursive-include src/pytest-workflow/schema *

@@ -20,7 +20,7 @@ import jsonschema
 import json
 from pathlib import Path
 
-SCHEMA = Path(__file__).parent() / Path("schema") / Path("schema.json")
+SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 with open(SCHEMA) as schema:
     JSON_SCHEMA = json.load(schema)
 

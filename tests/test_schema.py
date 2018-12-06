@@ -18,4 +18,19 @@
 # This file contains tests for the schema for the yaml file
 
 from pytest_workflow.schema import validate_schema
+import pytest
+import yaml
+from pathlib import Path
+
+def valid_yamls():
+    valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
+    return [
+        (valid_yaml_dir / Path("valid_test.yml"))
+    ]
+
+
+@pytest.mark.parametrize("yaml", valid_yamls())
+def test_validate_schema(yaml_file):
+    with open(yaml_file) as yaml_fh:
+        validate_schema(yaml.safe_load(yaml_fh))
 
