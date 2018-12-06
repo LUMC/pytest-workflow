@@ -18,9 +18,8 @@
 
 import pytest
 import yaml
-
+from pathlib import Path
 from .schema import validate_schema
-
 
 class YamlFile(pytest.File):
     def collect(self):
@@ -31,3 +30,12 @@ class YamlFile(pytest.File):
 class WorkflowItem(pytest.Item):
     def __init__(self, name, parent, spec):
         super(WorkflowItem, self).__init__(name, parent)
+
+    def runtest(self):
+        pass
+
+    def repr_failure(self, excinfo):
+        pass
+
+    def reportinfo(self):
+        return self.fspath, 0, "usecase: {0}".format(self.name)
