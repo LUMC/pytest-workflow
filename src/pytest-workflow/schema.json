@@ -1,1 +1,6 @@
-{}
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "pytest-workflow YAML",
+  "description": "A YAML file describing a test for the pytest-workflow plugin",
+  "type": "object"
+}
