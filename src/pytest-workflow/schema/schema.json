@@ -21,14 +21,15 @@
               "path": {
                 "type": "string"
               },
-              "contains": {
-
+              "md5sum": {
+                "type": "string"
               }
-            }
+            },
+            "required": ["path"]
           }
         }
       }
     }
   },
-  "required": ["command"]
+  "required": ["command", "results"]
 }
