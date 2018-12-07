@@ -21,6 +21,13 @@ import yaml
 from pathlib import Path
 from .schema import validate_schema
 
+def pytest_collect_file(path, parent):
+    """Collection hook
+    This collects the yaml files where the tests are defined."""
+    if path.ext == ".yml":
+        return YamlFile(path, parent)
+
+
 class YamlFile(pytest.File):
     """This class collects YAML files and turns them into test items."""
     def collect(self):
@@ -30,7 +37,10 @@ class YamlFile(pytest.File):
 
 class WorkflowItem(pytest.Item):
     """This class defines a pytest item. That has methods for running tests."""
-    def __init__(self, name, parent, spec):
+    def __init__(self, name, parent, yaml_content):
+        validate_schema(yaml_content)
+        self.yaml_content = yaml_content
+
         super(WorkflowItem, self).__init__(name, parent)
 
     def runtest(self):
