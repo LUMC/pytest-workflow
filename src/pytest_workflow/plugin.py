@@ -16,12 +16,14 @@
 
 """core functionality of pytest-workflow plugin"""
 
+from typing import List
+
 import pytest
 import yaml
-from typing import List
-from pathlib import Path
+
 from .schema import validate_schema
 from .workflow import Workflow
+
 
 def pytest_collect_file(path, parent):
     """Collection hook
@@ -32,13 +34,16 @@ def pytest_collect_file(path, parent):
 
 class YamlFile(pytest.File):
     """This class collects YAML files and turns them into test items."""
+
     def collect(self):
         yaml_content = yaml.load(self.fspath.open())
         validate_schema(yaml_content)
-        yield WorkflowItem(yaml_content.get("name"),self, yaml_content)
+        yield WorkflowItem(yaml_content.get("name"), self, yaml_content)
+
 
 class WorkflowItem(pytest.Item):
     """This class defines a pytest item. That has methods for running tests."""
+
     def __init__(self, name, parent, yaml_content):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
@@ -54,6 +59,7 @@ class WorkflowItem(pytest.Item):
     def reportinfo(self):
         return self.fspath, 0, "usecase: {0}".format(self.name)
 
+
 def pytest_addoption(parser):
     """This adds extra options to the pytest executable"""
     parser.addoption(
@@ -62,12 +68,12 @@ def pytest_addoption(parser):
         help="The executable used to run the workflow."
     )
 
+
 @pytest.fixture(scope="module")  # scope=module so that it only executes once.
 def workflow_run(args: List[str], request):
-    workflow = Workflow(executable = request.config.getoption("executable"),arguments= args)
+    workflow = Workflow(executable=request.config.getoption("executable"), arguments=args)
     workflow.run()
     yield workflow
     # everything after 'yield' in a pytest fixture
     #  is performed after test completion.
     workflow.cleanup()
-
