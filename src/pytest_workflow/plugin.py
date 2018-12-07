@@ -54,3 +54,8 @@ class WorkflowItem(pytest.Item):
 
 def pytest_addoption(parser):
     """This adds extra options to the pytest executable"""
+    parser.addoption(
+        "--workflow-executable",
+        dest="workflow_executable",
+        help="The executable used to run the workflow."
+    )
