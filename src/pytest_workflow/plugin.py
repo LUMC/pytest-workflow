@@ -21,6 +21,7 @@ from typing import List
 import pytest
 import yaml
 
+from pathlib import Path
 from .schema import validate_schema
 from .workflow import Workflow
 
@@ -49,14 +50,15 @@ class WorkflowItem(pytest.Item):
 
         super(WorkflowItem, self).__init__(name, parent)
 
-    def runtest(self, workflow_executable):
+    def runtest(self):
         """Run test runs the item test
         We use the workflow_run fixture here to run the workflow"""
         workflow = Workflow(
-            executable=workflow_executable,
+            executable=self.config.getoption("workflow_executable"),
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
-        assert workflow.exit_code == 0
+        for file in self.yaml_content.get("results").get("files", []):
+            assert Path(file.get("path")).exists()
 
 
     def reportinfo(self):
@@ -70,7 +72,3 @@ def pytest_addoption(parser):
         dest="workflow_executable",
         help="The executable used to run the workflow. This argument is required for running workflows."
     )
-
-@pytest.fixture()
-def workflow_executable(request):
-    return request.config.getoption("workflow_executable")
