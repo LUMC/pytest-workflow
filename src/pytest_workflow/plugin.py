@@ -49,17 +49,15 @@ class WorkflowItem(pytest.Item):
 
         super(WorkflowItem, self).__init__(name, parent)
 
-    def runtest(self, request):
+    def runtest(self, workflow_executable):
         """Run test runs the item test
         We use the workflow_run fixture here to run the workflow"""
         workflow = Workflow(
-            executable=request.config.getoption("workflow_executable"),
+            executable=workflow_executable,
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
         assert workflow.exit_code == 0
 
-    def repr_failure(self, excinfo):
-        pass
 
     def reportinfo(self):
         return self.fspath, None, self.name
@@ -72,3 +70,7 @@ def pytest_addoption(parser):
         dest="workflow_executable",
         help="The executable used to run the workflow. This argument is required for running workflows."
     )
+
+@pytest.fixture()
+def workflow_executable(request):
+    return request.config.getoption("workflow_executable")
