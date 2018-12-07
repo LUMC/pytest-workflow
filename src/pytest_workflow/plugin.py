@@ -18,8 +18,10 @@
 
 import pytest
 import yaml
+from typing import List
 from pathlib import Path
 from .schema import validate_schema
+from .workflow import Workflow
 
 def pytest_collect_file(path, parent):
     """Collection hook
@@ -59,3 +61,13 @@ def pytest_addoption(parser):
         dest="workflow_executable",
         help="The executable used to run the workflow."
     )
+
+@pytest.fixture(scope="module")  # scope=module so that it only executes once.
+def workflow_run(args: List[str], request):
+    workflow = Workflow(executable = request.config.getoption("executable"),arguments= args)
+    workflow.run()
+    yield workflow
+    # everything after 'yield' in a pytest fixture
+    #  is performed after test completion.
+    workflow.cleanup()
+

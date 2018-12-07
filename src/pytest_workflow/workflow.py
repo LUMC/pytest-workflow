@@ -1,17 +1,14 @@
 """This file was created by A.H.B. Bollen as a proof of concept."""
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 import subprocess
 
-import pytest
 
+class Workflow(object):
 
-class Pipeline(object):
-
-    def __init__(self, executable: Path, arguments: List[str], outputs: Optional[List[Path]] = None):
+    def __init__(self, executable: Path, arguments: List[str]):
         self.executable = executable  # you could do a pre-test to make sure the executable even exists
         self.arguments = arguments
-        self.outputs = outputs
 
         self._proc_out = None
 
@@ -34,22 +31,8 @@ class Pipeline(object):
 
     def cleanup(self):
         # e.g. cleanup output files
-        raise NotImplementedError
-
-    @classmethod
-    def from_yaml(cls, yaml_path: Path):
-        # make instance of this class from a yaml file
-        raise NotImplementedError
-
-
-@pytest.fixture(scope="module")  # scope=module so that it only executes once.
-def hello_world_pipeline():
-    pipeline = Pipeline(Path("/bin/echo"), ["hello_world!"], [Path("hello.txt")])
-    pipeline.run()
-    yield pipeline
-    # everything after 'yield' in a pytest fixture
-    #  is performed after test completion.
-    pipeline.cleanup()
+        # TODO: Implement something?
+        pass
 
 
 def test_exit_code(hello_world_pipeline):
