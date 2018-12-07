@@ -39,3 +39,6 @@ class WorkflowItem(pytest.Item):
 
     def reportinfo(self):
         return self.fspath, 0, "usecase: {0}".format(self.name)
+
+def pytest_addoption(parser):
+    """This adds extra options to the pytest executable"""
