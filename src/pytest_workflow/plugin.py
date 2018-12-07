@@ -38,14 +38,13 @@ class YamlFile(pytest.File):
     def collect(self):
         yaml_content = yaml.load(self.fspath.open())
         validate_schema(yaml_content)
-        yield WorkflowItem(yaml_content.get("name"), self, yaml_content)
+        yield WorkflowItem(self.fspath.basename, self, yaml_content)
 
 
 class WorkflowItem(pytest.Item):
     """This class defines a pytest item. That has methods for running tests."""
 
     def __init__(self, name, parent, yaml_content: dict):
-        validate_schema(yaml_content)
         self.yaml_content = yaml_content
 
         super(WorkflowItem, self).__init__(name, parent)
@@ -57,12 +56,13 @@ class WorkflowItem(pytest.Item):
             executable=request.config.getoption("workflow_executable"),
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
+        assert workflow.exit_code == 0
 
     def repr_failure(self, excinfo):
         pass
 
     def reportinfo(self):
-        return self.fspath, 0, "usecase: {0}".format(self.name)
+        return self.fspath, None, self.name
 
 
 def pytest_addoption(parser):

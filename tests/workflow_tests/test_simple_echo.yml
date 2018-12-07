@@ -1,0 +1,7 @@
+name: simple echo
+arguments:
+  - "-c"
+  - "echo moo > log.file && echo moo again"
+results:
+  files:
+    - path: "log.file"
