@@ -28,7 +28,7 @@ from .workflow import Workflow
 def pytest_collect_file(path, parent):
     """Collection hook
     This collects the yaml files where the tests are defined."""
-    if path.ext == ".yml":
+    if path.ext == ".yml" and path.basename.startswith("test"):
         return YamlFile(path, parent)
 
 
@@ -44,14 +44,19 @@ class YamlFile(pytest.File):
 class WorkflowItem(pytest.Item):
     """This class defines a pytest item. That has methods for running tests."""
 
-    def __init__(self, name, parent, yaml_content):
+    def __init__(self, name, parent, yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
 
         super(WorkflowItem, self).__init__(name, parent)
 
-    def runtest(self):
-        pass
+    def runtest(self, request):
+        """Run test runs the item test
+        We use the workflow_run fixture here to run the workflow"""
+        workflow = Workflow(
+            executable=request.config.getoption("workflow_executable"),
+            arguments=self.yaml_content.get("arguments"))
+        workflow.run()
 
     def repr_failure(self, excinfo):
         pass
@@ -65,15 +70,5 @@ def pytest_addoption(parser):
     parser.addoption(
         "--workflow-executable",
         dest="workflow_executable",
-        help="The executable used to run the workflow."
+        help="The executable used to run the workflow. This argument is required for running workflows."
     )
-
-
-@pytest.fixture(scope="module")  # scope=module so that it only executes once.
-def workflow_run(args: List[str], request):
-    workflow = Workflow(executable=request.config.getoption("executable"), arguments=args)
-    workflow.run()
-    yield workflow
-    # everything after 'yield' in a pytest fixture
-    #  is performed after test completion.
-    workflow.cleanup()

@@ -1,5 +1,7 @@
 name: "Some random valid test"
-command: "bla string"
+arguments:
+  - "bla"
+  - "bla"
 results:
   files:
     - path: "bladiebla"

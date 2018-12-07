@@ -8,9 +8,12 @@
       "description": "Name of the test",
       "type": "string"
     },
-    "command": {
-      "description": "The command used to execute the workflow",
-      "type": "string"
+    "arguments": {
+      "description": "arguments for the executable",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     },
     "results": {
       "description": "A dictionary containing the results",
@@ -35,5 +38,5 @@
       }
     }
   },
-  "required": ["command", "results", "name"]
+  "required": ["arguments", "results", "name"]
 }
