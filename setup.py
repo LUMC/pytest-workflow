@@ -28,6 +28,8 @@ setup(
         "Framework :: Pytest",
     ],
     install_requires=[
-        "pytest>=4"
+        "pytest>=4",
+        "pyyaml",
+        "jsonschema"
     ]
 )
