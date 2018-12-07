@@ -31,5 +31,6 @@ setup(
         "pytest>=4",
         "pyyaml",
         "jsonschema"
-    ]
+    ],
+    entry_points={"pytest11": ["pytest-workflow = pytest_workflow.plugin"]}
 )
