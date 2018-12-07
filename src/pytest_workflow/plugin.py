@@ -57,6 +57,10 @@ class WorkflowItem(pytest.Item):
             executable=self.config.getoption("workflow_executable"),
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
+
+        # Here all the assertions are done. This is butt-ugly. Preferably
+        # Some stuff is parameterized or something.
+        assert workflow.exit_code == 0  # We may want to allow for failing workflows later and make this configurable in the yaml.
         for file in self.yaml_content.get("results").get("files", []):
             assert Path(file.get("path")).exists()
 
