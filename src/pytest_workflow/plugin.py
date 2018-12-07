@@ -22,12 +22,14 @@ from pathlib import Path
 from .schema import validate_schema
 
 class YamlFile(pytest.File):
+    """This class collects YAML files and turns them into test items."""
     def collect(self):
         yaml_content = yaml.load(self.fspath.open())
         validate_schema(yaml_content)
         yield WorkflowItem(yaml_content.get("name"),self, yaml_content)
 
 class WorkflowItem(pytest.Item):
+    """This class defines a pytest item. That has methods for running tests."""
     def __init__(self, name, parent, spec):
         super(WorkflowItem, self).__init__(name, parent)
 
