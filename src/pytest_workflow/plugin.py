@@ -44,10 +44,9 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class defines a pytest item. That has methods for running tests."""
 
-    def __init__(self, name, parent, yaml_content: dict):
+    def __init__(self, yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
-        super(WorkflowTestsCollector, self).__init__(name, parent)
         self.workflow = Workflow(
             executable=self.config.getoption("workflow_executable"),
             arguments=self.yaml_content.get("arguments"))
