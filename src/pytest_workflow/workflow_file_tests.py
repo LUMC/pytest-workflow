@@ -4,8 +4,16 @@ from typing import List
 from pathlib import Path
 import pytest
 class WorkflowFilesTestCollector(pytest.Collector):
-    def __init__(self, files: List[dict]):
+    def __init__(self, name, files: List[dict]):
         self.files = files
+        self.name = name
+
+    def collect(self):
+        filepaths = [Path(x.get("path")) for x in self.files ]
+        # Structure why not the file exists directly?
+        # Because also some other operations on files will be added to
+        # this list.
+        return [FilesExistCollector(self.name, filepaths)]
 
 class FilesExistCollector(pytest.Collector):
     def __init__(self, name, files: List[Path]):
