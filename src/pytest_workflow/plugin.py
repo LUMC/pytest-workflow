@@ -38,36 +38,28 @@ class YamlFile(pytest.File):
 
     def collect(self):
         yaml_content = yaml.load(self.fspath.open())
-        validate_schema(yaml_content)
-        yield WorkflowItem(self.fspath.basename, self, yaml_content)
+        yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
 
 
-class WorkflowItem(pytest.Item):
+class WorkflowTestsCollector(pytest.Collector):
     """This class defines a pytest item. That has methods for running tests."""
 
     def __init__(self, name, parent, yaml_content: dict):
+        validate_schema(yaml_content)
         self.yaml_content = yaml_content
-
-        super(WorkflowItem, self).__init__(name, parent)
-
-    def runtest(self):
-        """Run test runs the item test
-        We use the workflow_run fixture here to run the workflow"""
-        workflow = Workflow(
+        super(WorkflowTestsCollector, self).__init__(name, parent)
+        self.workflow = Workflow(
             executable=self.config.getoption("workflow_executable"),
             arguments=self.yaml_content.get("arguments"))
-        workflow.run()
+        # Run the workflow on initialization
+        self.workflow.run()
 
-        # Here all the assertions are done. This is butt-ugly. Preferably
-        # Some stuff is parameterized or something.
-        assert workflow.exit_code == 0  # We may want to allow for failing workflows later and make this configurable in the yaml.
-        for file in self.yaml_content.get("results").get("files", []):
-            assert Path(file.get("path")).exists()
-
+    def collect(self):
+        workflow_tests=[]
+        return workflow_tests
 
     def reportinfo(self):
         return self.fspath, None, self.name
-
 
 def pytest_addoption(parser):
     """This adds extra options to the pytest executable"""
