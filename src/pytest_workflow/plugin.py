@@ -57,7 +57,7 @@ class WorkflowTestsCollector(pytest.Collector):
     def collect(self):
         """Run the workflow and start the tests"""
         # Make sure workflow is run in a temporary directory
-        tempdir = tempfile.mkdtemp(prefix="pytest_wf", dir= tempfile.gettempdir()).__str__()
+        tempdir = tempfile.mkdtemp(prefix="pytest_wf", dir= tempfile.gettempdir())
         copy_tree(os.getcwd(), tempdir)
         print(tempdir)
         workflow = Workflow(
@@ -69,7 +69,6 @@ class WorkflowTestsCollector(pytest.Collector):
             WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []), tempdir)]
         for test in workflow_tests:
             yield test
-        #tempdir.cleanup()
 
     def reportinfo(self):
         return self.fspath, None, self.name
