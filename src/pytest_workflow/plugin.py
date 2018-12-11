@@ -36,6 +36,8 @@ def pytest_collect_file(path, parent):
 
 class YamlFile(pytest.File):
     """This class collects YAML files and turns them into test items."""
+    def __init__(self, path, parent):
+        super(YamlFile, self).__init__(path, parent=parent)
 
     def collect(self):
         with self.fspath.open() as yaml_file:
@@ -46,7 +48,7 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class defines a pytest item. That has methods for running tests."""
 
-    def __init__(self, name, yaml_content: dict):
+    def __init__(self, name,  yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
         self.name = name
