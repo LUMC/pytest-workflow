@@ -74,6 +74,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # TODO: Figure out proper cleanup. If tempdir is removed here, all tests will fail.
         # After yielding the tests this object is no longer needed, so deleting the
         # tempdir here does not work.
+        # There is probably some fixture that can handle this.
 
     def reportinfo(self):
         return self.fspath, None, self.name
