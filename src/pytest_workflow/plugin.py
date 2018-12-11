@@ -61,7 +61,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # Make sure workflow is run in a temporary directory
         tempdir = tempfile.mkdtemp(prefix="pytest_wf")
         copy_tree(os.getcwd(), tempdir)
-        print(tempdir)
         workflow = Workflow(
             executable=self.yaml_content.get("executable"),
             arguments=self.yaml_content.get("arguments"),
