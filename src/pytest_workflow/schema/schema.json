@@ -11,6 +11,10 @@
         "type": "string"
       }
     },
+    "executable": {
+      "description": "The executable that is being run",
+      "type": "string"
+    },
     "results": {
       "description": "A dictionary containing the results",
       "type": "object",
@@ -34,5 +38,5 @@
       }
     }
   },
-  "required": ["arguments", "results"]
+  "required": ["executable","arguments", "results"]
 }

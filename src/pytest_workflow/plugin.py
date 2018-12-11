@@ -54,7 +54,7 @@ class WorkflowItem(pytest.Item):
         """Run test runs the item test
         We use the workflow_run fixture here to run the workflow"""
         workflow = Workflow(
-            executable=self.config.getoption("workflow_executable"),
+            executable=self.yaml_content.get("executable"),
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
 
@@ -67,12 +67,3 @@ class WorkflowItem(pytest.Item):
 
     def reportinfo(self):
         return self.fspath, None, self.name
-
-
-def pytest_addoption(parser):
-    """This adds extra options to the pytest executable"""
-    parser.addoption(
-        "--workflow-executable",
-        dest="workflow_executable",
-        help="The executable used to run the workflow. This argument is required for running workflows."
-    )

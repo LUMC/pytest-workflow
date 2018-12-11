@@ -1,4 +1,5 @@
 name: "Some random valid test"
+executable: "/bin/bla"
 arguments:
   - "bla"
   - "bla"

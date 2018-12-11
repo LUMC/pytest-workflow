@@ -1,4 +1,5 @@
 name: simple echo
+executable: "bash"
 arguments:
   - "-c"
   - "echo moo > log.file && echo moo again"
