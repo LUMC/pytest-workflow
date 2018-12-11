@@ -29,7 +29,8 @@
                 "type": "string"
               },
               "md5sum": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": ["path"]
