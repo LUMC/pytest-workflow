@@ -6,6 +6,5 @@ arguments:
 results:
   files:
     - path: "bladiebla"
-      md5sum: "bla"
     - path: "/bla/bla"
     - path: "bla/bla.bla"

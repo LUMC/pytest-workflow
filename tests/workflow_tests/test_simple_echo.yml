@@ -1,8 +1,7 @@
 name: simple echo
-executable: "bash"
+executable: "touch"
 arguments:
-  - "-c"
-  - "echo moo > log.file && echo moo again"
+  - "log.file"
 results:
   files:
     - path: "log.file"
