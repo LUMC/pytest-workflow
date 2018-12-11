@@ -37,7 +37,8 @@ class YamlFile(pytest.File):
     """This class collects YAML files and turns them into test items."""
 
     def collect(self):
-        yaml_content = yaml.load(self.fspath.open())
+        with self.fspath.open() as yaml_file:
+            yaml_content = yaml.load(yaml_file)
         yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
 
 
@@ -48,7 +49,7 @@ class WorkflowTestsCollector(pytest.Collector):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
         self.workflow = Workflow(
-            executable=self.config.getoption("workflow_executable"),
+            executable=self.yaml_content.get("executable"),
             arguments=self.yaml_content.get("arguments"))
         # Run the workflow on initialization
         self.workflow.run()
@@ -59,11 +60,3 @@ class WorkflowTestsCollector(pytest.Collector):
 
     def reportinfo(self):
         return self.fspath, None, self.name
-
-def pytest_addoption(parser):
-    """This adds extra options to the pytest executable"""
-    parser.addoption(
-        "--workflow-executable",
-        dest="workflow_executable",
-        help="The executable used to run the workflow. This argument is required for running workflows."
-    )

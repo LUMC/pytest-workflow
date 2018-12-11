@@ -22,15 +22,13 @@ import pytest
 import yaml
 from pathlib import Path
 
-def valid_yamls():
-    valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
-    return [
+valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
+valid_yamls = [
         (valid_yaml_dir / Path("valid_test.yml"))
     ]
 
 
-@pytest.mark.parametrize("yaml_path", valid_yamls())
+@pytest.mark.parametrize("yaml_path", valid_yamls)
 def test_validate_schema(yaml_path):
     with yaml_path.open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
-

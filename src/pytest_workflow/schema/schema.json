@@ -11,6 +11,10 @@
         "type": "string"
       }
     },
+    "executable": {
+      "description": "The executable that is being run",
+      "type": "string"
+    },
     "results": {
       "description": "A dictionary containing the results",
       "type": "object",
@@ -25,7 +29,8 @@
                 "type": "string"
               },
               "md5sum": {
-                "type": "string"
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
               }
             },
             "required": ["path"]
@@ -34,5 +39,5 @@
       }
     }
   },
-  "required": ["arguments", "results"]
+  "required": ["executable","arguments", "results"]
 }
