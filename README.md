@@ -22,10 +22,11 @@ We aim to make pytest-workflow available on PYPI in the future
 
 Below is an example of a YAML file that defines a test:
 ```YAML
-command: "echo test > test.log && echo 'Finished!' "
+executable: "touch"
+arguments: "test.file"
 results:
     files:
-      - path: test.log
+      - path: test.file
 ```
 
 When `pytest` is run the `pytest-workflow` plugin will:
