@@ -15,14 +15,12 @@ what is being tested. There has to be a better way. Enter pytest-workflow.
 
 ## Installation
 
-Install pytest-workflow in your virtual environment: `pip install pytest-workflow`. Then create
-a `conftest.py` in your repository with the following contents:
+- make sure your virtual environment is activated
+- Install using pip `pip install git+https://github.com/lumc/pytest-workflow.git`
+- create a `tests` directory in the root of your repository.
+- Create your test yaml files in the test directory
 
-```Python 
-# Stub. conftest.py information here.
-```
-
-Then create a `tests` directory in the root of your repository. 
+We aim to make pytest-workflow available on PYPI in the future  
 
 ## Writing tests with pytest-workflow
 
@@ -30,13 +28,8 @@ Below is an example of a YAML file that defines a test:
 ```YAML
 command: "echo test > test.log && echo 'Finished!' "
 results:
-    stdout: 
-      contains:
-        - "Finished!"
     files:
       - path: test.log
-        contains:
-          - "test"
 ```
 
 When `pytest` is run the `pytest-workflow` plugin will:
