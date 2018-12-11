@@ -59,7 +59,7 @@ class WorkflowTestsCollector(pytest.Collector):
     def collect(self):
         """Run the workflow and start the tests"""
         # Make sure workflow is run in a temporary directory
-        tempdir = tempfile.mkdtemp(prefix="pytest_wf", dir=tempfile.gettempdir())
+        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
         copy_tree(os.getcwd(), tempdir)
         print(tempdir)
         workflow = Workflow(
