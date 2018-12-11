@@ -24,6 +24,7 @@ from .schema import validate_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 from distutils.dir_util import copy_tree
+from shutil import rmtree
 from pathlib import Path
 
 def pytest_collect_file(path, parent):
@@ -69,6 +70,9 @@ class WorkflowTestsCollector(pytest.Collector):
             WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []), tempdir)]
         for test in workflow_tests:
             yield test
+        # TODO: Figure out proper cleanup. If tempdir is removed here, all tests will fail.
+        # After yielding the tests this object is no longer needed, so deleting the
+        # tempdir here does not work.
 
     def reportinfo(self):
         return self.fspath, None, self.name
