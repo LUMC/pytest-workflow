@@ -17,7 +17,7 @@ class WorkflowFilesTestCollector(pytest.Collector):
         # Structure why not the file exists directly?
         # Because also some other operations on files will be added to
         # this list.
-        return [FilesExistCollector(self.name, self, filepaths ,self.cwd)]
+        return [FilesExistCollector(self.name, self, filepaths, self.cwd)]
 
 
 class FilesExistCollector(pytest.Collector):
