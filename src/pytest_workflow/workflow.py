@@ -29,8 +29,3 @@ class Workflow(object):
     @property
     def exit_code(self):
         return self._proc_out.returncode
-
-    def cleanup(self):
-        # e.g. cleanup output files
-        # TODO: Implement something?
-        pass
