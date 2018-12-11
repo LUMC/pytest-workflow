@@ -32,5 +32,7 @@ setup(
         "pyyaml",
         "jsonschema"
     ],
+    # This line makes sure the plugin is automatically loaded when it is installed in the
+    # same environment as pytest. No need to configure conftest.py to enable this plugin.
     entry_points={"pytest11": ["pytest-workflow = pytest_workflow.plugin"]}
 )
