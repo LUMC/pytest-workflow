@@ -37,7 +37,8 @@ class YamlFile(pytest.File):
     """This class collects YAML files and turns them into test items."""
 
     def collect(self):
-        yaml_content = yaml.load(self.fspath.open())
+        with self.fspath.open() as yaml_file:
+            yaml_content = yaml.load(yaml_file)
         validate_schema(yaml_content)
         yield WorkflowItem(self.fspath.basename, self, yaml_content)
 
@@ -61,8 +62,8 @@ class WorkflowItem(pytest.Item):
         # Here all the assertions are done. This is butt-ugly. Preferably
         # Some stuff is parameterized or something.
         assert workflow.exit_code == 0  # We may want to allow for failing workflows later and make this configurable in the yaml.
-        for file in self.yaml_content.get("results").get("files", []):
-            assert Path(file.get("path")).exists()
+        for test_file in self.yaml_content.get("results", {}).get("files", []):
+            assert Path(test_file.get("path")).exists()
 
 
     def reportinfo(self):
