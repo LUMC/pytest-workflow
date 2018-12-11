@@ -20,8 +20,11 @@
 from pathlib import Path
 
 import pytest
-import yaml
+
 from pytest_workflow.schema import validate_schema
+
+import yaml
+
 
 valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
 valid_yamls = [
