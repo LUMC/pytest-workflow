@@ -1,12 +1,12 @@
 """This file was created by A.H.B. Bollen as a proof of concept."""
+import subprocess
 from pathlib import Path
 from typing import List
-import subprocess
 
 
 class Workflow(object):
 
-    def __init__(self, executable: Path, arguments: List[str], cwd = None):
+    def __init__(self, executable: Path, arguments: List[str], cwd=None):
         self.executable = executable
         # you could do a pre-test to make sure the executable even exists
         self.arguments = arguments
