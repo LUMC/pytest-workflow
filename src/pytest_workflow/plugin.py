@@ -17,12 +17,13 @@
 """core functionality of pytest-workflow plugin"""
 
 import pytest
+import tempfile
 import yaml
-
+import os
 from .schema import validate_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
-
+from distutils.dir_util import copy_tree
 
 def pytest_collect_file(path, parent):
     """Collection hook
@@ -54,13 +55,20 @@ class WorkflowTestsCollector(pytest.Collector):
 
     def collect(self):
         """Run the workflow and start the tests"""
+        # Make sure workflow is run in a temporary directory
+        tempdir = tempfile.TemporaryDirectory(prefix="pytest_wf")
+        self.config
+        copy_tree(os.getcwd(), tempdir.name)
+        print(tempdir)
         workflow = Workflow(
             executable=self.yaml_content.get("executable"),
             arguments=self.yaml_content.get("arguments"))
         workflow.run()
         workflow_tests = [
             WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []))]
-        return workflow_tests
+        for test in workflow_tests:
+            yield test
+        tempdir.cleanup()
 
     def reportinfo(self):
         return self.fspath, None, self.name
