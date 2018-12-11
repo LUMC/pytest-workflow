@@ -4,14 +4,10 @@ by using yaml files for the test configuration.
 
 ## Introduction
 
-[There are nine million bicycles in Bejing](https://youtu.be/eHQG6-DojVw). 
-That's a fact, it's a thing we can't deny, like the fact that the number of workflow
-engines is rapidly approaching [the same number](https://github.com/common-workflow-language/common-workflow-language/wiki/Existing-Workflow-systems).
-Not to mention all the custom workflows that are scripted in python, bash or another language.
-
-These workflows all still need to be tested in some way or an other. Custom scripts do the job,
-but these are not easily ported to other projects, and neither are they very transparant in
-what is being tested. There has to be a better way. Enter pytest-workflow.
+Writing workflows is hard. Testing if they are correct is even harder. Testing with
+bash scripts or other code has some flaws. Is this bug in the pipeline. or in my test-framework?
+Pytest-workflow aims to make testing as simple as possible so you can focus on debugging
+your pipeline.
 
 ## Installation
 
