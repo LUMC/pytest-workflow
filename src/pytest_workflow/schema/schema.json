@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "title": "pytest-workflow YAML",
+  "description": "A YAML file describing a test for the pytest-workflow plugin",
+  "type": "object",
+  "properties": {
+    "arguments": {
+      "description": "arguments for the executable",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "executable": {
+      "description": "The executable that is being run",
+      "type": "string"
+    },
+    "results": {
+      "description": "A dictionary containing the results",
+      "type": "object",
+      "properties": {
+        "files": {
+          "description": "files produced by the workflow",
+          "type": "array",
+          "items": {
+            "type":"object",
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "md5sum": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              }
+            },
+            "required": ["path"]
+          }
+        }
+      }
+    }
+  },
+  "required": ["executable","arguments", "results"]
+}

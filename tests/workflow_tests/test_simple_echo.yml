@@ -1,0 +1,7 @@
+name: simple echo
+executable: "touch"
+arguments:
+  - "log.file"
+results:
+  files:
+    - path: "log.file"

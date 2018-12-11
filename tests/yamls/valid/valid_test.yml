@@ -1,0 +1,10 @@
+name: "Some random valid test"
+executable: "/bin/bla"
+arguments:
+  - "bla"
+  - "bla"
+results:
+  files:
+    - path: "bladiebla"
+    - path: "/bla/bla"
+    - path: "bla/bla.bla"

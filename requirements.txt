@@ -1,0 +1,3 @@
+pyyaml==3.13
+pytest==4.0.1
+jsonschema
