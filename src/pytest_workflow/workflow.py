@@ -6,7 +6,7 @@ import subprocess
 
 class Workflow(object):
 
-    def __init__(self, executable: Path, arguments: List[str], cwd):
+    def __init__(self, executable: Path, arguments: List[str], cwd = None):
         self.executable = executable  # you could do a pre-test to make sure the executable even exists
         self.arguments = arguments
 
@@ -34,12 +34,3 @@ class Workflow(object):
         # e.g. cleanup output files
         # TODO: Implement something?
         pass
-
-
-def test_exit_code(hello_world_pipeline):
-    assert hello_world_pipeline.exit_code == 0
-
-
-def test_outputs_exist(hello_world_pipeline):
-    for output in hello_world_pipeline.outputs:
-        assert output.exists()
