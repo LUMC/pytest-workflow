@@ -24,6 +24,7 @@ import yaml
 from pathlib import Path
 from .schema import validate_schema
 from .workflow import Workflow
+from .workflow_file_tests import WorkflowFilesTestCollector
 
 
 def pytest_collect_file(path, parent):
@@ -39,23 +40,24 @@ class YamlFile(pytest.File):
     def collect(self):
         with self.fspath.open() as yaml_file:
             yaml_content = yaml.load(yaml_file)
-        yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
+        yield WorkflowTestsCollector(self.fspath.basename, yaml_content)
 
 
 class WorkflowTestsCollector(pytest.Collector):
     """This class defines a pytest item. That has methods for running tests."""
 
-    def __init__(self, yaml_content: dict):
+    def __init__(self, name, yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
-        self.workflow = Workflow(
-            executable=self.yaml_content.get("executable"),
-            arguments=self.yaml_content.get("arguments"))
-        # Run the workflow on initialization
-        self.workflow.run()
+        self.name = name
 
     def collect(self):
-        workflow_tests=[]
+        '''Run the workflow and start the tests'''
+        workflow = Workflow(
+            executable=self.yaml_content.get("executable"),
+            arguments=self.yaml_content.get("arguments"))
+        self.workflow.run()
+        workflow_tests=[WorkflowFilesTestCollector(self.name,self.yaml_content.get("results",{}).get("files",[]))]
         return workflow_tests
 
     def reportinfo(self):
