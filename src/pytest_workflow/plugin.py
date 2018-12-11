@@ -67,12 +67,16 @@ class WorkflowTestsCollector(pytest.Collector):
             cwd=tempdir)
         workflow.run()
         workflow_tests = [
-            WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []), tempdir)]
+            WorkflowFilesTestCollector(
+                self.name, self,
+                self.yaml_content.get("results", {}).get("files", []),
+                tempdir)]
         for test in workflow_tests:
             yield test
-        # TODO: Figure out proper cleanup. If tempdir is removed here, all tests will fail.
-        # After yielding the tests this object is no longer needed, so deleting the
-        # tempdir here does not work.
+        # TODO: Figure out proper cleanup.
+        # If tempdir is removed here, all tests will fail.
+        # After yielding the tests this object is no longer needed, so
+        # deleting the tempdir here does not work.
         # There is probably some fixture that can handle this.
 
     def reportinfo(self):

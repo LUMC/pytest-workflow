@@ -25,5 +25,6 @@ SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 with SCHEMA.open() as schema:
     JSON_SCHEMA = json.load(schema)
 
+
 def validate_schema(instance):
     jsonschema.validate(instance, JSON_SCHEMA)
