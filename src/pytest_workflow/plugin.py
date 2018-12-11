@@ -24,6 +24,7 @@ from .schema import validate_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 from distutils.dir_util import copy_tree
+from pathlib import Path
 
 def pytest_collect_file(path, parent):
     """Collection hook
@@ -56,19 +57,19 @@ class WorkflowTestsCollector(pytest.Collector):
     def collect(self):
         """Run the workflow and start the tests"""
         # Make sure workflow is run in a temporary directory
-        tempdir = tempfile.TemporaryDirectory(prefix="pytest_wf")
-        self.config
-        copy_tree(os.getcwd(), tempdir.name)
+        tempdir = tempfile.mkdtemp(prefix="pytest_wf", dir= tempfile.gettempdir()).__str__()
+        copy_tree(os.getcwd(), tempdir)
         print(tempdir)
         workflow = Workflow(
             executable=self.yaml_content.get("executable"),
-            arguments=self.yaml_content.get("arguments"))
+            arguments=self.yaml_content.get("arguments"),
+            cwd=tempdir)
         workflow.run()
         workflow_tests = [
-            WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []))]
+            WorkflowFilesTestCollector(self.name, self, self.yaml_content.get("results", {}).get("files", []), tempdir)]
         for test in workflow_tests:
             yield test
-        tempdir.cleanup()
+        #tempdir.cleanup()
 
     def reportinfo(self):
         return self.fspath, None, self.name
