@@ -7,8 +7,18 @@ from typing import List
 class Workflow(object):
 
     def __init__(self, executable: Path, arguments: List[str], cwd=None):
+        """
+        Initiates a workflow object
+        :param executable: The executable, such as `snakemake` `/bin/make`
+        or `cromwell`
+        :param arguments: The arguments passed to the executable. Such as
+        `-i inputs.json my_workflow.wdl`
+        :param cwd: The current working directory in which the command will
+        be executed.
+        """
+
         self.executable = executable
-        # you could do a pre-test to make sure the executable even exists
+        # TODO: a pre-test to make sure the executable even exists
         self.arguments = arguments
 
         self._proc_out = None
