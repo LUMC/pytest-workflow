@@ -63,7 +63,6 @@ class WorkflowTestsCollector(pytest.Collector):
                  yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
-        self.name = name
         super().__init__(name, parent=parent)
 
     def collect(self):

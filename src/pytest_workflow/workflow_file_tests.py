@@ -21,7 +21,6 @@ class WorkflowFilesTestCollector(pytest.Collector):
         be tested.
         """
         self.files = files
-        self.name = name
         self.cwd = cwd
         super().__init__(name, parent=parent)
 
@@ -46,7 +45,6 @@ class FilesExistCollector(pytest.Collector):
         :param cwd: The directory relative to which relative paths are tested.
         """
         self.files = files
-        self.name = name
         self.cwd = cwd
         super().__init__(name, parent=parent)
 
