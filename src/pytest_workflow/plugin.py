@@ -42,10 +42,10 @@ class YamlFile(pytest.File):
     This class collects YAML files and turns them into test items.
     """
 
-    def __init__(self, path, parent):
+    def __init__(self, path: str, parent: pytest.Collector):
         # This super statement is important for pytest reasons. It should
         # be in any collector!
-        super(YamlFile, self).__init__(path, parent=parent)
+        super().__init__(path, parent=parent)
 
     def collect(self):
         """This function now only returns one WorkflowTestsCollector,
@@ -59,11 +59,11 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
-    def __init__(self, name, parent, yaml_content: dict):
+    def __init__(self, name: str, parent: pytest.Collector,
+                 yaml_content: dict):
         validate_schema(yaml_content)
         self.yaml_content = yaml_content
-        self.name = name
-        super(WorkflowTestsCollector, self).__init__(name, parent=parent)
+        super().__init__(name, parent=parent)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests

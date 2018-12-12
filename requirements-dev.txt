@@ -3,3 +3,4 @@ tox
 coverage
 flake8
 flake8-import-order
+mypy
