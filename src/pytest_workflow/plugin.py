@@ -16,55 +16,96 @@
 
 """core functionality of pytest-workflow plugin"""
 
-from typing import List
+import os
+import tempfile
+from distutils.dir_util import copy_tree
 
 import pytest
+
 import yaml
 
-from pathlib import Path
 from .schema import validate_schema
 from .workflow import Workflow
+from .workflow_file_tests import WorkflowFilesTestCollector
 
 
 def pytest_collect_file(path, parent):
     """Collection hook
-    This collects the yaml files where the tests are defined."""
+    This collects the yaml files called r'test.*\.ya?ml'"""  # noqa: W605
+    # noqa ignores invalid escape sequence in the regex.
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
 
 
 class YamlFile(pytest.File):
-    """This class collects YAML files and turns them into test items."""
+    """
+    This class collects YAML files and turns them into test items.
+    """
+
+    def __init__(self, path: str, parent: pytest.Collector):
+        # This super statement is important for pytest reasons. It should
+        # be in any collector!
+        super().__init__(path, parent=parent)
 
     def collect(self):
+        """This function now only returns one WorkflowTestsCollector,
+            but this might be increased later when we decide to put multiple
+            tests in one yaml. """
         with self.fspath.open() as yaml_file:
-            yaml_content = yaml.load(yaml_file)
+            yaml_content = yaml.safe_load(yaml_file)
+        yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
+
+
+class WorkflowTestsCollector(pytest.Collector):
+    """This class starts all the tests collectors per workflow"""
+
+    def __init__(self, name: str, parent: pytest.Collector,
+                 yaml_content: dict):
         validate_schema(yaml_content)
-        yield WorkflowItem(self.fspath.basename, self, yaml_content)
-
-
-class WorkflowItem(pytest.Item):
-    """This class defines a pytest item. That has methods for running tests."""
-
-    def __init__(self, name, parent, yaml_content: dict):
         self.yaml_content = yaml_content
+        super().__init__(name, parent=parent)
 
-        super(WorkflowItem, self).__init__(name, parent)
+    def collect(self):
+        """This runs the workflow and starts all the associated tests
+        The idea is that isolated parts of the yaml get their own collector.
+        So in the results key in hte yaml there is a key called `files` this
+        generates the WorkflowFilesTestCollector. When we add a key `stdout
+        we add a new class WorkflowStdoutTestCollector etc."""
 
-    def runtest(self):
-        """Run test runs the item test
-        We use the workflow_run fixture here to run the workflow"""
+        # Create a temporary directory where the workflow is run.
+        # This will prevent the project repository from getting filled up with
+        # test workflow output.
+        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
+
+        # Copy the project directory to the temporary directory. os.getcwd()
+        # is used here because it is assumed pytest is run from project root.
+        # Using the python git plugin was considered, as it can also give the
+        # project root. But this assumes git. So this choice is debatable.
+        copy_tree(os.getcwd(), tempdir)
+
+        # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(
             executable=self.yaml_content.get("executable"),
-            arguments=self.yaml_content.get("arguments"))
+            arguments=self.yaml_content.get("arguments"),
+            cwd=tempdir)
         workflow.run()
 
-        # Here all the assertions are done. This is butt-ugly. Preferably
-        # Some stuff is parameterized or something.
-        assert workflow.exit_code == 0  # We may want to allow for failing workflows later and make this configurable in the yaml.
-        for test_file in self.yaml_content.get("results", {}).get("files", []):
-            assert Path(test_file.get("path")).exists()
-
+        # Add new testcollectors to this list if new types of tests are
+        # defined.
+        workflow_tests = [
+            WorkflowFilesTestCollector(
+                self.name, self,
+                self.yaml_content.get("results", {}).get("files", []),
+                tempdir)]
+        for test in workflow_tests:
+            yield test
+        # TODO: Figure out proper cleanup.
+        # If tempdir is removed here, all tests will fail.
+        # After yielding the tests this object is no longer needed, so
+        # deleting the tempdir here does not work.
+        # There is probably some fixture that can handle this.
 
     def reportinfo(self):
+        # TODO: Figure out what reportinfo does
+        # This was copied from code example.
         return self.fspath, None, self.name

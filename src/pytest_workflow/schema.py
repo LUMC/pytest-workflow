@@ -25,5 +25,12 @@ SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 with SCHEMA.open() as schema:
     JSON_SCHEMA = json.load(schema)
 
-def validate_schema(instance):
+
+def validate_schema(instance: dict):
+    """
+    Validates the pytest-workflow schema
+    :param instance: a dictionary that is validated against the schema
+    :return: This function rasises a ValidationError
+    when the schema is not correct.
+    """
     jsonschema.validate(instance, JSON_SCHEMA)

@@ -17,10 +17,14 @@
 
 # This file contains tests for the schema for the yaml file
 
-from pytest_workflow.schema import validate_schema
-import pytest
-import yaml
 from pathlib import Path
+
+import pytest
+
+from pytest_workflow.schema import validate_schema
+
+import yaml
+
 
 valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
 valid_yamls = [
