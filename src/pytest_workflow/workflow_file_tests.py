@@ -9,7 +9,7 @@ import pytest
 class WorkflowFilesTestCollector(pytest.Collector):
     """Collects all the files related tests"""
 
-    def __init__(self, name, parent, files: List[dict],
+    def __init__(self, name: str, parent: pytest.Collector, files: List[dict],
                  cwd: Union[bytes, str]):
         """
         A WorkflowFilesTestCollector starts all the files-related tests
@@ -37,7 +37,7 @@ class WorkflowFilesTestCollector(pytest.Collector):
 class FilesExistCollector(pytest.Collector):
     """Spawns tests to check for files existence"""
 
-    def __init__(self, name, parent, files: List[Path],
+    def __init__(self, name: str, parent: pytest.Collector, files: List[Path],
                  cwd: Union[bytes, str]):
         """
         :param name: Name of the test.
@@ -60,7 +60,7 @@ class FilesExistCollector(pytest.Collector):
 class FileExists(pytest.Item):
     """A pytest file exists test."""
 
-    def __init__(self, name, parent, file: Path):
+    def __init__(self, name: str, parent: pytest.Collector, file: Path):
         """
         :param name: Test name
         :param parent: Collector that started this test

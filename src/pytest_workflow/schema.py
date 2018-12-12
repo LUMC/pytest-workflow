@@ -26,7 +26,7 @@ with SCHEMA.open() as schema:
     JSON_SCHEMA = json.load(schema)
 
 
-def validate_schema(instance):
+def validate_schema(instance: dict):
     """
     Validates the pytest-workflow schema
     :param instance: a dictionary that is validated against the schema
