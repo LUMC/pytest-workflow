@@ -1,5 +1,5 @@
 sphinx
 tox
-pytest-cov
+coverage
 flake8
 flake8-import-order
