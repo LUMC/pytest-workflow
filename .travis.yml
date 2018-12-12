@@ -22,3 +22,4 @@ script:
         sed -i "s:${pkg_path}:src:g" coverage.xml;
         python-codacy-coverage -r coverage.xml;
       fi'
+      
