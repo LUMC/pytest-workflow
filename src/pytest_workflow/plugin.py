@@ -44,7 +44,7 @@ class YamlFile(pytest.File):
 
     def collect(self):
         with self.fspath.open() as yaml_file:
-            yaml_content = yaml.load(yaml_file)
+            yaml_content = yaml.safe_load(yaml_file)
         yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
 
 
