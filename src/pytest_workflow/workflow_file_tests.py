@@ -26,7 +26,7 @@ class WorkflowFilesTestCollector(pytest.Collector):
 
     def collect(self):
         """Starts all file related tests"""
-        filepaths = [Path(x.get("path")) for x in self.files]
+        filepaths = [Path(x["path"]) for x in self.files]
         # Structure why not the file exists directly?
         # Because also some other operations on files will be added to
         # this list. Like contains, md5sum etc.
