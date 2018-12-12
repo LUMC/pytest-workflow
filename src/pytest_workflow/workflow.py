@@ -1,12 +1,13 @@
 """This file was created by A.H.B. Bollen as a proof of concept."""
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Union
 
 
 class Workflow(object):
 
-    def __init__(self, executable: Path, arguments: List[str], cwd=None):
+    def __init__(self, executable: Path, arguments: List[str],
+                 cwd: Union[bytes, str] = None):
         """
         Initiates a workflow object
         :param executable: The executable, such as `snakemake` `/bin/make`
