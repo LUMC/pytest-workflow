@@ -23,7 +23,7 @@ class WorkflowFilesTestCollector(pytest.Collector):
         self.files = files
         self.name = name
         self.cwd = cwd
-        super(WorkflowFilesTestCollector, self).__init__(name, parent=parent)
+        super().__init__(name, parent=parent)
 
     def collect(self):
         """Starts all file related tests"""
@@ -48,7 +48,7 @@ class FilesExistCollector(pytest.Collector):
         self.files = files
         self.name = name
         self.cwd = cwd
-        super(FilesExistCollector, self).__init__(name, parent=parent)
+        super().__init__(name, parent=parent)
 
     def collect(self):
         """Starts all the file existence tests."""
@@ -66,7 +66,7 @@ class FileExists(pytest.Item):
         :param parent: Collector that started this test
         :param file: A path to the file
         """
-        super(FileExists, self).__init__(name, parent)
+        super().__init__(name, parent)
         self.file = file
 
     def runtest(self):
