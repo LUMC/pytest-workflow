@@ -31,25 +31,32 @@ from .workflow_file_tests import WorkflowFilesTestCollector
 
 def pytest_collect_file(path, parent):
     """Collection hook
-    This collects the yaml files where the tests are defined."""
+    This collects the yaml files called r'test.*\.ya?ml'"""
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
 
 
 class YamlFile(pytest.File):
-    """This class collects YAML files and turns them into test items."""
+    """
+    This class collects YAML files and turns them into test items.
+    """
 
     def __init__(self, path, parent):
+        # This super statement is important for pytest reasons. It should
+        # be in any collector!
         super(YamlFile, self).__init__(path, parent=parent)
 
     def collect(self):
+        """This function now only returns one WorkflowTestsCollector,
+            but this might be increased later when we decide to put multiple
+            tests in one yaml. """
         with self.fspath.open() as yaml_file:
             yaml_content = yaml.safe_load(yaml_file)
         yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
 
 
 class WorkflowTestsCollector(pytest.Collector):
-    """This class defines a pytest item. That has methods for running tests."""
+    """This class starts all the tests collectors per workflow"""
 
     def __init__(self, name, parent, yaml_content: dict):
         validate_schema(yaml_content)
@@ -58,15 +65,31 @@ class WorkflowTestsCollector(pytest.Collector):
         super(WorkflowTestsCollector, self).__init__(name, parent=parent)
 
     def collect(self):
-        """Run the workflow and start the tests"""
-        # Make sure workflow is run in a temporary directory
+        """This runs the workflow and starts all the associated tests
+        The idea is that isolated parts of the yaml get their own collector.
+        So in the results key in hte yaml there is a key called `files` this
+        generates the WorkflowFilesTestCollector. When we add a key `stdout
+        we add a new class WorkflowStdoutTestCollector etc."""
+
+        # Create a temporary directory where the workflow is run.
+        # This will prevent the project repository from getting filled up with
+        # test workflow output.
         tempdir = tempfile.mkdtemp(prefix="pytest_wf")
+
+        # Copy the project directory to the temporary directory. os.getcwd()
+        # is used here because it is assumed pytest is run from project root.
+        # Using the python git plugin was considered, as it can also give the
+        # project root. But this assumes git. So this choice is debatable.
         copy_tree(os.getcwd(), tempdir)
+
+        # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(
             executable=self.yaml_content.get("executable"),
             arguments=self.yaml_content.get("arguments"),
             cwd=tempdir)
         workflow.run()
+
+        # Add new testcollectors to this list. If new types of tests are defined.
         workflow_tests = [
             WorkflowFilesTestCollector(
                 self.name, self,
@@ -81,4 +104,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # There is probably some fixture that can handle this.
 
     def reportinfo(self):
+        # TODO: Figure out what reportinfo does
+        # This was copied from code example.
         return self.fspath, None, self.name
