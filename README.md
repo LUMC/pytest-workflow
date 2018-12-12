@@ -1,3 +1,5 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59)](https://www.codacy.com/app/LUMC/pytest-workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LUMC/pytest-workflow&amp;utm_campaign=Badge_Grade)
+
 # pytest-workflow
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy 
 by using yaml files for the test configuration.

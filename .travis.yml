@@ -1,6 +1,7 @@
 language: python
 install:
   - pip install tox
+  - pip install codacy-coverage
 matrix:
   include:
     # Test most recent editions of python 3
@@ -12,3 +13,6 @@ matrix:
       env: TOX_ENV=py37
 script:
     - tox -e $TOX_ENV
+    # Only run if CODACY_PROJECT_TOKEN is defined.
+    # This is not the case for pull requests outside of galaxyproject/ephemeris
+    - bash -c 'if [[ -v CODACY_PROJECT_TOKEN ]]  ; then  python-codacy-coverage -r coverage.xml; fi'
