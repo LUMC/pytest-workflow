@@ -31,7 +31,8 @@ from .workflow_file_tests import WorkflowFilesTestCollector
 
 def pytest_collect_file(path, parent):
     """Collection hook
-    This collects the yaml files called r'test.*\.ya?ml'"""
+    This collects the yaml files called r'test.*\.ya?ml'"""  # noqa: W605
+    # noqa ignores invalid escape sequence in the regex.
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
 
@@ -89,7 +90,8 @@ class WorkflowTestsCollector(pytest.Collector):
             cwd=tempdir)
         workflow.run()
 
-        # Add new testcollectors to this list. If new types of tests are defined.
+        # Add new testcollectors to this list if new types of tests are
+        # defined.
         workflow_tests = [
             WorkflowFilesTestCollector(
                 self.name, self,
