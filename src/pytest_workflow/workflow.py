@@ -41,3 +41,12 @@ class Workflow(object):
     @property
     def exit_code(self):
         return self._proc_out.returncode
+
+    @classmethod
+    def from_yaml_content(cls, yaml_contents: dict, cwd=None):
+        # FIXME what is type of cwd?
+        return cls(
+            Path(yaml_contents['executable']),
+            yaml_contents['arguments'],
+            cwd=cwd
+        )
