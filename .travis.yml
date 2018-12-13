@@ -2,6 +2,7 @@ language: python
 install:
   - pip install tox
   - pip install codacy-coverage
+  - pip install codecov
 matrix:
   include:
     # Test most recent editions of python 3
@@ -14,6 +15,15 @@ matrix:
       env: TOX_ENV=py37
 script:
     - tox -e $TOX_ENV
-    # Only run if CODACY_PROJECT_TOKEN is defined.
-    # This is not the case for pull requests outside of galaxyproject/ephemeris
-    - bash -c 'if [[ -v CODACY_PROJECT_TOKEN ]]  ; then  python-codacy-coverage -r coverage.xml; fi'
+
+after_success:
+  # Correct coverage xml for coverage services.
+  - >
+    bash -c 'set -eux;
+    pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
+    sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml'
+  - >
+    bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
+    python-codacy-coverage -r coverage.xml;
+    fi'
+  - codecov

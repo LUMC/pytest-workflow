@@ -84,10 +84,7 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(
-            executable=self.yaml_content.get("executable"),
-            arguments=self.yaml_content.get("arguments"),
-            cwd=tempdir)
+        workflow = Workflow.from_yaml_content(self.yaml_content, tempdir)
         workflow.run()
 
         # Add new testcollectors to this list if new types of tests are
