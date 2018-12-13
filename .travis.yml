@@ -19,7 +19,7 @@ script:
     - >
       bash -c 'set -eux; if [[ -v CODACY_PROJECT_TOKEN ]]; then
         pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
-        sed -i "s:${pkg_path}:src:g" coverage.xml;
+        sed -i "s:${pkg_path}:src/pytest_workflows:g" coverage.xml;
         python-codacy-coverage -r coverage.xml;
       fi'
       
