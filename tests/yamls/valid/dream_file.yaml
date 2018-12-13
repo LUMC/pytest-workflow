@@ -21,3 +21,8 @@
       - "bla"
   exit_code: 127
   command: "the one string"
+- name: other test
+  command: "cowsay moo"
+  stdout:
+    contains:
+      - "moo"
