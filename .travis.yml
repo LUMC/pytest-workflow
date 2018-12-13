@@ -17,18 +17,13 @@ script:
     - tox -e $TOX_ENV
 
 after_success:
-  # Only run if CODACY_PROJECT_TOKEN is defined.
-    # This is not the case for pull requests outside of LUMC/pytest_workflow
-    - >
-      bash -c 'set -eux; if [[ -v CODACY_PROJECT_TOKEN ]]; then
-        pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
-        sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml;
-        python-codacy-coverage -r coverage.xml;
-      fi'
-      
-    - >
-      bash -c 'set -eux; if [[ -v CODECOV_TOKEN ]] ; then
-      pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
-      sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml;
-      codecov ;
-      fi'
+  # Correct coverage xml for coverage services.
+  - >
+    bash -c 'set -eux;
+    pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
+    sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml'
+  - >
+    bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
+    python-codacy-coverage -r coverage.xml;
+    fi'
+  - codecov
