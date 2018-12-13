@@ -18,7 +18,7 @@ script:
 
 after_success:
   # Only run if CODACY_PROJECT_TOKEN is defined.
-    # This is not the case for pull requests outside of galaxyproject/ephemeris
+    # This is not the case for pull requests outside of LUMC/pytest_workflow
     - >
       bash -c 'set -eux; if [[ -v CODACY_PROJECT_TOKEN ]]; then
         pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
