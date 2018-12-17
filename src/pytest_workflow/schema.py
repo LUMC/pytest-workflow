@@ -18,13 +18,13 @@
 
 import json
 from pathlib import Path
-from typing import NamedTuple, NewType, List, Type, Optional
+from typing import List, Type, Optional
 
 import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
-DEFAULT_FILES = []
+
 with SCHEMA.open() as schema:
     JSON_SCHEMA = json.load(schema)
 
@@ -45,34 +45,60 @@ def validate_schema(instance):
 # around between test objects. But instead these objects which have self-
 # documenting members
 
-class ContentCheck(NamedTuple):
+class ContentCheck(object):
     """
     A class that holds two lists of strings. Everything in `contains` should be
     present in the file/text
     Everything in `must_not_contain` should not be present.
     """
-    def __init__(self, contains: List[str] = [],
-                 must_not_contain: List[str] = []):
-        self.contains = contains
-        self.must_not_contain = must_not_contain
+
+    def __init__(self, contains: List[str] = None,
+                 must_not_contain: List[str] = None):
+        if contains:
+            self.contains = contains
+        else:
+            self.contains = []
+        if must_not_contain:
+            self.must_not_contain = must_not_contain
+        else:
+            self.must_not_contain = []
+
+    @classmethod
+    def from_dict(cls, dictionary: dict):
+        return cls(contains=dictionary.get("contains", []),
+                   must_not_contain=dictionary.get("must_not_contain", []))
 
 
 class FileTest(ContentCheck):
     def __init__(self, path: str, md5sum: Optional[str] = None,
-                 contains: List[str] = [], must_not_contain: List[str] = []):
-        super.__init__(contains=contains, must_not_contain=must_not_contain)
+                 contains: List[str] = None,
+                 must_not_contain: List[str] = None):
+        super().__init__(contains=contains, must_not_contain=must_not_contain)
         self.path_as_string = path
         self.path = Path(path)
         self.md5sum = md5sum
 
-class WorkflowTest(NamedTuple):
-    def __init__(self, name: str, command: str, exit_code: int = 0,
+    @classmethod
+    def from_dict(cls, dictionary: dict):
+        return cls(path=dictionary["path"],  # Compulsory value should fail
+                   # when not present
+                   md5sum=dictionary.get("md5sum", None),
+                   contains=dictionary.get("contains", None),
+                   must_not_contain=dictionary.get("must_not_contain", None))
+
+
+class WorkflowTest(object):
+    def __init__(self, name: str, command: str,
+                 exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: Type[ContentCheck] = ContentCheck(),
                  stderr: Type[ContentCheck] = ContentCheck(),
-                 files: List[Type[FileTest]] = []):
+                 files: List[Type[FileTest]] = None):
         self.name = name
         self.command = command
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
-        self.files = files
+        if files:
+            self.files = files
+        else:
+            self.files = []
