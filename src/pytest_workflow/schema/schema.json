@@ -6,6 +6,10 @@
   "items": {
     "type": "object",
     "properties": {
+      "name": {
+        "description": "Name of the test",
+        "type": "string"
+      },
       "command": {
         "description": "The command that is run for the workflow",
         "type": "string"
@@ -13,6 +17,42 @@
       "exit_code": {
         "description": "The expected exit code",
         "type": "number"
+      },
+      "stderr": {
+        "type": "object",
+        "properties": {
+          "contains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "must_not_contain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "stdout": {
+        "type": "object",
+        "properties": {
+          "contains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "must_not_contain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
       },
       "files": {
         "description": "files produced by the workflow",
@@ -26,16 +66,34 @@
             "md5sum": {
               "type": "string",
               "pattern": "^[a-f0-9]{32}$"
+            },
+            "should_exist": {
+              "type": "boolean"
+            },
+            "contains": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "must_not_contain": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "required": [
             "path"
-          ]
+          ],
+          "additionalProperties": false
         }
       }
     },
     "required": [
+      "name",
       "command"
-    ]
+    ],
+    "additionalProperties": false
   }
 }
