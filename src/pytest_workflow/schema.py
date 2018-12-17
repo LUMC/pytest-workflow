@@ -39,24 +39,40 @@ def validate_schema(instance):
     jsonschema.validate(instance, JSON_SCHEMA)
 
 
-####### Schema classes below
-####### These should be dataclasses. But that's not supported in python<3.7
+# Schema classes below
+# These should be dataclasses. But that's not supported in python<3.7
+# These classes are created so that the test yaml does not have to be passed
+# around between test objects. But instead these objects which have self-
+# documenting members
+
 class ContentCheck(NamedTuple):
+    """
+    A class that holds two lists of strings. Everything in `contains` should be
+    present in the file/text
+    Everything in `must_not_contain` should not be present.
+    """
     def __init__(self, contains: List[str] = [],
                  must_not_contain: List[str] = []):
-        pass
+        self.contains = contains
+        self.must_not_contain = must_not_contain
 
 
 class FileTest(ContentCheck):
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  contains: List[str] = [], must_not_contain: List[str] = []):
         super.__init__(contains=contains, must_not_contain=must_not_contain)
-        pass
-
+        self.path_as_string = path
+        self.path = Path(path)
+        self.md5sum = md5sum
 
 class WorkflowTest(NamedTuple):
     def __init__(self, name: str, command: str, exit_code: int = 0,
                  stdout: Type[ContentCheck] = ContentCheck(),
                  stderr: Type[ContentCheck] = ContentCheck(),
                  files: List[Type[FileTest]] = []):
-        pass
+        self.name = name
+        self.command = command
+        self.exit_code = exit_code
+        self.stdout = stdout
+        self.stderr = stderr
+        self.files = files
