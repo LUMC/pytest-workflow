@@ -12,7 +12,7 @@
       },
       "exit_code": {
         "description": "The expected exit code",
-        "type": "int"
+        "type": "number"
       },
       "files": {
         "description": "files produced by the workflow",
@@ -31,11 +31,11 @@
           "required": [
             "path"
           ]
-            }
-          }
         }
+      }
     },
     "required": [
       "command"
     ]
+  }
 }

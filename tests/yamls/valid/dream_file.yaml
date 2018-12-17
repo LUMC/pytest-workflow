@@ -1,7 +1,7 @@
 - name: simple echo
   files:
     - path: "log.file"
-      md5sum: ""
+      md5sum: "e583af1f8b00b53cda87ae9ead880224"
       contains:
         - "bla"
         - "die"
