@@ -19,9 +19,9 @@
 import os
 import tempfile
 from distutils.dir_util import copy_tree
+from typing import Union
 
 import pytest
-
 import yaml
 
 from .schema import validate_schema, WorkflowTest
@@ -55,8 +55,7 @@ class YamlFile(pytest.File):
             schema = yaml.safe_load(yaml_file)
         validate_schema(schema)
         for test in schema:
-            WorkflowTest.from_schema(test)
-            yield WorkflowTestsCollector(WorkflowTest)
+            yield WorkflowTestsCollector(WorkflowTest.from_schema(test), self)
 
 
 class WorkflowTestsCollector(pytest.Collector):
@@ -76,7 +75,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
         # test workflow output.
-        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
+        tempdir = tempfile.mkdtemp(
+            prefix="pytest_wf")  # type: Union[bytes, str]
 
         # Copy the project directory to the temporary directory. os.getcwd()
         # is used here because it is assumed pytest is run from project root.
@@ -85,16 +85,15 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow.from_yaml_content(self.test.command, tempdir)
+        workflow = Workflow(self.test.command, tempdir)
         workflow.run()
 
         # Add new testcollectors to this list if new types of tests are
         # defined.
         workflow_tests = [
             WorkflowFilesTestCollector(
-                self.name, self,
-                self.yaml_content.get("results", {}).get("files", []),
-                tempdir)]
+                self.test.name, self, self.test.files, tempdir)
+        ]
         for test in workflow_tests:
             yield test
         # TODO: Figure out proper cleanup.
