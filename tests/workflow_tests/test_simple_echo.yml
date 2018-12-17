@@ -1,7 +1,4 @@
-name: simple echo
-executable: "touch"
-arguments:
-  - "log.file"
-results:
+- name: simple touch
+  command: "touch log.file"
   files:
     - path: "log.file"
