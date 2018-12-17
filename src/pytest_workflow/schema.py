@@ -18,15 +18,15 @@
 
 import json
 from pathlib import Path
-from typing import List, Type, Optional
+from typing import List, Optional
 
 import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
 
-with SCHEMA.open() as schema:
-    JSON_SCHEMA = json.load(schema)
+with SCHEMA.open() as schema_fh:
+    JSON_SCHEMA = json.load(schema_fh)
 
 
 def validate_schema(instance):
@@ -45,7 +45,7 @@ def validate_schema(instance):
 # around between test objects. But instead these objects which have self-
 # documenting members
 
-class ContentCheck(object):
+class ContentTest(object):
     """
     A class that holds two lists of strings. Everything in `contains` should be
     present in the file/text
@@ -65,11 +65,13 @@ class ContentCheck(object):
 
     @classmethod
     def from_dict(cls, dictionary: dict):
-        return cls(contains=dictionary.get("contains", []),
-                   must_not_contain=dictionary.get("must_not_contain", []))
+        return cls(
+            contains=dictionary.get("contains"),
+            must_not_contain=dictionary.get("must_not_contain")
+        )
 
 
-class FileTest(ContentCheck):
+class FileTest(ContentTest):
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  contains: List[str] = None,
                  must_not_contain: List[str] = None):
@@ -80,19 +82,21 @@ class FileTest(ContentCheck):
 
     @classmethod
     def from_dict(cls, dictionary: dict):
-        return cls(path=dictionary["path"],  # Compulsory value should fail
-                   # when not present
-                   md5sum=dictionary.get("md5sum", None),
-                   contains=dictionary.get("contains", None),
-                   must_not_contain=dictionary.get("must_not_contain", None))
+        return cls(
+            path=dictionary["path"],  # Compulsory value should fail
+            # when not present
+            md5sum=dictionary.get("md5sum"),
+            contains=dictionary.get("contains"),
+            must_not_contain=dictionary.get("must_not_contain")
+        )
 
 
 class WorkflowTest(object):
     def __init__(self, name: str, command: str,
                  exit_code: int = DEFAULT_EXIT_CODE,
-                 stdout: Type[ContentCheck] = ContentCheck(),
-                 stderr: Type[ContentCheck] = ContentCheck(),
-                 files: List[Type[FileTest]] = None):
+                 stdout: ContentTest = ContentTest(),
+                 stderr: ContentTest = ContentTest(),
+                 files: List[FileTest] = None):
         self.name = name
         self.command = command
         self.exit_code = exit_code
@@ -102,3 +106,20 @@ class WorkflowTest(object):
             self.files = files
         else:
             self.files = []
+
+    @classmethod
+    def from_schema(cls, schema: dict):
+        test_file_dicts = schema.get("files", [])
+
+        test_files = []
+        for test_file_dict in test_file_dicts:
+            test_files.append(FileTest.from_dict(test_file_dict))
+
+        return cls(
+            name=schema["name"],
+            command=schema["command"],
+            exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
+            stdout=ContentTest.from_dict(schema.get("stdout", {})),
+            stderr=ContentTest.from_dict(schema.get("stderr", {})),
+            files=test_files
+        )
