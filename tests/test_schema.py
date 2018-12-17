@@ -25,11 +25,10 @@ import jsonschema
 
 import pytest
 
-from pytest_workflow.schema import WorkflowTest, validate_schema, \
+from pytest_workflow.schema import FileTest, WorkflowTest, validate_schema, \
     workflow_tests_from_schema
 
 import yaml
-
 
 valid_yaml_dir = Path(__file__).parent / Path("yamls") / Path("valid")
 valid_yamls = os.listdir(valid_yaml_dir.__str__())
@@ -74,3 +73,22 @@ def test_workflow_tests_from_schema():
         test_yaml = yaml.load(yaml_fh)
         workflow_tests = workflow_tests_from_schema(test_yaml)
         assert len(workflow_tests) == 2
+
+
+def test_workflow_test_defaults():
+    workflow_test = WorkflowTest.from_schema(
+        dict(name="minimal", command="cowsay minimal"))
+    assert workflow_test.files == []
+    assert workflow_test.stdout.contains == []
+    assert workflow_test.stdout.must_not_contain == []
+    assert workflow_test.stderr.contains == []
+    assert workflow_test.stderr.must_not_contain == []
+    assert workflow_test.exit_code == 0
+
+
+def test_filtest_defaults():
+    file_test = FileTest.from_dict(dict(path="bla"))
+    assert file_test.contains == []
+    assert file_test.must_not_contain == []
+    assert file_test.md5sum is None
+    assert file_test.should_exist
