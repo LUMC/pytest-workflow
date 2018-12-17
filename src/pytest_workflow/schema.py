@@ -30,6 +30,12 @@ with SCHEMA.open() as schema_fh:
     JSON_SCHEMA = json.load(schema_fh)
 
 
+def workflow_tests_from_schema(schema):
+    """Returns workflow test objects from a schema"""
+    validate_schema(schema)
+    return [WorkflowTest.from_schema(x) for x in schema]
+
+
 def validate_schema(instance):
     """
     Validates the pytest-workflow schema
@@ -54,7 +60,6 @@ def validate_schema(instance):
 
 
 # Schema classes below
-# These should be dataclasses. But that's not supported in python<3.7
 # These classes are created so that the test yaml does not have to be passed
 # around between test objects. But instead these objects which have self-
 # documenting members
@@ -86,10 +91,20 @@ class ContentTest(object):
 
 
 class FileTest(ContentTest):
+    """A class that contains all the properties of a to be tested file."""
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: List[str] = None,
                  must_not_contain: List[str] = None):
+        """
+        A container object
+        :param path: the path to the file
+        :param md5sum: md5sum of the file contents
+        :param should_exist: whether the file should exist or not
+        :param contains: a list of strings that should be present in the file
+        :param must_not_contain: a list of strings that should not be present
+        in the file
+        """
         super().__init__(contains=contains, must_not_contain=must_not_contain)
         self.path_as_string = path
         self.path = Path(path)
@@ -98,6 +113,11 @@ class FileTest(ContentTest):
 
     @classmethod
     def from_dict(cls, dictionary: dict):
+        """
+        Creates a FileTest object from a dictionary
+        :param dictionary: dictionary containing at least a "path" key
+        :return: a FileTest object
+        """
         return cls(
             path=dictionary["path"],  # Compulsory value should fail
             # when not present
@@ -110,11 +130,21 @@ class FileTest(ContentTest):
 
 
 class WorkflowTest(object):
+    """A class that contains all properties of a to be tested workflow"""
     def __init__(self, name: str, command: str,
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
                  stderr: ContentTest = ContentTest(),
                  files: List[FileTest] = None):
+        """
+        Create a WorkflowTest object.
+        :param name: The name of the test
+        :param command: The command to start the workflow
+        :param exit_code: The expected exit code of the workflow
+        :param stdout: a ContentTest object
+        :param stderr: a ContentTest object
+        :param files: a list of FileTest objects
+        """
         self.name = name
         self.command = command
         self.exit_code = exit_code
@@ -127,6 +157,7 @@ class WorkflowTest(object):
 
     @classmethod
     def from_schema(cls, schema: dict):
+        """Generate a WorkflowTest object from schema objects"""
         test_file_dicts = schema.get("files", [])
 
         test_files = []

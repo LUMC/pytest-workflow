@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from .schema import WorkflowTest, validate_schema
+from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 
@@ -53,9 +53,9 @@ class YamlFile(pytest.File):
             tests in one yaml. """
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
-        validate_schema(schema)
-        for test in schema:
-            yield WorkflowTestsCollector(WorkflowTest.from_schema(test), self)
+        workflow_tests = workflow_tests_from_schema(schema)
+        for test in workflow_tests:
+            yield WorkflowTestsCollector(test, self)
 
 
 class WorkflowTestsCollector(pytest.Collector):
