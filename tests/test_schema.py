@@ -23,7 +23,8 @@ import jsonschema
 
 import pytest
 
-from pytest_workflow.schema import WorkflowTest, validate_schema
+from pytest_workflow.schema import WorkflowTest, validate_schema, \
+    workflow_tests_from_schema
 
 import yaml
 
@@ -66,3 +67,10 @@ def test_validate_schema_conflicting_keys():
         ])
     assert error.match("Content checking not allowed on non existing" +
                        " file: /some/path. Key = must_not_contain")
+
+
+def test_workflow_tests_from_schema():
+    with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
+        test_yaml = yaml.load(yaml_fh)
+        workflow_tests = workflow_tests_from_schema(test_yaml)
+        assert len(workflow_tests) == 2
