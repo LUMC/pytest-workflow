@@ -17,6 +17,8 @@
 
 # This file contains tests for the schema for the yaml file
 
+
+import os
 from pathlib import Path
 
 import jsonschema
@@ -29,15 +31,13 @@ from pytest_workflow.schema import WorkflowTest, validate_schema, \
 import yaml
 
 
-valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
-valid_yamls = [
-        (valid_yaml_dir / Path("dream_file.yaml"))
-    ]
+valid_yaml_dir = Path(__file__).parent / Path("yamls") / Path("valid")
+valid_yamls = os.listdir(valid_yaml_dir.__str__())
 
 
 @pytest.mark.parametrize("yaml_path", valid_yamls)
 def test_validate_schema(yaml_path):
-    with yaml_path.open() as yaml_fh:
+    with Path(valid_yaml_dir / Path(yaml_path)).open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
 
 
