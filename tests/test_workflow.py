@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from pytest_workflow.workflow import Workflow
 
 

@@ -19,12 +19,12 @@
 import os
 import tempfile
 from distutils.dir_util import copy_tree
-from typing import Union
 
 import pytest
+
 import yaml
 
-from .schema import validate_schema, WorkflowTest
+from .schema import WorkflowTest, validate_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 
@@ -76,7 +76,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # This will prevent the project repository from getting filled up with
         # test workflow output.
         tempdir = tempfile.mkdtemp(
-            prefix="pytest_wf")  # type: Union[bytes, str]
+            prefix="pytest_wf")
 
         # Copy the project directory to the temporary directory. os.getcwd()
         # is used here because it is assumed pytest is run from project root.

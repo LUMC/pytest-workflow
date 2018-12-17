@@ -3,9 +3,9 @@
 from pathlib import Path
 from typing import List, Union
 
-from .schema import FileTest
-
 import pytest
+
+from .schema import FileTest
 
 
 class WorkflowFilesTestCollector(pytest.Collector):
