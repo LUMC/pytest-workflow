@@ -21,7 +21,7 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.schema import validate_schema
+from pytest_workflow.schema import WorkflowTest, validate_schema
 
 import yaml
 
@@ -36,3 +36,16 @@ valid_yamls = [
 def test_validate_schema(yaml_path):
     with yaml_path.open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
+
+
+def test_WorkflowTest():
+    with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
+        test_yaml = yaml.load(yaml_fh)
+        tests = [WorkflowTest.from_schema(x) for x in test_yaml]
+        assert tests[0].name == "simple echo"
+        assert tests[0].files[0].path == Path("log.file")
+        assert len(tests[0].files[0].contains) == 3
+        assert len(tests[0].files[0].must_not_contain) == 1
+        assert len(tests[0].files) == 1
+        assert tests[0].stdout.contains == ["bla"]
+        assert tests[0].exit_code == 127
