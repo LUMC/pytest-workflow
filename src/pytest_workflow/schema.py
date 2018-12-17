@@ -18,10 +18,13 @@
 
 import json
 from pathlib import Path
+from typing import NamedTuple, NewType, List, Type
 
 import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
+DEFAULT_EXIT_CODE = 0
+DEFAULT_FILES = []
 with SCHEMA.open() as schema:
     JSON_SCHEMA = json.load(schema)
 
@@ -35,3 +38,23 @@ def validate_schema(instance):
     """
     jsonschema.validate(instance, JSON_SCHEMA)
 
+
+####### Schema classes below
+####### These should be dataclasses. But that's not supported in python<3.7
+class StdOutErr(NamedTuple):
+    def __init__(self, contains: List[str] = [],
+                 must_not_contain: List[str] = []):
+        pass
+
+
+class FileTest(NamedTuple):
+    def __init__(self):
+        pass
+
+
+class WorkflowTest(NamedTuple):
+    def __init__(self, name: str, command: str, exit_code: int = 0,
+                 stdout: Type[StdOutErr] = StdOutErr(),
+                 stderr: Type[StdOutErr] = StdOutErr(),
+                 files: List[Type[FileTest]] = []):
+        pass
