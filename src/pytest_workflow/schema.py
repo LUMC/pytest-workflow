@@ -24,6 +24,7 @@ import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
+DEFAULT_FILE_SHOULD_EXIST = True
 
 with SCHEMA.open() as schema_fh:
     JSON_SCHEMA = json.load(schema_fh)
@@ -37,6 +38,19 @@ def validate_schema(instance):
     when the schema is not correct.
     """
     jsonschema.validate(instance, JSON_SCHEMA)
+
+    for test in instance:
+        for test_file in test.get("files", []):
+            keys = test_file.keys()
+            file_should_exist = test_file.get("should_exist",
+                                              DEFAULT_FILE_SHOULD_EXIST)
+            if not file_should_exist:
+                for check in ["md5sum", "contains", "must_not_contain"]:
+                    if check in keys:
+                        raise jsonschema.ValidationError(
+                            "Content checking not allowed " +
+                            "on non existing file: {0}. Key = {1}".format(
+                                test_file["path"], check))
 
 
 # Schema classes below
@@ -73,12 +87,14 @@ class ContentTest(object):
 
 class FileTest(ContentTest):
     def __init__(self, path: str, md5sum: Optional[str] = None,
+                 should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: List[str] = None,
                  must_not_contain: List[str] = None):
         super().__init__(contains=contains, must_not_contain=must_not_contain)
         self.path_as_string = path
         self.path = Path(path)
         self.md5sum = md5sum
+        self.should_exist = should_exist
 
     @classmethod
     def from_dict(cls, dictionary: dict):
@@ -86,6 +102,8 @@ class FileTest(ContentTest):
             path=dictionary["path"],  # Compulsory value should fail
             # when not present
             md5sum=dictionary.get("md5sum"),
+            should_exist=dictionary.get("should_exist",
+                                        DEFAULT_FILE_SHOULD_EXIST),
             contains=dictionary.get("contains"),
             must_not_contain=dictionary.get("must_not_contain")
         )
