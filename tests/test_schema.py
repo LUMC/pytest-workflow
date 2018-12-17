@@ -19,6 +19,8 @@
 
 from pathlib import Path
 
+import jsonschema
+
 import pytest
 
 from pytest_workflow.schema import WorkflowTest, validate_schema
@@ -49,3 +51,18 @@ def test_WorkflowTest():
         assert len(tests[0].files) == 1
         assert tests[0].stdout.contains == ["bla"]
         assert tests[0].exit_code == 127
+
+
+def test_validate_schema_conflicting_keys():
+    with pytest.raises(jsonschema.ValidationError) as error:
+        validate_schema([
+            dict(name="bla",
+                 command="cowsay moo",
+                 files=[dict(
+                     path="/some/path",
+                     should_exist=False,
+                     must_not_contain=["bla"]
+                 )])
+        ])
+    assert error.match("Content checking not allowed on non existing" +
+                       " file: /some/path. Key = must_not_contain")
