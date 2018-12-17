@@ -1,43 +1,41 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema",
   "title": "pytest-workflow YAML",
-  "description": "A YAML file describing a test for the pytest-workflow plugin",
-  "type": "object",
-  "properties": {
-    "arguments": {
-      "description": "arguments for the executable",
-      "type": "array",
-      "items": {
+  "description": "A YAML file describing tests for the pytest-workflow plugin",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "command": {
+        "description": "The command that is run for the workflow",
         "type": "string"
-      }
-    },
-    "executable": {
-      "description": "The executable that is being run",
-      "type": "string"
-    },
-    "results": {
-      "description": "A dictionary containing the results",
-      "type": "object",
-      "properties": {
-        "files": {
-          "description": "files produced by the workflow",
-          "type": "array",
-          "items": {
-            "type":"object",
-            "properties": {
-              "path": {
-                "type": "string"
-              },
-              "md5sum": {
-                "type": "string",
-                "pattern": "^[a-f0-9]{32}$"
-              }
+      },
+      "exit_code": {
+        "description": "The expected exit code",
+        "type": "int"
+      },
+      "files": {
+        "description": "files produced by the workflow",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string"
             },
-            "required": ["path"]
+            "md5sum": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{32}$"
+            }
+          },
+          "required": [
+            "path"
+          ]
+            }
           }
         }
-      }
-    }
-  },
-  "required": ["executable","arguments", "results"]
+    },
+    "required": [
+      "command"
+    ]
 }

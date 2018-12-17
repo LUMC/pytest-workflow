@@ -28,7 +28,7 @@ import yaml
 
 valid_yaml_dir = (Path(__file__).parent / Path("yamls") / Path("valid"))
 valid_yamls = [
-        (valid_yaml_dir / Path("valid_test.yml"))
+        (valid_yaml_dir / Path("dream_file.yaml"))
     ]
 
 
