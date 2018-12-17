@@ -6,17 +6,17 @@
         - "bla"
         - "die"
         - "blabla"
-      may_not_contain:
+      must_not_contain:
         - "stuff"
   stdout:
     contains:
       - "bla"
-    may_not_contain:
+    must_not_contain:
       - "bla"
   stderr:
     contains:
       - "bla"
-    may_not_contain:
+    must_not_contain:
       - "bla"
   exit_code: 127
   command: "the one string"
