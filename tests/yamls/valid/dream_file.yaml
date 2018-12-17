@@ -6,7 +6,6 @@
         - "bla"
         - "die"
         - "blabla"
-      exists: false
       may_not_contain:
         - "stuff"
   stdout:
@@ -23,6 +22,9 @@
   command: "the one string"
 - name: other test
   command: "cowsay moo"
+  files:
+    - path: moo
+      should_exist: false
   stdout:
     contains:
       - "moo"
