@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from .schema import validate_schema
+from .schema import validate_schema, WorkflowTest
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 
@@ -52,18 +52,19 @@ class YamlFile(pytest.File):
             but this might be increased later when we decide to put multiple
             tests in one yaml. """
         with self.fspath.open() as yaml_file:
-            yaml_content = yaml.safe_load(yaml_file)
-        yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
+            schema = yaml.safe_load(yaml_file)
+        validate_schema(schema)
+        for test in schema:
+            WorkflowTest.from_schema(test)
+            yield WorkflowTestsCollector(WorkflowTest)
 
 
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
-    def __init__(self, name: str, parent: pytest.Collector,
-                 yaml_content: dict):
-        validate_schema(yaml_content)
-        self.yaml_content = yaml_content
-        super().__init__(name, parent=parent)
+    def __init__(self, test: WorkflowTest, parent: pytest.Collector):
+        self.test = test
+        super().__init__(test.name, parent=parent)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
@@ -84,7 +85,7 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow.from_yaml_content(self.yaml_content, tempdir)
+        workflow = Workflow.from_yaml_content(self.test.command, tempdir)
         workflow.run()
 
         # Add new testcollectors to this list if new types of tests are
