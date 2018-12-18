@@ -75,8 +75,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
         # test workflow output.
-        tempdir = tempfile.mkdtemp(
-            prefix="pytest_wf")
+        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
 
         # Copy the project directory to the temporary directory. os.getcwd()
         # is used here because it is assumed pytest is run from project root.
