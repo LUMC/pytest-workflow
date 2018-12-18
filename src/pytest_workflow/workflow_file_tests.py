@@ -74,6 +74,17 @@ class FileExists(pytest.Item):
         assert self.file.exists()
 
 
+class Md5SumCheckCollector(pytest.Collector):
+    def __init(self, name: str, parent: pytest.Collector,
+               path_md5_pairs: List[tuple[Path, str]]):
+        super().__init__(name, parent)
+        self.path_md5_pairs = path_md5_pairs
+
+    def collect(self):
+        for path, md5 in self.path_md5_pairs:
+            yield CheckMd5("check_md5sum", self, path, md5)
+
+
 class CheckMd5(pytest.Item):
     def __init__(self, name: str, parent: pytest.Collector, filepath: Path,
                  md5sum):
