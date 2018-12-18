@@ -1,81 +1,36 @@
 """All tests for workflow files"""
 import hashlib
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import Union
 
 import pytest
 
 from .schema import FileTest
 
 
-class WorkflowFilesTestCollector(pytest.Collector):
-    """Collects all the files related tests"""
+class FileTestCollector(pytest.Collector):
+    """This collector returns all tests for one particular file"""
 
-    def __init__(self, name: str, parent: pytest.Collector,
-                 filetests: List[FileTest],
+    def __init__(self, parent: pytest.Collector, filetest: FileTest,
                  cwd: Union[bytes, str]):
-        """
-        A WorkflowFilesTestCollector starts all the files-related tests
-        :param name: The name of the tests
-        :param parent: The collector that started this collector
-        :param filetests: A list of `FileTest` which are objects that name
-        all the properties of a to be tested file
-        :param cwd: The directory relative to which relative file paths will
-        be tested.
-        """
-        self.filetests = filetests
-        self.cwd = cwd
-        super().__init__(name, parent=parent)
+        self.name = filetest.path.__str__()
+        super().__init__(self.name, parent)
+        self.filetest = filetest
+        self.cwd = Path(cwd)
 
     def collect(self):
-        """Starts all file related tests"""
-
-        # Get a list of filepaths
-        path_existence_pairs = [(x.path, x.should_exist) for x in
-                                self.filetests]
-
-        # Get a list of path and md5 pairs for files where path and md5sum are
-        # both defined
-        path_md5_pairs = [(x.path, x.md5sum) for x in self.filetests if
-                          x.path and x.md5sum]
-
-        return [FilesExistCollector(self.name, self, path_existence_pairs,
-                                    self.cwd),
-                FilesMd5SumCheckCollector(self.name, self, path_md5_pairs,
-                                          self.cwd)]
-
-
-class FilesExistCollector(pytest.Collector):
-    """Spawns tests to check for files existence"""
-
-    def __init__(self, name: str, parent: pytest.Collector,
-                 path_existence_pairs: List[Tuple[Path, bool]],
-                 cwd: Union[bytes, str]):
-        """
-        :param name: Name of the test.
-        :param parent: Collector that started this test.
-        :param path_existence_pairs: A list of paths and whether they should
-        exist.
-        :param cwd: The directory relative to which relative paths are tested.
-        """
-        self.path_existence_pairs = path_existence_pairs
-        self.cwd = cwd
-        super().__init__(name, parent=parent)
-
-    def collect(self):
-        """Starts all the file existence tests."""
-        for path, should_exist in self.path_existence_pairs:
-            yield FileExists(self.name, self, Path(self.cwd) / path,
-                             should_exist)
+        filepath = self.cwd / self.filetest.path
+        tests = [FileExists(self, filepath, self.filetest.should_exist),
+                 FileMd5(self, filepath, self.filetest.md5sum)]
+        return tests
 
 
 class FileExists(pytest.Item):
     """A pytest file exists test."""
 
-    def __init__(self, name: str, parent: pytest.Collector, filepath: Path,
+    def __init__(self, parent: pytest.Collector, filepath: Path,
                  should_exist: bool):
         """
-        :param name: Test name
         :param parent: Collector that started this test
         :param filepath: A path to the file
         :param should_exist: Whether the file should exist
@@ -92,26 +47,12 @@ class FileExists(pytest.Item):
         assert self.file.exists() == self.should_exist
 
 
-class FilesMd5SumCheckCollector(pytest.Collector):
-    def __init__(self, name: str, parent: pytest.Collector,
-                 path_md5_pairs: List[Tuple[Path, str]],
-                 cwd: Union[bytes, str]):
-        super().__init__(name, parent)
-        self.path_md5_pairs = path_md5_pairs
-        self.cwd = cwd
-
-    def collect(self):
-        for path, md5 in self.path_md5_pairs:
-            yield CheckMd5("{0}: check md5sum".format(path), self, path, md5,
-                           self.cwd)
-
-
-class CheckMd5(pytest.Item):
+class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
-                 md5sum: str, cwd: Union[bytes, str]):
+                 md5sum: str):
         self.name = "Check md5sum"
         super().__init__(self.name, parent)
-        self.filepath = Path(cwd) / filepath
+        self.filepath = filepath
         self.md5sum = md5sum
 
     def runtest(self):
