@@ -42,7 +42,7 @@ def test_validate_schema(yaml_path):
 
 def test_WorkflowTest():
     with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
-        test_yaml = yaml.load(yaml_fh)
+        test_yaml = yaml.safe_load(yaml_fh)
         tests = [WorkflowTest.from_schema(x) for x in test_yaml]
         assert tests[0].name == "simple echo"
         assert tests[0].files[0].path == Path("log.file")
