@@ -84,15 +84,17 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.test.command, tempdir)
+        workflow = Workflow(self.workflow_test.command, tempdir)
         workflow.run()
 
         # Generate all filetests for this workflow
-        filetests = [FileTestCollector(self, filetest, tempdir) for filetest in self.workflow_test.files]
+        filetests = [FileTestCollector(self, filetest, tempdir) for filetest in
+                     self.workflow_test.files]
         # Add new testcollectors to this list if new types of tests are
         # defined.
 
-        workflow_tests = [filetests,]
+        # More tests can be added later
+        workflow_tests = filetests
         for test in workflow_tests:
             yield test
         # TODO: Figure out proper cleanup.
