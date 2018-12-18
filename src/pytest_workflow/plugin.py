@@ -26,7 +26,7 @@ import yaml
 
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
-from .workflow_file_tests import WorkflowFilesTestCollector
+from .workflow_file_tests import FileTestCollector
 
 
 def pytest_collect_file(path, parent):
@@ -61,9 +61,9 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
-    def __init__(self, test: WorkflowTest, parent: pytest.Collector):
-        self.test = test
-        super().__init__(test.name, parent=parent)
+    def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
+        self.workflow_test = workflow_test
+        super().__init__(workflow_test.name, parent=parent)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
@@ -87,12 +87,12 @@ class WorkflowTestsCollector(pytest.Collector):
         workflow = Workflow(self.test.command, tempdir)
         workflow.run()
 
+        # Generate all filetests for this workflow
+        filetests = [FileTestCollector(self, filetest, tempdir) for filetest in self.workflow_test.files]
         # Add new testcollectors to this list if new types of tests are
         # defined.
-        workflow_tests = [
-            WorkflowFilesTestCollector(
-                self.test.name, self, self.test.files, tempdir)
-        ]
+
+        workflow_tests = [filetests,]
         for test in workflow_tests:
             yield test
         # TODO: Figure out proper cleanup.
