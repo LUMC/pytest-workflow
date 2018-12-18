@@ -31,14 +31,16 @@ class WorkflowFilesTestCollector(pytest.Collector):
         """Starts all file related tests"""
 
         # Get a list of filepaths
-        filepaths = [test.path for test in self.filetests]
+        path_existence_pairs = [(x.path, x.should_exist) for x in
+                                self.filetests]
 
         # Get a list of path and md5 pairs for files where path and md5sum are
         # both defined
         path_md5_pairs = [(x.path, x.md5sum) for x in self.filetests if
                           x.path and x.md5sum]
 
-        return [FilesExistCollector(self.name, self, filepaths, self.cwd),
+        return [FilesExistCollector(self.name, self, path_existence_pairs,
+                                    self.cwd),
                 FilesMd5SumCheckCollector(self.name, self, path_md5_pairs,
                                           self.cwd)]
 
@@ -46,39 +48,44 @@ class WorkflowFilesTestCollector(pytest.Collector):
 class FilesExistCollector(pytest.Collector):
     """Spawns tests to check for files existence"""
 
-    def __init__(self, name: str, parent: pytest.Collector, files: List[Path],
+    def __init__(self, name: str, parent: pytest.Collector,
+                 path_existence_pairs: List[Tuple[Path, bool]],
                  cwd: Union[bytes, str]):
         """
         :param name: Name of the test.
         :param parent: Collector that started this test.
-        :param files: A list of paths to be tested.
+        :param path_existence_pairs: A list of paths and whether they should
+        exist.
         :param cwd: The directory relative to which relative paths are tested.
         """
-        self.files = files
+        self.path_existence_pairs = path_existence_pairs
         self.cwd = cwd
         super().__init__(name, parent=parent)
 
     def collect(self):
         """Starts all the file existence tests."""
-        for test_file in self.files:
-            name = "{0}. File exists: {1}".format(self.name, test_file)
-            yield FileExists(name, self, Path(self.cwd) / test_file)
+        for path, should_exist in self.path_existence_pairs:
+            yield FileExists(self.name, self, Path(self.cwd) / path,
+                             should_exist)
 
 
 class FileExists(pytest.Item):
     """A pytest file exists test."""
 
-    def __init__(self, name: str, parent: pytest.Collector, file: Path):
+    def __init__(self, name: str, parent: pytest.Collector, filepath: Path,
+                 should_exist: bool):
         """
         :param name: Test name
         :param parent: Collector that started this test
-        :param file: A path to the file
+        :param filepath: A path to the file
+        :param should_exist: Whether the file should exist
         """
         super().__init__(name, parent)
-        self.file = file
+        self.file = filepath
+        self.should_exist = should_exist
 
     def runtest(self):
-        assert self.file.exists()
+        assert self.file.exists() == self.should_exist
 
 
 class FilesMd5SumCheckCollector(pytest.Collector, ):
