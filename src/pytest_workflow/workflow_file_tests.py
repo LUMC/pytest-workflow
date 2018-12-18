@@ -82,10 +82,10 @@ class CheckMd5(pytest.Item):
         self.md5sum = md5sum
 
     def runtest(self):
-        assert file_md5(self.filepath) == self.md5sum
+        assert file_md5sum(self.filepath) == self.md5sum
 
 
-def file_md5(filepath: Path):
+def file_md5sum(filepath: Path):
     """
     Generates a md5sum for a file. Reads file in blocks to save memory.
     :param filepath: a pathlib. Path to the file
