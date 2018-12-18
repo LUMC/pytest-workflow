@@ -4,5 +4,6 @@ coverage:
     project:
       default:
         target: 90  # let's try to hit high standards
-      patch:
+    patch:
+      default:
         target: 90  # Tests should be written for new features
