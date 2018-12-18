@@ -1,4 +1,9 @@
-- name: simple touch
-  command: "touch log.file"
+- name: simple echo
+  # Gruesome command injection here. This is for testing purposes only.
+  # Do not try this at home.
+  command: "bash -c 'echo moo > moo.txt'"
   files:
-    - path: "log.file"
+    - path: "moo.txt"
+      contains:
+        - "moo"
+      md5sum: e583af1f8b00b53cda87ae9ead880224
