@@ -1,4 +1,5 @@
 """All tests for workflow files"""
+import hashlib
 
 from pathlib import Path
 from typing import List, Union
@@ -72,3 +73,27 @@ class FileExists(pytest.Item):
 
     def runtest(self):
         assert self.file.exists()
+
+
+class CheckMd5(pytest.Item):
+    def __init__(self, name: str, parent: pytest.Collector, filepath: Path,
+                 md5sum):
+        super().__init__(name, parent)
+        self.filepath = filepath
+        self.md5sum = md5sum
+
+    def runtest(self):
+        assert file_md5(self.filepath) == self.md5sum
+
+
+def file_md5(filepath: Path):
+    """
+    Generates a md5sum for a file. Reads file line by line to save memory.
+    :param filepath: a pathlib. Path to the file
+    :return: a md5sum as hexadecimal string.
+    """
+    hasher = hashlib.md5()
+    with filepath.open('rb') as f:  # Read the file in bytes
+        for line in f:
+            hasher.update(line)
+    return hasher.hexdigest()
