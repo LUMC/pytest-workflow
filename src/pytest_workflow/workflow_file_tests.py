@@ -119,10 +119,7 @@ def file_md5sum(filepath: Path):
     :param filepath: a pathlib. Path to the file
     :return: a md5sum as hexadecimal string.
     """
-    if not filepath.exists():
-        raise FileNotFoundError(
-            "Cannot calculate md5 on non-existing file: {0}."
-            .format(filepath))
+
     hasher = hashlib.md5()
     with filepath.open('rb') as f:  # Read the file in bytes
         # Hardcode the blocksize at 8192 bytes here.
