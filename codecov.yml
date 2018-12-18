@@ -1,1 +1,8 @@
 comment: off
+coverage:
+  status:
+    project:
+      default:
+        target: 90  # let's try to hit high standards
+      patch:
+        target: 90  # Tests should be written for new commits
