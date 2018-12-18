@@ -88,7 +88,7 @@ class FileExists(pytest.Item):
         assert self.file.exists() == self.should_exist
 
 
-class FilesMd5SumCheckCollector(pytest.Collector, ):
+class FilesMd5SumCheckCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
                  path_md5_pairs: List[Tuple[Path, str]],
                  cwd: Union[bytes, str]):
