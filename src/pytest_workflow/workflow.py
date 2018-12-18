@@ -20,8 +20,7 @@ class Workflow(object):
         self.cwd = cwd
 
     def run(self):
-        arguments = shlex.split(self.command)
-        sub_procces_args = arguments
+        sub_procces_args = shlex.split(self.command)
         self._proc_out = subprocess.run(
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
