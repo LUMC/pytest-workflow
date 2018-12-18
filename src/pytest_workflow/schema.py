@@ -71,8 +71,8 @@ class ContentTest(object):
     Everything in `must_not_contain` should not be present.
     """
 
-    def __init__(self, contains: List[str] = None,
-                 must_not_contain: List[str] = None):
+    def __init__(self, contains: Optional[List[str]] = None,
+                 must_not_contain: Optional[List[str]] = None):
         if contains:
             self.contains = contains
         else:
@@ -94,8 +94,8 @@ class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
-                 contains: List[str] = None,
-                 must_not_contain: List[str] = None):
+                 contains: Optional[List[str]] = None,
+                 must_not_contain: Optional[List[str]] = None):
         """
         A container object
         :param path: the path to the file
@@ -135,7 +135,7 @@ class WorkflowTest(object):
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
                  stderr: ContentTest = ContentTest(),
-                 files: List[FileTest] = None):
+                 files: Optional[List[FileTest]] = None):
         """
         Create a WorkflowTest object.
         :param name: The name of the test
