@@ -94,7 +94,8 @@ def file_md5sum(filepath: Path):
     hasher = hashlib.md5()
     with filepath.open('rb') as f:  # Read the file in bytes
         # Hardcode the blocksize at 8192 bytes here.
-        # This can be changed when the requirements ask for it.
+        # This can be changed or made variable when the requirements compel us
+        # to do so.
         for block in iter(lambda: f.read(8192), b''):
             hasher.update(block)
     return hasher.hexdigest()
