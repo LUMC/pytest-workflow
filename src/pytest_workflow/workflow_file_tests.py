@@ -1,6 +1,5 @@
 """All tests for workflow files"""
 import hashlib
-
 from pathlib import Path
 from typing import List, Union
 
@@ -88,12 +87,14 @@ class CheckMd5(pytest.Item):
 
 def file_md5(filepath: Path):
     """
-    Generates a md5sum for a file. Reads file line by line to save memory.
+    Generates a md5sum for a file. Reads file in blocks to save memory.
     :param filepath: a pathlib. Path to the file
     :return: a md5sum as hexadecimal string.
     """
     hasher = hashlib.md5()
     with filepath.open('rb') as f:  # Read the file in bytes
-        for line in f:
-            hasher.update(line)
+        # Hardcode the blocksize at 8192 bytes here.
+        # This can be changed when the requirements ask for it.
+        for block in iter(lambda: f.read(8192), b''):
+            hasher.update(block)
     return hasher.hexdigest()
