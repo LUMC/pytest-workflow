@@ -106,7 +106,6 @@ class FileTest(ContentTest):
         in the file
         """
         super().__init__(contains=contains, must_not_contain=must_not_contain)
-        self.path_as_string = path
         self.path = Path(path)
         self.md5sum = md5sum
         self.should_exist = should_exist
