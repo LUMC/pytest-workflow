@@ -5,28 +5,31 @@ from typing import List, Union
 
 import pytest
 
+from .schema import FileTest
+
 
 class WorkflowFilesTestCollector(pytest.Collector):
     """Collects all the files related tests"""
 
-    def __init__(self, name: str, parent: pytest.Collector, files: List[dict],
+    def __init__(self, name: str, parent: pytest.Collector,
+                 filetests: List[FileTest],
                  cwd: Union[bytes, str]):
         """
         A WorkflowFilesTestCollector starts all the files-related tests
         :param name: The name of the tests
         :param parent: The collector that started this collector
-        :param files: A list of `files` which are dictionaries in the schema
-        the dictionaries define the tests.
+        :param filetests: A list of `FileTest` which are objects that name
+        all the properties of a to be tested file
         :param cwd: The directory relative to which relative file paths will
         be tested.
         """
-        self.files = files
+        self.filetests = filetests
         self.cwd = cwd
         super().__init__(name, parent=parent)
 
     def collect(self):
         """Starts all file related tests"""
-        filepaths = [Path(x["path"]) for x in self.files]
+        filepaths = [test.path for test in self.filetests]
         # Structure why not the file exists directly?
         # Because also some other operations on files will be added to
         # this list. Like contains, md5sum etc.

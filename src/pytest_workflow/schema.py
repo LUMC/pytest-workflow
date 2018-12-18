@@ -18,19 +18,153 @@
 
 import json
 from pathlib import Path
+from typing import List, Optional
 
 import jsonschema
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
-with SCHEMA.open() as schema:
-    JSON_SCHEMA = json.load(schema)
+DEFAULT_EXIT_CODE = 0
+DEFAULT_FILE_SHOULD_EXIST = True
+
+with SCHEMA.open() as schema_fh:
+    JSON_SCHEMA = json.load(schema_fh)
 
 
-def validate_schema(instance: dict):
+def workflow_tests_from_schema(schema):
+    """Returns workflow test objects from a schema"""
+    validate_schema(schema)
+    return [WorkflowTest.from_schema(x) for x in schema]
+
+
+def validate_schema(instance):
     """
     Validates the pytest-workflow schema
-    :param instance: a dictionary that is validated against the schema
+    :param instance: an object that is validated against the schema
     :return: This function rasises a ValidationError
     when the schema is not correct.
     """
     jsonschema.validate(instance, JSON_SCHEMA)
+
+    for test in instance:
+        for test_file in test.get("files", []):
+            keys = test_file.keys()
+            file_should_exist = test_file.get("should_exist",
+                                              DEFAULT_FILE_SHOULD_EXIST)
+            if not file_should_exist:
+                for check in ["md5sum", "contains", "must_not_contain"]:
+                    if check in keys:
+                        raise jsonschema.ValidationError(
+                            "Content checking not allowed " +
+                            "on non existing file: {0}. Key = {1}".format(
+                                test_file["path"], check))
+
+
+# Schema classes below
+# These classes are created so that the test yaml does not have to be passed
+# around between test objects. But instead these objects which have self-
+# documenting members
+
+class ContentTest(object):
+    """
+    A class that holds two lists of strings. Everything in `contains` should be
+    present in the file/text
+    Everything in `must_not_contain` should not be present.
+    """
+
+    def __init__(self, contains: Optional[List[str]] = None,
+                 must_not_contain: Optional[List[str]] = None):
+        if contains:
+            self.contains = contains
+        else:
+            self.contains = []
+        if must_not_contain:
+            self.must_not_contain = must_not_contain
+        else:
+            self.must_not_contain = []
+
+    @classmethod
+    def from_dict(cls, dictionary: dict):
+        return cls(
+            contains=dictionary.get("contains"),
+            must_not_contain=dictionary.get("must_not_contain")
+        )
+
+
+class FileTest(ContentTest):
+    """A class that contains all the properties of a to be tested file."""
+    def __init__(self, path: str, md5sum: Optional[str] = None,
+                 should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
+                 contains: Optional[List[str]] = None,
+                 must_not_contain: Optional[List[str]] = None):
+        """
+        A container object
+        :param path: the path to the file
+        :param md5sum: md5sum of the file contents
+        :param should_exist: whether the file should exist or not
+        :param contains: a list of strings that should be present in the file
+        :param must_not_contain: a list of strings that should not be present
+        in the file
+        """
+        super().__init__(contains=contains, must_not_contain=must_not_contain)
+        self.path = Path(path)
+        self.md5sum = md5sum
+        self.should_exist = should_exist
+
+    @classmethod
+    def from_dict(cls, dictionary: dict):
+        """
+        Creates a FileTest object from a dictionary
+        :param dictionary: dictionary containing at least a "path" key
+        :return: a FileTest object
+        """
+        return cls(
+            path=dictionary["path"],  # Compulsory value should fail
+            # when not present
+            md5sum=dictionary.get("md5sum"),
+            should_exist=dictionary.get("should_exist",
+                                        DEFAULT_FILE_SHOULD_EXIST),
+            contains=dictionary.get("contains"),
+            must_not_contain=dictionary.get("must_not_contain")
+        )
+
+
+class WorkflowTest(object):
+    """A class that contains all properties of a to be tested workflow"""
+    def __init__(self, name: str, command: str,
+                 exit_code: int = DEFAULT_EXIT_CODE,
+                 stdout: ContentTest = ContentTest(),
+                 stderr: ContentTest = ContentTest(),
+                 files: Optional[List[FileTest]] = None):
+        """
+        Create a WorkflowTest object.
+        :param name: The name of the test
+        :param command: The command to start the workflow
+        :param exit_code: The expected exit code of the workflow
+        :param stdout: a ContentTest object
+        :param stderr: a ContentTest object
+        :param files: a list of FileTest objects
+        """
+        self.name = name
+        self.command = command
+        self.exit_code = exit_code
+        self.stdout = stdout
+        self.stderr = stderr
+        if files:
+            self.files = files
+        else:
+            self.files = []
+
+    @classmethod
+    def from_schema(cls, schema: dict):
+        """Generate a WorkflowTest object from schema objects"""
+        test_file_dicts = schema.get("files", [])
+        test_files = [FileTest.from_dict(x) for x in test_file_dicts]
+
+        return cls(
+            name=schema["name"],
+            command=schema["command"],
+            exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
+            stdout=ContentTest.from_dict(schema.get("stdout", {})),
+            stderr=ContentTest.from_dict(schema.get("stderr", {})),
+            files=test_files
+        )

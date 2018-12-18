@@ -1,0 +1,30 @@
+- name: simple echo
+  files:
+    - path: "log.file"
+      md5sum: "e583af1f8b00b53cda87ae9ead880224"
+      contains:
+        - "bla"
+        - "die"
+        - "blabla"
+      must_not_contain:
+        - "stuff"
+  stdout:
+    contains:
+      - "bla"
+    must_not_contain:
+      - "bla"
+  stderr:
+    contains:
+      - "bla"
+    must_not_contain:
+      - "bla"
+  exit_code: 127
+  command: "the one string"
+- name: other test
+  command: "cowsay moo"
+  files:
+    - path: moo
+      should_exist: false
+  stdout:
+    contains:
+      - "moo"

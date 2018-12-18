@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from .schema import validate_schema
+from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 from .workflow_file_tests import WorkflowFilesTestCollector
 
@@ -52,18 +52,18 @@ class YamlFile(pytest.File):
             but this might be increased later when we decide to put multiple
             tests in one yaml. """
         with self.fspath.open() as yaml_file:
-            yaml_content = yaml.safe_load(yaml_file)
-        yield WorkflowTestsCollector(self.fspath.basename, self, yaml_content)
+            schema = yaml.safe_load(yaml_file)
+        workflow_tests = workflow_tests_from_schema(schema)
+        for test in workflow_tests:
+            yield WorkflowTestsCollector(test, self)
 
 
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
-    def __init__(self, name: str, parent: pytest.Collector,
-                 yaml_content: dict):
-        validate_schema(yaml_content)
-        self.yaml_content = yaml_content
-        super().__init__(name, parent=parent)
+    def __init__(self, test: WorkflowTest, parent: pytest.Collector):
+        self.test = test
+        super().__init__(test.name, parent=parent)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
@@ -84,16 +84,15 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow.from_yaml_content(self.yaml_content, tempdir)
+        workflow = Workflow(self.test.command, tempdir)
         workflow.run()
 
         # Add new testcollectors to this list if new types of tests are
         # defined.
         workflow_tests = [
             WorkflowFilesTestCollector(
-                self.name, self,
-                self.yaml_content.get("results", {}).get("files", []),
-                tempdir)]
+                self.test.name, self, self.test.files, tempdir)
+        ]
         for test in workflow_tests:
             yield test
         # TODO: Figure out proper cleanup.
