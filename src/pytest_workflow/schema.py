@@ -158,10 +158,7 @@ class WorkflowTest(object):
     def from_schema(cls, schema: dict):
         """Generate a WorkflowTest object from schema objects"""
         test_file_dicts = schema.get("files", [])
-
-        test_files = []
-        for test_file_dict in test_file_dicts:
-            test_files.append(FileTest.from_dict(test_file_dict))
+        test_files = [FileTest.from_dict(x) for x in test_file_dicts]
 
         return cls(
             name=schema["name"],
