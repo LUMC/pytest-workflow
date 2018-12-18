@@ -1,0 +1,5 @@
+This is some random text.
+It was placed here to test the md5sum hashing algorithm in the program.
+Note that this file has newlines, which is important for the function.
+This file is encoded in unicode, but there should be a zipped companion
+file present.
