@@ -1,7 +1,7 @@
 """All tests for workflow files"""
 import hashlib
 from pathlib import Path
-from typing import List, Union
+from typing import List, Tuple, Union
 
 import pytest
 
@@ -29,11 +29,18 @@ class WorkflowFilesTestCollector(pytest.Collector):
 
     def collect(self):
         """Starts all file related tests"""
+
+        # Get a list of filepaths
         filepaths = [test.path for test in self.filetests]
-        # Structure why not the file exists directly?
-        # Because also some other operations on files will be added to
-        # this list. Like contains, md5sum etc.
-        return [FilesExistCollector(self.name, self, filepaths, self.cwd)]
+
+        # Get a list of path and md5 pairs for files where path and md5sum are
+        # both defined
+        path_md5_pairs = [(x.path, x.md5sum) for x in self.filetests if
+                          x.path and x.md5sum]
+
+        return [FilesExistCollector(self.name, self, filepaths, self.cwd),
+                FilesMd5SumCheckCollector(self.name, self, path_md5_pairs,
+                                          self.cwd)]
 
 
 class FilesExistCollector(pytest.Collector):
@@ -74,22 +81,25 @@ class FileExists(pytest.Item):
         assert self.file.exists()
 
 
-class Md5SumCheckCollector(pytest.Collector):
-    def __init(self, name: str, parent: pytest.Collector,
-               path_md5_pairs: List[tuple[Path, str]]):
+class FilesMd5SumCheckCollector(pytest.Collector, ):
+    def __init__(self, name: str, parent: pytest.Collector,
+                 path_md5_pairs: List[Tuple[Path, str]],
+                 cwd: Union[bytes, str]):
         super().__init__(name, parent)
         self.path_md5_pairs = path_md5_pairs
+        self.cwd = cwd
 
     def collect(self):
         for path, md5 in self.path_md5_pairs:
-            yield CheckMd5("check_md5sum", self, path, md5)
+            yield CheckMd5("{0}: check md5sum".format(path), self, path, md5,
+                           self.cwd)
 
 
 class CheckMd5(pytest.Item):
     def __init__(self, name: str, parent: pytest.Collector, filepath: Path,
-                 md5sum):
+                 md5sum: str, cwd: Union[bytes, str]):
         super().__init__(name, parent)
-        self.filepath = filepath
+        self.filepath = Path(cwd) / filepath
         self.md5sum = md5sum
 
     def runtest(self):
@@ -102,6 +112,10 @@ def file_md5sum(filepath: Path):
     :param filepath: a pathlib. Path to the file
     :return: a md5sum as hexadecimal string.
     """
+    if not filepath.exists():
+        raise FileNotFoundError(
+            "Cannot calculate md5 on non-existing file: {0}."
+            .format(filepath))
     hasher = hashlib.md5()
     with filepath.open('rb') as f:  # Read the file in bytes
         # Hardcode the blocksize at 8192 bytes here.
