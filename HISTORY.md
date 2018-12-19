@@ -8,6 +8,8 @@ that users understand how the changes affect the new version.
 --->
 
 ## Current development version
++ Add functionality to test whether certain strings exist in files, stdout and 
+stderr.
 + Enable easy to understand output when using pytest verbose mode 
 (`pytest -v`).  
 The required code refactoring has simplified the code base and made it easier 
