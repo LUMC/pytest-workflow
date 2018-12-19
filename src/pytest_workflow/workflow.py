@@ -14,7 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
-"""This file was created by A.H.B. Bollen as a proof of concept."""
+"""
+Contains all functionality regarding the running of workflows and reporting
+on stdout, stderr and exit code.
+This file was created by A.H.B. Bollen
+"""
 import shlex
 import subprocess
 from typing import Union
