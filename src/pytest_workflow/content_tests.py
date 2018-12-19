@@ -77,7 +77,7 @@ def generate_content_tests(
     :param contains: The strings that should be in the text lines
     :param must_not_contain: The strings that should not be in the text lines
     :param test_name_prefix: a text prefix for the test name.
-    :return: 
+    :return: A list of pytest Items
     """
     found_dictionary = check_content(contains + must_not_contain, text_lines)
 
