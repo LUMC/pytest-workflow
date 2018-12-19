@@ -18,10 +18,10 @@
 and logs."""
 
 from pathlib import Path
-from typing import Dict, Iterator, List
+from typing import Dict, Iterable, List
 
 
-def check_content(strings: List[str], text: Iterator[str]) -> Dict[str, bool]:
+def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:
     # Make a copy of the list here to prevent aliasing.
     not_found_strings = list(strings)
     # By default all strings are not found.
@@ -38,7 +38,7 @@ def check_content(strings: List[str], text: Iterator[str]) -> Dict[str, bool]:
     return found_dictionary
 
 
-def file_to_string_generator(filepath: Path) -> Iterator[str]:
+def file_to_string_generator(filepath: Path) -> Iterable[str]:
     with filepath.open("r") as f:  # Use 'r' here explicitly as opposed to 'rb'
         for line in f:
             yield line
