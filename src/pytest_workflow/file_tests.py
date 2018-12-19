@@ -13,12 +13,21 @@ class FileTestCollector(pytest.Collector):
 
     def __init__(self, parent: pytest.Collector, filetest: FileTest,
                  cwd: Union[bytes, str]):
+        """
+        Create a FiletestCollector
+        :param parent: The collector that started this collector
+        :param filetest: a FileTest object
+        :param cwd: the working directory from which relative filepaths should
+        be evaluated
+        """
         name = filetest.path.__str__()
         super().__init__(name, parent)
         self.filetest = filetest
         self.cwd = Path(cwd)
 
     def collect(self):
+        """Returns all tests for one file. Also the absolute path of the files
+        is determined in this function."""
         filepath = self.filetest.path \
             if self.filetest.path.is_absolute() \
             else self.cwd / self.filetest.path
