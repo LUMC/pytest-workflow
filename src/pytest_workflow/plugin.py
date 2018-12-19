@@ -21,6 +21,7 @@ import tempfile
 from distutils.dir_util import copy_tree
 
 import pytest
+
 import yaml
 
 from .content_tests import generate_content_tests

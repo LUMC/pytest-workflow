@@ -22,8 +22,6 @@ from typing import Dict, Iterable, List
 
 import pytest
 
-from . import GenericTest
-
 
 def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:
     # Make a copy of the list here to prevent aliasing.
@@ -78,3 +76,21 @@ def generate_content_tests(
         for string in must_not_contain]
 
     return test_items
+
+
+class GenericTest(pytest.Item):
+    """Test that can be used to report a failing or succeeding test
+    in the log"""
+
+    def __init__(self, name: str, parent: pytest.Collector, result: bool):
+        """
+        Create a GenericTest item
+        :param name: The name of the test
+        :param parent: A pytest Collector from which the test originates
+        :param result: Whether the test has succeeded.
+        """
+        super().__init__(name, parent=parent)
+        self.result = result
+
+    def runtest(self):
+        assert self.result
