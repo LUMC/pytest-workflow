@@ -13,3 +13,23 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+
+import pytest
+
+
+class GenericTest(pytest.Item):
+    """Test that can be used to report a failing or succeeding test
+    in the log"""
+
+    def __init__(self, name: str, parent: pytest.Collector, result: bool):
+        """
+        Create a GenericTest item
+        :param name: The name of the test
+        :param parent: A pytest Collector from which the test originates
+        :param result: Whether the test has succeeded.
+        """
+        super().__init__(name, parent=parent)
+        self.result = result
+
+    def runtest(self):
+        assert self.result
