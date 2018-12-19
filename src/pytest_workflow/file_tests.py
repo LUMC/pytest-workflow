@@ -66,6 +66,12 @@ class FileExists(pytest.Item):
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
                  md5sum: str):
+        """
+        Create a tests for the file md5sum.
+        :param parent: The collector that started this item
+        :param filepath: The path to the file
+        :param md5sum:  The expected md5sum
+        """
         name = "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
