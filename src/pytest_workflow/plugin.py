@@ -21,9 +21,9 @@ import tempfile
 from distutils.dir_util import copy_tree
 
 import pytest
-
 import yaml
 
+from .content_tests import generate_content_tests
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
@@ -93,6 +93,28 @@ class WorkflowTestsCollector(pytest.Collector):
 
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
+
+        # There is some code duplication between stdout and stderr, but
+        # Generalizing this into a function does not help readability.
+        stdout_test = self.workflow_test.stdout
+        if stdout_test.contains or stdout_test.must_not_contain:
+            tests += generate_content_tests(
+                parent=self,
+                content=workflow.stdout.splitlines(keepends=True),
+                contains=stdout_test.contains,
+                must_not_contain=stdout_test.must_not_contain,
+                prefix="stdout "
+            )
+
+        stderr_test = self.workflow_test.stderr
+        if stderr_test.contains or stderr_test.must_not_contain:
+            tests += generate_content_tests(
+                parent=self,
+                content=workflow.stderr.splitlines(keepends=True),
+                contains=stderr_test.contains,
+                must_not_contain=stderr_test.contains,
+                prefix="stderr "
+            )
 
         for test in tests:
             yield test
