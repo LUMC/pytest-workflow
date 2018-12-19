@@ -20,6 +20,9 @@ and logs."""
 from pathlib import Path
 from typing import Dict, Iterable, List
 
+from . import GenericTest
+import pytest
+
 
 def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:
     # Make a copy of the list here to prevent aliasing.
@@ -42,3 +45,35 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
     with filepath.open("r") as f:  # Use 'r' here explicitly as opposed to 'rb'
         for line in f:
             yield line
+
+
+def generate_content_tests(
+        parent: pytest.Collector,
+        content: Iterable[str],
+        contains: List[str],
+        must_not_contain: List[str],
+        prefix: str = "") -> List[pytest.Item]:
+    found_dictionary = check_content(contains + must_not_contain, content)
+
+    test_items = []
+
+    # Check whether `contains` strings have been found
+    test_items += [
+        GenericTest(
+            name=prefix + "contains '{0}'".format(string),
+            parent=parent,
+            result=found_dictionary[string]
+        )
+        for string in contains]
+
+    # Check whether `must_not_contain` strings have been found
+    test_items += [
+        GenericTest(
+            name=prefix + "does not contain '{0}".format(string),
+            parent=parent,
+            result=not found_dictionary[string]  # If not found, result should
+            # be True, so the test succeeds.
+        )
+        for string in must_not_contain]
+
+    return test_items
