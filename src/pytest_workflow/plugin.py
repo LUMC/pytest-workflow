@@ -87,15 +87,16 @@ class WorkflowTestsCollector(pytest.Collector):
         workflow = Workflow(self.workflow_test.command, tempdir)
         workflow.run()
 
-        # Generate all filetests for this workflow
-        filetests = [FileTestCollector(self, filetest, tempdir) for filetest in
-                     self.workflow_test.files]
-        # Add new testcollectors to this list if new types of tests are
-        # defined.
+        # Below structure makes it easy to append tests
+        tests = []
+        tests.extend(
+            [FileTestCollector(self, filetest, tempdir) for filetest in
+             self.workflow_test.files])
 
-        # More tests can be added later
-        workflow_tests = filetests
-        for test in workflow_tests:
+        tests.append(ExitCodeTest(self, workflow.exit_code,
+                                  self.workflow_test.exit_code))
+
+        for test in tests:
             yield test
         # TODO: Figure out proper cleanup.
         # If tempdir is removed here, all tests will fail.
@@ -107,3 +108,15 @@ class WorkflowTestsCollector(pytest.Collector):
         # TODO: Figure out what reportinfo does
         # This was copied from code example.
         return self.fspath, None, self.name
+
+
+class ExitCodeTest(pytest.Item):
+    def __init__(self, parent: pytest.Collector, exit_code: int,
+                 desired_exit_code: int):
+        self.name = "Exit code should be {0}".format(desired_exit_code)
+        super().__init__(self.name, parent=parent)
+        self.exit_code = exit_code
+        self.desired_exit_code = desired_exit_code
+
+    def runtest(self):
+        assert self.exit_code == self.desired_exit_code
