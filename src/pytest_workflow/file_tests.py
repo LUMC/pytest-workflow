@@ -52,10 +52,10 @@ class FileTestCollector(pytest.Collector):
         # certain conditions are met.
         tests = []
 
-        tests.append(FileExists(self, filepath, self.filetest.should_exist))
+        tests += [FileExists(self, filepath, self.filetest.should_exist)]
 
         if self.filetest.md5sum:
-            tests.append(FileMd5(self, filepath, self.filetest.md5sum))
+            tests += [FileMd5(self, filepath, self.filetest.md5sum)]
 
         return tests
 

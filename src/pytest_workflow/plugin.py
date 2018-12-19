@@ -87,12 +87,12 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Below structure makes it easy to append tests
         tests = []
-        tests.extend(
-            [FileTestCollector(self, filetest, tempdir) for filetest in
-             self.workflow_test.files])
 
-        tests.append(ExitCodeTest(self, workflow.exit_code,
-                                  self.workflow_test.exit_code))
+        tests += [FileTestCollector(self, filetest, tempdir) for filetest in
+                  self.workflow_test.files]
+
+        tests += [ExitCodeTest(self, workflow.exit_code,
+                               self.workflow_test.exit_code)]
 
         for test in tests:
             yield test
