@@ -36,7 +36,7 @@ class FileTestCollector(pytest.Collector):
         :param cwd: the working directory from which relative filepaths should
         be evaluated
         """
-        name = filetest.path.__str__()
+        name = str(filetest.path)
         super().__init__(name, parent)
         self.filetest = filetest
         self.cwd = Path(cwd)
