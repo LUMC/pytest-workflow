@@ -44,9 +44,9 @@ class FileTestCollector(pytest.Collector):
     def collect(self):
         """Returns all tests for one file. Also the absolute path of the files
         is determined in this function."""
-        filepath = self.filetest.path \
-            if self.filetest.path.is_absolute() \
-            else self.cwd / self.filetest.path
+        filepath = (
+            self.filetest.path if self.filetest.path.is_absolute()
+            else self.cwd / self.filetest.path)
 
         # Below structure was chosen since it allows for adding tests when
         # certain conditions are met.
