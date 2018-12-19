@@ -67,10 +67,8 @@ class WorkflowTestsCollector(pytest.Collector):
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
-        The idea is that isolated parts of the yaml get their own collector.
-        So in the results key in hte yaml there is a key called `files` this
-        generates the WorkflowFilesTestCollector. When we add a key `stdout
-        we add a new class WorkflowStdoutTestCollector etc."""
+        The idea is that isolated parts of the yaml get their own collector or
+        item."""
 
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
