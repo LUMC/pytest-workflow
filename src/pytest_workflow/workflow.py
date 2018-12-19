@@ -46,11 +46,11 @@ class Workflow(object):
             stderr=subprocess.PIPE, cwd=self.cwd)
 
     @property
-    def stdout(self) -> str:
+    def stdout(self) -> bytes:
         return self._proc_out.stdout  # for testing log
 
     @property
-    def stderr(self) -> str:
+    def stderr(self) -> bytes:
         return self._proc_out.stderr  # for testing log
 
     @property

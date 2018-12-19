@@ -101,7 +101,8 @@ class WorkflowTestsCollector(pytest.Collector):
         if stdout_test.contains or stdout_test.must_not_contain:
             tests += generate_content_tests(
                 parent=self,
-                content=workflow.stdout.splitlines(keepends=True),
+                content=[
+                    str(line) for line in workflow.stdout.splitlines(True)],
                 contains=stdout_test.contains,
                 must_not_contain=stdout_test.must_not_contain,
                 prefix="stdout "
@@ -111,9 +112,10 @@ class WorkflowTestsCollector(pytest.Collector):
         if stderr_test.contains or stderr_test.must_not_contain:
             tests += generate_content_tests(
                 parent=self,
-                content=workflow.stderr.splitlines(keepends=True),
+                content=[
+                    str(line) for line in workflow.stderr.splitlines(True)],
                 contains=stderr_test.contains,
-                must_not_contain=stderr_test.contains,
+                must_not_contain=stderr_test.must_not_contain,
                 prefix="stderr "
             )
 
