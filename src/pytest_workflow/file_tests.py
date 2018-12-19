@@ -19,9 +19,19 @@ class FileTestCollector(pytest.Collector):
         self.cwd = Path(cwd)
 
     def collect(self):
-        filepath = self.cwd / self.filetest.path
-        tests = [FileExists(self, filepath, self.filetest.should_exist),
-                 FileMd5(self, filepath, self.filetest.md5sum)]
+        filepath = self.filetest.path \
+            if self.filetest.path.is_absolute() \
+            else self.cwd / self.filetest.path
+
+        # Below structure was chosen since it allows for adding tests when
+        # certain conditions are met.
+        tests = []
+
+        tests.append(FileExists(self, filepath, self.filetest.should_exist))
+
+        if self.filetest.md5sum:
+            tests.append(FileMd5(self, filepath, self.filetest.md5sum))
+
         return tests
 
 
