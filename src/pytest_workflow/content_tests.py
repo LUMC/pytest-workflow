@@ -25,24 +25,39 @@ import pytest
 from .schema import ContentTest
 
 
-def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:
+def check_content(strings: List[str],
+                  text_lines: Iterable[str]) -> Dict[str, bool]:
+    """
+    Checks whether any of the strings is present in the text lines
+    This function is optimized for big texts, it stops searching when
+    everything is found.
+    :param strings: A list of strings for which the present is checked
+    :param text_lines: The lines of text that need to be searched.
+    :return:
+    """
     # Make a copy of the list here to prevent aliasing.
     not_found_strings = list(strings)
     # By default all strings are not found.
     found_dictionary = {key: False for key in not_found_strings}
 
-    for line in text:
+    for line in text_lines:
+        # Break the loop if the list of not found strings is empty.
+        if not not_found_strings:
+            break
         for string in not_found_strings:
             if string in line:
                 found_dictionary[string] = True
                 not_found_strings.remove(string)
-        # Break the loop if the list of not found strings is empty.
-        if not not_found_strings:
-            break
+
     return found_dictionary
 
 
 def file_to_string_generator(filepath: Path) -> Iterable[str]:
+    """
+    Turns a file into a line generator.
+    :param filepath: the file path
+    :return: yields lines of the file
+    """
     with filepath.open("r") as f:  # Use 'r' here explicitly as opposed to 'rb'
         for line in f:
             yield line
@@ -50,18 +65,28 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
 
 def generate_content_tests(
         parent: pytest.Collector,
-        content: Iterable[str],
+        text_lines: Iterable[str],
         contains: List[str],
         must_not_contain: List[str],
-        prefix: str = "") -> List[pytest.Item]:
-    found_dictionary = check_content(contains + must_not_contain, content)
+        test_name_prefix: str = "") -> List[pytest.Item]:
+    """
+    Checks text lines for content. Spawns test items that indicate whether
+    certain strings have been found or not.
+    :param parent: The parent for the test items.
+    :param text_lines: The lines of text to search.
+    :param contains: The strings that should be in the text lines
+    :param must_not_contain: The strings that should not be in the text lines
+    :param test_name_prefix: a text prefix for the test name.
+    :return: 
+    """
+    found_dictionary = check_content(contains + must_not_contain, text_lines)
 
     test_items = []
 
     # Check whether `contains` strings have been found
     test_items += [
         GenericTest(
-            name=prefix + "contains '{0}'".format(string),
+            name=test_name_prefix + "contains '{0}'".format(string),
             parent=parent,
             result=found_dictionary[string]
         )
@@ -70,7 +95,7 @@ def generate_content_tests(
     # Check whether `must_not_contain` strings have been found
     test_items += [
         GenericTest(
-            name=prefix + "does not contain '{0}".format(string),
+            name=test_name_prefix + "does not contain '{0}".format(string),
             parent=parent,
             result=not found_dictionary[string]  # If not found, result should
             # be True, so the test succeeds.
@@ -85,13 +110,15 @@ def generate_log_tests(
         log: bytes,
         log_test: ContentTest,
         prefix: str) -> List[pytest.Item]:
+    """A helper function that calls generate_content_tests and does
+    the necessary conversions for workflow log testing."""
     return generate_content_tests(
         parent=parent,
         # Convert log bytestring to unicode strings
-        content=[str(line) for line in log.splitlines(keepends=True)],
+        text_lines=[str(line) for line in log.splitlines(keepends=True)],
         contains=log_test.contains,
         must_not_contain=log_test.must_not_contain,
-        prefix=prefix)
+        test_name_prefix=prefix)
 
 
 class GenericTest(pytest.Item):

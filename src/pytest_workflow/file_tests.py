@@ -58,7 +58,7 @@ class FileTestCollector(pytest.Collector):
         if self.filetest.contains or self.filetest.must_not_contain:
             tests += generate_content_tests(
                 parent=self,
-                content=file_to_string_generator(filepath),
+                text_lines=file_to_string_generator(filepath),
                 contains=self.filetest.contains,
                 must_not_contain=self.filetest.must_not_contain
             )
