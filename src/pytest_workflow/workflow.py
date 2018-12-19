@@ -39,20 +39,20 @@ class Workflow(object):
         self._proc_out = None
         self.cwd = cwd
 
-    def run(self):
+    def run(self) -> subprocess.CompletedProcess:
         sub_procces_args = shlex.split(self.command)
         self._proc_out = subprocess.run(
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
 
     @property
-    def stdout(self):
+    def stdout(self) -> str:
         return self._proc_out.stdout  # for testing log
 
     @property
-    def stderr(self):
+    def stderr(self) -> str:
         return self._proc_out.stderr  # for testing log
 
     @property
-    def exit_code(self):
+    def exit_code(self) -> int:
         return self._proc_out.returncode
