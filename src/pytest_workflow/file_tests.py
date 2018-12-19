@@ -13,8 +13,8 @@ class FileTestCollector(pytest.Collector):
 
     def __init__(self, parent: pytest.Collector, filetest: FileTest,
                  cwd: Union[bytes, str]):
-        self.name = filetest.path.__str__()
-        super().__init__(self.name, parent)
+        name = filetest.path.__str__()
+        super().__init__(name, parent)
         self.filetest = filetest
         self.cwd = Path(cwd)
 
@@ -45,8 +45,8 @@ class FileExists(pytest.Item):
         :param filepath: A path to the file
         :param should_exist: Whether the file should exist
         """
-        self.name = "should exist" if should_exist else "should not exist"
-        super().__init__(self.name, parent)
+        name = "should exist" if should_exist else "should not exist"
+        super().__init__(name, parent)
         self.file = filepath
         self.should_exist = should_exist
 
@@ -57,8 +57,8 @@ class FileExists(pytest.Item):
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
                  md5sum: str):
-        self.name = "md5sum"
-        super().__init__(self.name, parent)
+        name = "md5sum"
+        super().__init__(name, parent)
         self.filepath = filepath
         self.md5sum = md5sum
 
