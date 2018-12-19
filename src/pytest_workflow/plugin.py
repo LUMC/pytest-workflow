@@ -103,8 +103,7 @@ class WorkflowTestsCollector(pytest.Collector):
                                     log_test=self.workflow_test.stderr,
                                     prefix="stderr ")
 
-        for test in tests:
-            yield test
+        return tests
         # TODO: Figure out proper cleanup.
         # If tempdir is removed here, all tests will fail.
         # After yielding the tests this object is no longer needed, so
