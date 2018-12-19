@@ -20,8 +20,9 @@ and logs."""
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-from . import GenericTest
 import pytest
+
+from . import GenericTest
 
 
 def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:

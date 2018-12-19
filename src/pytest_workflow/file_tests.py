@@ -21,6 +21,7 @@ from typing import Union
 
 import pytest
 
+from .content_tests import file_to_string_generator, generate_content_tests
 from .schema import FileTest
 
 
@@ -53,6 +54,14 @@ class FileTestCollector(pytest.Collector):
         tests = []
 
         tests += [FileExists(self, filepath, self.filetest.should_exist)]
+
+        if self.filetest.contains or self.filetest.must_not_contain:
+            tests += generate_content_tests(
+                parent=self,
+                content=file_to_string_generator(filepath),
+                contains=self.filetest.contains,
+                must_not_contain=self.filetest.must_not_contain
+            )
 
         if self.filetest.md5sum:
             tests += [FileMd5(self, filepath, self.filetest.md5sum)]
