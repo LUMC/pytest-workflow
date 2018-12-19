@@ -38,6 +38,7 @@ def check_content(strings: List[str], text: Iterator[str]) -> Dict[str, bool]:
     return found_dictionary
 
 
-def file_to_string_iterator(filepath: Path) -> Iterator[str]:
+def file_to_string_generator(filepath: Path) -> Iterator[str]:
     with filepath.open("r") as f:  # Use 'r' here explicitly as opposed to 'rb'
-        yield f.readline()
+        for line in f:
+            yield line

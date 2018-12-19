@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 
 from pytest_workflow.content_tests import check_content, \
-    file_to_string_iterator
+    file_to_string_generator
 
 LICENSE = Path(__file__).parent / Path("content_files") / Path("LICENSE")
 
@@ -37,10 +37,10 @@ tests = [
                          [(list(test.keys()), test) for test in tests])
 def test_check_content(input_strings, expected_output):
     assert check_content(
-        input_strings, file_to_string_iterator(LICENSE)) == expected_output
+        input_strings, file_to_string_generator(LICENSE)) == expected_output
 
 
 def test_file_to_string_iterator():
-    license_iterator = file_to_string_iterator(LICENSE)
+    license_iterator = file_to_string_generator(LICENSE)
     # This was checked using `wc -l`
     assert len(list(license_iterator)) == 661
