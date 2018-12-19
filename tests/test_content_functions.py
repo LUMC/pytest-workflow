@@ -38,3 +38,9 @@ tests = [
 def test_check_content(input_strings, expected_output):
     assert check_content(
         input_strings, file_to_string_iterator(LICENSE)) == expected_output
+
+
+def test_file_to_string_iterator():
+    license_iterator = file_to_string_iterator(LICENSE)
+    # This was checked using `wc -l`
+    assert len(list(license_iterator)) == 661
