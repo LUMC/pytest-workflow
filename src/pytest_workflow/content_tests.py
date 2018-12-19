@@ -22,6 +22,8 @@ from typing import Dict, Iterable, List
 
 import pytest
 
+from .schema import ContentTest
+
 
 def check_content(strings: List[str], text: Iterable[str]) -> Dict[str, bool]:
     # Make a copy of the list here to prevent aliasing.
@@ -76,6 +78,20 @@ def generate_content_tests(
         for string in must_not_contain]
 
     return test_items
+
+
+def generate_log_tests(
+        parent: pytest.Collector,
+        log: bytes,
+        log_test: ContentTest,
+        prefix: str) -> List[pytest.Item]:
+    return generate_content_tests(
+        parent=parent,
+        # Convert log bytestring to unicode strings
+        content=[str(line) for line in log.splitlines(keepends=True)],
+        contains=log_test.contains,
+        must_not_contain=log_test.must_not_contain,
+        prefix=prefix)
 
 
 class GenericTest(pytest.Item):
