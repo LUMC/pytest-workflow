@@ -95,19 +95,13 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
 
-        tests += generate_log_tests(
-            parent=self,
-            log=workflow.stdout,
-            log_test=self.workflow_test.stdout,
-            prefix="stdout "
-        )
+        tests += generate_log_tests(parent=self, log=workflow.stdout,
+                                    log_test=self.workflow_test.stdout,
+                                    prefix="stdout ")
 
-        tests += generate_log_tests(
-            parent=self,
-            log=workflow.stderr,
-            log_test=self.workflow_test.stderr,
-            prefix="stderr "
-        )
+        tests += generate_log_tests(parent=self, log=workflow.stderr,
+                                    log_test=self.workflow_test.stderr,
+                                    prefix="stderr ")
 
         for test in tests:
             yield test
