@@ -24,9 +24,9 @@ import pytest
 
 import yaml
 
+from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
-from .workflow_file_tests import FileTestCollector
 
 
 def pytest_collect_file(path, parent):

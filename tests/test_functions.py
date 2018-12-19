@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.workflow_file_tests import file_md5sum
+from pytest_workflow.file_tests import file_md5sum
 
 hash_file_dir = Path(Path(__file__).parent / Path("hash_files"))
 
