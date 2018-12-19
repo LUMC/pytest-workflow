@@ -18,7 +18,7 @@
 and logs."""
 
 from pathlib import Path
-from typing import Dict, List, Iterator
+from typing import Dict, Iterator, List
 
 
 def check_content(strings: List[str], text: Iterator[str]) -> Dict[str, bool]:
