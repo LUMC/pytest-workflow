@@ -45,10 +45,7 @@ class FileExists(pytest.Item):
         :param filepath: A path to the file
         :param should_exist: Whether the file should exist
         """
-        if should_exist:
-            self.name = "should exist"
-        else:
-            self.name = "should not exist"
+        self.name = "should exist" if should_exist else "should not exist"
         super().__init__(self.name, parent)
         self.file = filepath
         self.should_exist = should_exist
