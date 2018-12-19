@@ -24,9 +24,9 @@ import pytest
 
 import yaml
 
+from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
-from .workflow_file_tests import WorkflowFilesTestCollector
 
 
 def pytest_collect_file(path, parent):
@@ -61,16 +61,14 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
-    def __init__(self, test: WorkflowTest, parent: pytest.Collector):
-        self.test = test
-        super().__init__(test.name, parent=parent)
+    def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
+        self.workflow_test = workflow_test
+        super().__init__(workflow_test.name, parent=parent)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
-        The idea is that isolated parts of the yaml get their own collector.
-        So in the results key in hte yaml there is a key called `files` this
-        generates the WorkflowFilesTestCollector. When we add a key `stdout
-        we add a new class WorkflowStdoutTestCollector etc."""
+        The idea is that isolated parts of the yaml get their own collector or
+        item."""
 
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
@@ -84,16 +82,19 @@ class WorkflowTestsCollector(pytest.Collector):
         copy_tree(os.getcwd(), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.test.command, tempdir)
+        workflow = Workflow(self.workflow_test.command, tempdir)
         workflow.run()
 
-        # Add new testcollectors to this list if new types of tests are
-        # defined.
-        workflow_tests = [
-            WorkflowFilesTestCollector(
-                self.test.name, self, self.test.files, tempdir)
-        ]
-        for test in workflow_tests:
+        # Below structure makes it easy to append tests
+        tests = []
+
+        tests += [FileTestCollector(self, filetest, tempdir) for filetest in
+                  self.workflow_test.files]
+
+        tests += [ExitCodeTest(self, workflow.exit_code,
+                               self.workflow_test.exit_code)]
+
+        for test in tests:
             yield test
         # TODO: Figure out proper cleanup.
         # If tempdir is removed here, all tests will fail.
@@ -105,3 +106,15 @@ class WorkflowTestsCollector(pytest.Collector):
         # TODO: Figure out what reportinfo does
         # This was copied from code example.
         return self.fspath, None, self.name
+
+
+class ExitCodeTest(pytest.Item):
+    def __init__(self, parent: pytest.Collector, exit_code: int,
+                 desired_exit_code: int):
+        name = "exit code should be {0}".format(desired_exit_code)
+        super().__init__(name, parent=parent)
+        self.exit_code = exit_code
+        self.desired_exit_code = desired_exit_code
+
+    def runtest(self):
+        assert self.exit_code == self.desired_exit_code
