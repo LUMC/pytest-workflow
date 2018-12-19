@@ -54,9 +54,9 @@ class YamlFile(pytest.File):
             tests in one yaml. """
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
-        workflow_tests = workflow_tests_from_schema(schema)
-        for test in workflow_tests:
-            yield WorkflowTestsCollector(test, self)
+
+        return [WorkflowTestsCollector(test, self)
+                for test in workflow_tests_from_schema(schema)]
 
 
 class WorkflowTestsCollector(pytest.Collector):
