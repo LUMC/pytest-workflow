@@ -113,7 +113,7 @@ class WorkflowTestsCollector(pytest.Collector):
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector, exit_code: int,
                  desired_exit_code: int):
-        self.name = "Exit code should be {0}".format(desired_exit_code)
+        self.name = "exit code should be {0}".format(desired_exit_code)
         super().__init__(self.name, parent=parent)
         self.exit_code = exit_code
         self.desired_exit_code = desired_exit_code

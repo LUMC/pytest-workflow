@@ -60,7 +60,7 @@ class FileExists(pytest.Item):
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
                  md5sum: str):
-        self.name = "Check md5sum"
+        self.name = "md5sum"
         super().__init__(self.name, parent)
         self.filepath = filepath
         self.md5sum = md5sum
