@@ -97,7 +97,7 @@ class FileMd5(pytest.Item):
         assert file_md5sum(self.filepath) == self.md5sum
 
 
-def file_md5sum(filepath: Path):
+def file_md5sum(filepath: Path) -> str:
     """
     Generates a md5sum for a file. Reads file in blocks to save memory.
     :param filepath: a pathlib. Path to the file
