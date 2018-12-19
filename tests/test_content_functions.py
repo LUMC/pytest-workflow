@@ -28,8 +28,13 @@ LICENSE = Path(__file__).parent / Path("content_files") / Path("LICENSE")
 # Yes we are checking the AGPLv3+. I am pretty sure some strings will not be
 # there
 tests = [
+    # Test both finding and not finding
     {"When we speak of free software": True,
-     "All hail Google, Guardian of our privacy": False}
+     "All hail Google, Guardian of our privacy": False},
+    # Test finding, this should break the loop in the function
+    {"When we speak of free software": True},
+    # Test not finding
+    {"All hail Google, Guardian of our privacy": False}
 ]
 
 
