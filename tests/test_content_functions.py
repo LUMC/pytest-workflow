@@ -54,7 +54,7 @@ def test_multiple_finds_one_line():
         "the true meaning of its creed: \"We hold these truths to be",
         "self-evident: that all men are created equal.\""]
     contains = ["dream", "day", "nation", "creed", "truths"]
-    found_strings, not_found_strings = check_content(contains, content)
+    found_strings, _not_found_strings = check_content(contains, content)[0]
     assert set(contains) == found_strings
 
 
