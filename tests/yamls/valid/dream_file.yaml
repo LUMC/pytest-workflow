@@ -12,12 +12,12 @@
     contains:
       - "bla"
     must_not_contain:
-      - "bla"
+      - "not_bla"
   stderr:
     contains:
       - "bla"
     must_not_contain:
-      - "bla"
+      - "not_bla"
   exit_code: 127
   command: "the one string"
 - name: other test

@@ -24,6 +24,7 @@ import pytest
 
 import yaml
 
+from .content_tests import generate_log_tests
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
@@ -53,9 +54,9 @@ class YamlFile(pytest.File):
             tests in one yaml. """
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
-        workflow_tests = workflow_tests_from_schema(schema)
-        for test in workflow_tests:
-            yield WorkflowTestsCollector(test, self)
+
+        return [WorkflowTestsCollector(test, self)
+                for test in workflow_tests_from_schema(schema)]
 
 
 class WorkflowTestsCollector(pytest.Collector):
@@ -94,8 +95,15 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
 
-        for test in tests:
-            yield test
+        tests += generate_log_tests(parent=self, log=workflow.stdout,
+                                    log_test=self.workflow_test.stdout,
+                                    prefix="stdout ")
+
+        tests += generate_log_tests(parent=self, log=workflow.stderr,
+                                    log_test=self.workflow_test.stderr,
+                                    prefix="stderr ")
+
+        return tests
         # TODO: Figure out proper cleanup.
         # If tempdir is removed here, all tests will fail.
         # After yielding the tests this object is no longer needed, so

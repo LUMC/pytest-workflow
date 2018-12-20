@@ -1,4 +1,4 @@
-- name: simple echo
+- name: moo file
   # Gruesome command injection here. This is for testing purposes only.
   # Do not try this at home.
   command: "bash -c 'echo moo > moo.txt'"
@@ -6,6 +6,28 @@
     - path: "moo.txt"
       contains:
         - "moo"
+      must_not_contain:
+        - "Cock a doodle doo"  # Unless our cow has severe identity disorders
       md5sum: e583af1f8b00b53cda87ae9ead880224
-    - path: "cow.txt"
+
+- name: simple echo
+  command: "echo moo"
+  files:
+    - path: "moo.txt"
       should_exist: false
+  stdout:
+    contains:
+      - "moo"
+    must_not_contain:
+      - "Cock a doodle doo"
+
+- name: failing grep
+  command: "grep"
+  stdout:
+    must_not_contain:
+      - "grep"  # stdout should be empty
+  stderr:
+    contains:
+      - 'Usage: grep'
+      - "Try 'grep --help'"
+  exit_code: 2
