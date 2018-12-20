@@ -98,7 +98,7 @@ def generate_content_tests(
     # Check whether `contains` strings have been found
     test_items += [
         GenericTest(
-            name=test_name_prefix + "contains '{0}'".format(string),
+            name="{0}contains '{1}'".format(test_name_prefix, string),
             parent=parent,
             result=found_dictionary[string]
         )
@@ -107,7 +107,7 @@ def generate_content_tests(
     # Check whether `must_not_contain` strings have been found
     test_items += [
         GenericTest(
-            name=test_name_prefix + "does not contain '{0}".format(string),
+            name="{0}does not contain '{1}".format(test_name_prefix, string),
             parent=parent,
             result=not found_dictionary[string]  # If not found, result should
             # be True, so the test succeeds.
