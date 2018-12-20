@@ -97,7 +97,7 @@ class ContentTest(object):
     present in the file/text
     Everything in `must_not_contain` should not be present.
     """
-
+    # pylint: disable=too-few-public-methods  # for schema class
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None):
         if contains:
@@ -119,6 +119,7 @@ class ContentTest(object):
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
+    # pylint: disable=too-few-public-methods  # for schema class
 
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
@@ -158,6 +159,7 @@ class FileTest(ContentTest):
 
 class WorkflowTest(object):
     """A class that contains all properties of a to be tested workflow"""
+    # pylint: disable=too-few-public-methods  # for schema class
 
     def __init__(self, name: str, command: str,
                  exit_code: int = DEFAULT_EXIT_CODE,
