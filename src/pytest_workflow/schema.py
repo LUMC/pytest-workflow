@@ -45,11 +45,38 @@ def validate_schema(instance):
     """
     jsonschema.validate(instance, JSON_SCHEMA)
 
+    # Some extra tests here below that can not be captured in jsonschema
+    def test_contains_concordance(dictionary: dict, name: str):
+        """
+        Test whether contains and must not contain have the same members.
+        :param dictionary: part of the schema dictionary.
+        :param name: The name of the object the dictionary originates from.
+        This makes the error easier to comprehend for the user.
+        :return: An error if the test fails.
+        """
+        contains = dictionary.get("contains", [])
+        must_not_contain = dictionary.get("must_not_contain", [])
+        if len(contains) > 0 and len(must_not_contain) > 0:
+            common_members = set(contains).intersection(set(must_not_contain))
+            if common_members != set():
+                raise jsonschema.ValidationError(
+                    "contains and must_not_contain are not allowed to have the"
+                    "same members for the same object."
+                    " Object: {0}. Common members: {1}".format(name,
+                                                               common_members)
+                )
+
     for test in instance:
+        test_contains_concordance(test.get('stdout', {}),
+                                  test['name'] + "/stdout")
+        test_contains_concordance(test.get('stderr', {}),
+                                  test['name'] + "/stderr")
         for test_file in test.get("files", []):
             keys = test_file.keys()
+            test_contains_concordance(test_file, test_file['path'])
             file_should_exist = test_file.get("should_exist",
                                               DEFAULT_FILE_SHOULD_EXIST)
+
             if not file_should_exist:
                 for check in ["md5sum", "contains", "must_not_contain"]:
                     if check in keys:
