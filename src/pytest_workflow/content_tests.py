@@ -21,7 +21,7 @@ The design philosophy here was that each piece of text should only be read
 once."""
 
 from pathlib import Path
-from typing import Dict, Iterable, List
+from typing import Iterable, List, Set, Tuple
 
 import pytest
 
@@ -29,7 +29,7 @@ from .schema import ContentTest
 
 
 def check_content(strings: List[str],
-                  text_lines: Iterable[str]) -> Dict[str, bool]:
+                  text_lines: Iterable[str]) -> Tuple[Set[str], Set[str]]:
     """
     Checks whether any of the strings is present in the text lines
     It only reads the lines once and it stops reading when
@@ -37,27 +37,29 @@ def check_content(strings: List[str],
     text more efficient.
     :param strings: A list of strings for which the present is checked
     :param text_lines: The lines of text that need to be searched.
-    :return:
+    :return: A tuple with a set of found strings, and a set of not found
+    strings
     """
     # Make a copy of the list here to prevent aliasing.
     # This should not be refactored back to strings.
-    search_for_strings = list(strings)
+    not_found_strings = set(strings)
 
     # By default all strings are not found.
     found_strings = set()
 
     for line in text_lines:
         # Break the loop if the list of not found strings is empty.
-        if len(search_for_strings) == 0:
+        if len(not_found_strings) == 0:
             break
-        for string in search_for_strings:
+        for string in not_found_strings:
             if string in line:
                 found_strings.add(string)
-                search_for_strings.remove(string)
+        # Difference update removes all that is in found_strings from
+        # not_found_strings
+        not_found_strings.difference_update(found_strings)
 
     # Set conversion has to be after the loop. Set is not allowed to change
     # size during iteration.
-    not_found_strings = set(search_for_strings)
     common_strings = found_strings.intersection(not_found_strings)
     if common_strings != set():
         raise ValueError(
