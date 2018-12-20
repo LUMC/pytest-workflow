@@ -48,6 +48,16 @@ def test_check_content_succeeding(contains_strings, does_not_contain_strings):
     assert set(does_not_contain_strings) == not_found_strings
 
 
+def test_multiple_finds_one_line():
+    content = [
+        "I have a dream that one day this nation will rise up and live out",
+        "the true meaning of its creed: \"We hold these truths to be",
+        "self-evident: that all men are created equal.\""]
+    contains = ["dream", "day", "nation", "creed", "truths"]
+    found_strings, not_found_strings = check_content(contains, content)
+    assert set(contains) == found_strings
+
+
 def test_file_to_string_iterator():
     license_iterator = file_to_string_generator(LICENSE)
     # This was checked using `wc -l`
