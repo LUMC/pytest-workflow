@@ -109,13 +109,6 @@ class ContentTest(object):
         else:
             self.must_not_contain = []
 
-        common_elements = set(self.contains).intersection(
-            self.must_not_contain)
-        if common_elements != set():
-            raise ValueError(
-                "contains and must_not_contain are not allowed "
-                "to have common elements: {0}".format(common_elements))
-
     @classmethod
     def from_dict(cls, dictionary: dict):
         return cls(
