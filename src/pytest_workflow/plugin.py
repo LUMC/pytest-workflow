@@ -18,7 +18,7 @@
 
 import os
 import tempfile
-from distutils.dir_util import copy_tree
+from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401 # fpos.
 
 import pytest
 
@@ -30,10 +30,10 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 
 
-def pytest_collect_file(path, parent):
+def pytest_collect_file(path, parent):  # pylint: disable=R1710 #pytestspecific
     """Collection hook
-    This collects the yaml files called r'test.*\.ya?ml'"""  # noqa: W605
-    # noqa ignores invalid escape sequence in the regex.
+    This collects the yaml files that start with "test" and end with
+    .yaml or .yml"""
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
 
