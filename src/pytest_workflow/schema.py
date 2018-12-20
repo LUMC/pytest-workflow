@@ -56,7 +56,7 @@ def validate_schema(instance):
         """
         contains = dictionary.get("contains", [])
         must_not_contain = dictionary.get("must_not_contain", [])
-        if len(contains) > 0 and len(must_not_contain) > 0:
+        if contains and must_not_contain:
             common_members = set(contains).intersection(set(must_not_contain))
             if common_members != set():
                 raise jsonschema.ValidationError(
