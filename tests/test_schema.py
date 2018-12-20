@@ -107,7 +107,7 @@ def test_validate_schema_contains_conflict(instance):
 
 def test_workflow_tests_from_schema():
     with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
-        test_yaml = yaml.load(yaml_fh)
+        test_yaml = yaml.safe_load(yaml_fh)
         workflow_tests = workflow_tests_from_schema(test_yaml)
         assert len(workflow_tests) == 2
 
