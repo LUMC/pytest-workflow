@@ -1,7 +1,7 @@
 [MESSAGES CONTROL]
 disable=wrong-import-order,  # This conflicts with flake8-import-order
-        useless-object-inheritance,
-        # Apparently inheriting from object is not needed in python 3,
-        # but I like this explicitness
+        useless-object-inheritance, # Apparently inheriting from object is not needed in python 3, but I like this explicitness
         W0511, # We can figure out the fixme's later.
-        C0111 # Sometimes docstrings are missing because they add visual clutter on self-documenting methods
+        missing-docstring
+        # Sometimes docstrings are missing because they add visual clutter on self-documenting methods.
+        # Adding `# pylint: disable missing-docstrings this method is self-documenting does not help!`
