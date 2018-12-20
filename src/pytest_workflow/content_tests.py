@@ -15,7 +15,10 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """This contains all the classes and methods for content testing of files
-and logs."""
+and logs.
+
+The design philosophy here was that each piece of text should only be read
+once."""
 
 from pathlib import Path
 from typing import Dict, Iterable, List
@@ -29,8 +32,9 @@ def check_content(strings: List[str],
                   text_lines: Iterable[str]) -> Dict[str, bool]:
     """
     Checks whether any of the strings is present in the text lines
-    This function is optimized for big texts, it stops searching when
-    everything is found.
+    It only reads the lines once and it stops reading when
+    everything is found. This makes searching for strings in large bodies of
+    text more efficient.
     :param strings: A list of strings for which the present is checked
     :param text_lines: The lines of text that need to be searched.
     :return:
@@ -63,6 +67,12 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
             yield line
 
 
+# Technically the function below does the same as a pytest Collector. It
+# returns a list of pytest Items. The reason that a pytest Collector was not
+# chosen here is that this function performs only one test on a file. It reads
+# the file and checks the contents. Also a pytest Collector is a node that
+# needs to have parents and itself becomes a parent. This hierarchy was not
+# considered necessary, as it performs only one test.
 def generate_content_tests(
         parent: pytest.Collector,
         text_lines: Iterable[str],
