@@ -40,11 +40,9 @@ def check_content(strings: List[str],
     :return: A tuple with a set of found strings, and a set of not found
     strings
     """
-    # Make a copy of the list here to prevent aliasing.
-    # This should not be refactored back to strings.
-    not_found_strings = set(strings)
 
-    # By default all strings are not found.
+    # Create two sets. By default all strings are not found.
+    not_found_strings = set(strings)
     found_strings = set()
 
     for line in text_lines:
@@ -55,15 +53,14 @@ def check_content(strings: List[str],
             if string in line:
                 found_strings.add(string)
         # Difference update removes all that is in found_strings from
-        # not_found_strings
+        # not_found_strings. So we only search for stuff that is not found yet.
         not_found_strings.difference_update(found_strings)
 
-    # Set conversion has to be after the loop. Set is not allowed to change
-    # size during iteration.
     common_strings = found_strings.intersection(not_found_strings)
     if common_strings != set():
         raise ValueError(
             "Keys can not be simultaneously be found and not found. "
+            "This is an algorithmic error. Please contact the developers. "
             "Offending keys: {0}".format(common_strings))
 
     return found_strings, not_found_strings
