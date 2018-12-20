@@ -68,16 +68,34 @@ def test_validate_schema_conflicting_keys():
                        " file: /some/path. Key = must_not_contain")
 
 
-base_dict = dict(name="bla", command="bla")
-conflicting_dict = dict(contains=["bla"], must_not_contain=["bla"])
 contains_list = [
-    (base_dict.update({"stdout": conflicting_dict})),
-    (base_dict.update({"stderr": conflicting_dict})),
-    (base_dict.update({"files": [conflicting_dict.update({"path": "bla"})]}))
+    """
+    - name: bla
+      command: bla
+      stdout:
+        contains: ["bla"]
+        must_not_contain: ["bla"]
+    """,
+    """
+    - name: bla
+      command: bla
+      stderr:
+        contains: ["bla"]
+        must_not_contain: ["bla"]
+    """,
+    """
+    - name: bla
+      command: bla
+      files:
+        - path: bla
+          contains: ["bla"]
+          must_not_contain: ["bla"]
+    """
 ]
 
 
-@pytest.mark.parametrize("instance", contains_list)
+@pytest.mark.parametrize("instance",
+                         [yaml.load(workflow) for workflow in contains_list])
 def test_validate_schema_contains_conflict(instance):
     with pytest.raises(jsonschema.ValidationError) as e:
         validate_schema(instance)
