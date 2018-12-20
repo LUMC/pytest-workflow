@@ -62,6 +62,12 @@ def check_content(strings: List[str],
             "Keys can not be simultaneously be found and not found. "
             "This is an algorithmic error. Please contact the developers. "
             "Offending keys: {0}".format(common_strings))
+    if set(strings) != found_strings.union(not_found_strings):
+        raise ValueError(
+            "Some strings went missing in this function. Please contact the "
+            "developers. Missing strings: {0}".format(set(strings).difference(
+                found_strings.union(not_found_strings)))
+        )
 
     return found_strings, not_found_strings
 
