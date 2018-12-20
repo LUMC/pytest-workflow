@@ -82,6 +82,13 @@ class ContentTest(object):
         else:
             self.must_not_contain = []
 
+        common_elements = set(self.contains).intersection(
+            self.must_not_contain)
+        if common_elements != set():
+            raise ValueError(
+                "contains and must_not_contain are not allowed "
+                "to have common elements: {0}".format(common_elements))
+
     @classmethod
     def from_dict(cls, dictionary: dict):
         return cls(
@@ -92,6 +99,7 @@ class ContentTest(object):
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
+
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
@@ -130,6 +138,7 @@ class FileTest(ContentTest):
 
 class WorkflowTest(object):
     """A class that contains all properties of a to be tested workflow"""
+
     def __init__(self, name: str, command: str,
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
