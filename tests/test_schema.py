@@ -40,7 +40,7 @@ def test_validate_schema(yaml_path):
         validate_schema(yaml.safe_load(yaml_fh))
 
 
-def test_WorkflowTest():
+def wtest_WorkflowTest():
     with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         tests = [WorkflowTest.from_schema(x) for x in test_yaml]
@@ -66,6 +66,24 @@ def test_validate_schema_conflicting_keys():
         ])
     assert error.match("Content checking not allowed on non existing" +
                        " file: /some/path. Key = must_not_contain")
+
+
+base_dict = dict(name="bla", command="bla")
+conflicting_dict = dict(contains=["bla"], must_not_contain=["bla"])
+contains_list = [
+    (base_dict.update({"stdout": conflicting_dict})),
+    (base_dict.update({"stderr": conflicting_dict})),
+    (base_dict.update({"files": [conflicting_dict.update({"path": "bla"})]}))
+]
+
+
+@pytest.mark.parametrize("instance", contains_list)
+def test_validate_schema_contains_conflict(instance):
+    with pytest.raises(jsonschema.ValidationError) as e:
+        validate_schema(instance)
+    assert e.match("contains and must_not_contain are not allowed to have "
+                   "the same members for the same object.")
+    assert e.match(" Common members: {'bla'}")
 
 
 def test_workflow_tests_from_schema():
