@@ -107,7 +107,7 @@ def generate_content_tests(
     :param test_name_prefix: a text prefix for the test name.
     :return: A list of pytest Items
     """
-    found_strings, not_found_strings = check_content(
+    found_strings = check_content(
         contains + must_not_contain, text_lines)
 
     test_items = []
@@ -124,7 +124,7 @@ def generate_content_tests(
         GenericTest(
             name="{0}does not contain '{1}".format(test_name_prefix, string),
             parent=parent,
-            result=string in not_found_strings
+            result=string not in found_strings
         )
         for string in must_not_contain]
 
