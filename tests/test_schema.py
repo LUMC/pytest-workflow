@@ -95,7 +95,7 @@ contains_list = [
 
 
 @pytest.mark.parametrize("instance",
-                         [yaml.load(workflow) for workflow in contains_list])
+                         [yaml.safe_load(workflow) for workflow in contains_list])
 def test_validate_schema_contains_conflict(instance):
     with pytest.raises(jsonschema.ValidationError) as e:
         validate_schema(instance)
