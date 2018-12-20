@@ -31,6 +31,7 @@ hash_files = [Path(hash_file_dir / Path(x)) for x in hash_files_relative]
 
 @pytest.mark.parametrize("hash_file", hash_files)
 def test_file_md5sum(hash_file: Path):
-    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
+    # No sec added because this hash is only used for checking file integrity
+    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()  # nosec
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5

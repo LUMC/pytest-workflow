@@ -113,7 +113,7 @@ def file_md5sum(filepath: Path) -> str:
     :return: a md5sum as hexadecimal string.
     """
 
-    hasher = hashlib.md5()
+    hasher = hashlib.md5()  # nosec: only used for file integrity
     with filepath.open('rb') as f:  # Read the file in bytes
         # Hardcode the blocksize at 8192 bytes here.
         # This can be changed or made variable when the requirements compel us
