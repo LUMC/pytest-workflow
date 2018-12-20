@@ -41,11 +41,11 @@ succeeding_tests = [
 @pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
                          succeeding_tests)
 def test_check_content_succeeding(contains_strings, does_not_contain_strings):
-    found_strings, not_found_strings = check_content(
-        contains_strings + does_not_contain_strings,
-        file_to_string_generator(LICENSE))
+    all_strings = set(contains_strings).union(set(does_not_contain_strings))
+    found_strings = check_content(list(all_strings),
+                                  file_to_string_generator(LICENSE))
     assert set(contains_strings) == found_strings
-    assert set(does_not_contain_strings) == not_found_strings
+    assert set(does_not_contain_strings) == all_strings - found_strings
 
 
 def test_multiple_finds_one_line():
@@ -54,7 +54,7 @@ def test_multiple_finds_one_line():
         "the true meaning of its creed: \"We hold these truths to be",
         "self-evident: that all men are created equal.\""]
     contains = ["dream", "day", "nation", "creed", "truths"]
-    found_strings, _not_found_strings = check_content(contains, content)[0]
+    found_strings = check_content(contains, content)
     assert set(contains) == found_strings
 
 
