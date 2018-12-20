@@ -40,13 +40,15 @@ def check_content(strings: List[str],
     :return:
     """
     # Make a copy of the list here to prevent aliasing.
+    # This should not be refactored back to strings.
     not_found_strings = list(strings)
+
     # By default all strings are not found.
     found_dictionary = {key: False for key in not_found_strings}
 
     for line in text_lines:
         # Break the loop if the list of not found strings is empty.
-        if not not_found_strings:
+        if len(not_found_strings) == 0:
             break
         for string in not_found_strings:
             if string in line:
