@@ -27,22 +27,25 @@ LICENSE = Path(__file__).parent / Path("content_files") / Path("LICENSE")
 
 # Yes we are checking the AGPLv3+. I am pretty sure some strings will not be
 # there
-tests = [
+succeeding_tests = [
     # Test both finding and not finding
-    {"When we speak of free software": True,
-     "All hail Google, Guardian of our privacy": False},
+    (["When we speak of free software"],
+     ["All hail Google, Guardian of our privacy"]),
     # Test finding, this should break the loop in the function
-    {"When we speak of free software": True},
+    (["When we speak of free software"], []),
     # Test not finding
-    {"All hail Google, Guardian of our privacy": False}
+    ([], ["All hail Google, Guardian of our privacy"])
 ]
 
 
-@pytest.mark.parametrize(["input_strings", "expected_output"],
-                         [(list(test.keys()), test) for test in tests])
-def test_check_content(input_strings, expected_output):
-    assert check_content(
-        input_strings, file_to_string_generator(LICENSE)) == expected_output
+@pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
+                         succeeding_tests)
+def test_check_content_succeeding(contains_strings, does_not_contain_strings):
+    found_strings, not_found_strings = check_content(
+        contains_strings + does_not_contain_strings,
+        file_to_string_generator(LICENSE))
+    assert set(contains_strings) == found_strings
+    assert set(does_not_contain_strings) == not_found_strings
 
 
 def test_file_to_string_iterator():
