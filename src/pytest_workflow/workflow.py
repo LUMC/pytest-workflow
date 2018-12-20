@@ -20,7 +20,7 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen
 """
 import shlex
-import subprocess
+import subprocess  # nosec: security implications have been considered
 from typing import Union
 
 
@@ -41,7 +41,7 @@ class Workflow(object):
 
     def run(self) -> subprocess.CompletedProcess:
         sub_procces_args = shlex.split(self.command)
-        self._proc_out = subprocess.run(
+        self._proc_out = subprocess.run(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
 
