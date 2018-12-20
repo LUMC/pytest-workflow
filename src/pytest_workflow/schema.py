@@ -134,6 +134,7 @@ class FileTest(ContentTest):
         :param must_not_contain: a list of strings that should not be present
         in the file
         """
+        # pylint: disable=too-many-arguments  # class is value container
         super().__init__(contains=contains, must_not_contain=must_not_contain)
         self.path = Path(path)
         self.md5sum = md5sum
@@ -175,6 +176,7 @@ class WorkflowTest(object):
         :param stderr: a ContentTest object
         :param files: a list of FileTest objects
         """
+        # pylint: disable=too-many-arguments  # class is value container
         self.name = name
         self.command = command
         self.exit_code = exit_code
