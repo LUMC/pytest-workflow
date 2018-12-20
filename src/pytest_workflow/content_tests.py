@@ -127,7 +127,7 @@ def generate_log_tests(
     return generate_content_tests(
         parent=parent,
         # Convert log bytestring to unicode strings
-        text_lines=[str(line) for line in log.splitlines(keepends=True)],
+        text_lines=log.decode().splitlines(),
         contains=log_test.contains,
         must_not_contain=log_test.must_not_contain,
         test_name_prefix=prefix)
