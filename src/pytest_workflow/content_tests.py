@@ -41,21 +41,30 @@ def check_content(strings: List[str],
     """
     # Make a copy of the list here to prevent aliasing.
     # This should not be refactored back to strings.
-    not_found_strings = list(strings)
+    search_for_strings = list(strings)
 
     # By default all strings are not found.
-    found_dictionary = {key: False for key in not_found_strings}
+    found_strings = set()
 
     for line in text_lines:
         # Break the loop if the list of not found strings is empty.
-        if len(not_found_strings) == 0:
+        if len(search_for_strings) == 0:
             break
-        for string in not_found_strings:
+        for string in search_for_strings:
             if string in line:
-                found_dictionary[string] = True
-                not_found_strings.remove(string)
+                found_strings.add(string)
+                search_for_strings.remove(string)
 
-    return found_dictionary
+    # Set conversion has to be after the loop. Set is not allowed to change
+    # size during iteration.
+    not_found_strings = set(search_for_strings)
+    common_strings = found_strings.intersection(not_found_strings)
+    if common_strings != set():
+        raise ValueError(
+            "Keys can not be simultaneously be found and not found. "
+            "Offending keys: {0}".format(common_strings))
+
+    return found_strings, not_found_strings
 
 
 def file_to_string_generator(filepath: Path) -> Iterable[str]:
@@ -91,26 +100,24 @@ def generate_content_tests(
     :param test_name_prefix: a text prefix for the test name.
     :return: A list of pytest Items
     """
-    found_dictionary = check_content(contains + must_not_contain, text_lines)
+    found_strings, not_found_strings = check_content(
+        contains + must_not_contain, text_lines)
 
     test_items = []
 
-    # Check whether `contains` strings have been found
     test_items += [
         GenericTest(
             name="{0}contains '{1}'".format(test_name_prefix, string),
             parent=parent,
-            result=found_dictionary[string]
+            result=string in found_strings
         )
         for string in contains]
 
-    # Check whether `must_not_contain` strings have been found
     test_items += [
         GenericTest(
             name="{0}does not contain '{1}".format(test_name_prefix, string),
             parent=parent,
-            result=not found_dictionary[string]  # If not found, result should
-            # be True, so the test succeeds.
+            result=string in not_found_strings
         )
         for string in must_not_contain]
 
