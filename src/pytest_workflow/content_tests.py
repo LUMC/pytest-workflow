@@ -21,7 +21,7 @@ The design philosophy here was that each piece of text should only be read
 once."""
 
 from pathlib import Path
-from typing import Iterable, List, Set, Tuple
+from typing import Iterable, List, Set
 
 import pytest
 
@@ -29,7 +29,7 @@ from .schema import ContentTest
 
 
 def check_content(strings: List[str],
-                  text_lines: Iterable[str]) -> Tuple[Set[str], Set[str]]:
+                  text_lines: Iterable[str]) -> Set[str]:
     """
     Checks whether any of the strings is present in the text lines
     It only reads the lines once and it stops reading when
@@ -42,34 +42,36 @@ def check_content(strings: List[str],
     """
 
     # Create two sets. By default all strings are not found.
-    not_found_strings = set(strings)
+    strings_to_check = set(strings)
     found_strings = set()
 
     for line in text_lines:
-        # Break the loop if the list of not found strings is empty.
-        if len(not_found_strings) == 0:
-            break
-        for string in not_found_strings:
-            if string in line:
-                found_strings.add(string)
-        # Difference update removes all that is in found_strings from
-        # not_found_strings. So we only search for stuff that is not found yet.
-        not_found_strings.difference_update(found_strings)
+        # Break the loop if all strings are found
+        # First do length check for speed as this runs every loop.
+        if len(found_strings) == len(strings_to_check):
+            # Then true check
+            if found_strings == strings_to_check:
+                break
+            else:
+                raise ValueError(
+                    "The number of strings found is equal to the "
+                    "number of strings to be checked. But the"
+                    " sets are not equal. Please contact the "
+                    "developers to fix this issue.")
 
-    common_strings = found_strings.intersection(not_found_strings)
-    if common_strings != set():
+        for string in strings_to_check:
+            if string not in found_strings and string in line:
+                found_strings.add(string)
+
+    if not found_strings.issubset(strings_to_check):
         raise ValueError(
-            "Keys can not be simultaneously be found and not found. "
-            "This is an algorithmic error. Please contact the developers. "
-            "Offending keys: {0}".format(common_strings))
-    if set(strings) != found_strings.union(not_found_strings):
-        raise ValueError(
-            "Some strings went missing in this function. Please contact the "
-            "developers. Missing strings: {0}".format(set(strings).difference(
-                found_strings.union(not_found_strings)))
+            "Strings where found that were not searched for. Please contact"
+            " the developers to fix this issue. \n" +
+            "Searched for strings: {0}\n".format(strings_to_check) +
+            "Found strings: {0}\n".format(found_strings)
         )
 
-    return found_strings, not_found_strings
+    return found_strings
 
 
 def file_to_string_generator(filepath: Path) -> Iterable[str]:
