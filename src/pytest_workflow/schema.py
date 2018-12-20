@@ -61,7 +61,7 @@ def validate_schema(instance):
             if common_members != set():
                 raise jsonschema.ValidationError(
                     "contains and must_not_contain are not allowed to have the"
-                    "same members for the same object."
+                    " same members for the same object."
                     " Object: {0}. Common members: {1}".format(name,
                                                                common_members)
                 )
