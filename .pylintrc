@@ -4,4 +4,4 @@ disable=wrong-import-order,  # This conflicts with flake8-import-order
         W0511, # We can figure out the fixme's later.
         missing-docstring
         # Sometimes docstrings are missing because they add visual clutter on self-documenting methods.
-        # Adding `# pylint: disable missing-docstrings this method is self-documenting does not help!`
+        # Adding `# pylint: disable missing-docstrings because this method is self-documenting` does not help with the visual clutter!
