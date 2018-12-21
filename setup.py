@@ -21,7 +21,7 @@ with open("README.md", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="0.1.0-dev",
+    version="0.1.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center, various departments",
