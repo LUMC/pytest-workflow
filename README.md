@@ -16,7 +16,8 @@ your pipeline.
 ## Installation
 
 - Make sure your virtual environment is activated.
-- Install using pip `pip install pytest-workflow`.
+- Install using pip `pip install git+https://github.com/lumc/pytest-workflow.git`
+for the latest development version. (Package is not published on PYPI yet.)
 - Create a `tests` directory in the root of your repository.
 - Create your test yaml files in the `tests` directory.
 
