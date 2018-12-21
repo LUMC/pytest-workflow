@@ -5,4 +5,4 @@ flake8
 flake8-import-order
 mypy
 bandit
-pytlint
+pylint
