@@ -31,13 +31,13 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 
 
-# Disable inconsistent-return-statements check for pylint specific function.
-def pytest_collect_file(path, parent):  # pylint: disable=R1710
+def pytest_collect_file(path, parent):
     """Collection hook
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
+    return None
 
 
 class YamlFile(pytest.File):
