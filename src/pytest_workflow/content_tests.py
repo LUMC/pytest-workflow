@@ -80,8 +80,9 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
     :param filepath: the file path
     :return: yields lines of the file
     """
-    with filepath.open("r") as f:  # Use 'r' here explicitly as opposed to 'rb'
-        for line in f:
+    # Use 'r' here explicitly as opposed to 'rb'
+    with filepath.open("r") as file_handler:
+        for line in file_handler:
             yield line
 
 

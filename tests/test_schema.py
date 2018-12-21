@@ -30,18 +30,18 @@ from pytest_workflow.schema import FileTest, WorkflowTest, validate_schema, \
 
 import yaml
 
-valid_yaml_dir = Path(__file__).parent / Path("yamls") / Path("valid")
-valid_yamls = os.listdir(valid_yaml_dir.__str__())
+VALID_YAML_DIR = Path(__file__).parent / Path("yamls") / Path("valid")
+VALID_YAMLS = os.listdir(VALID_YAML_DIR.__str__())
 
 
-@pytest.mark.parametrize("yaml_path", valid_yamls)
+@pytest.mark.parametrize("yaml_path", VALID_YAMLS)
 def test_validate_schema(yaml_path):
-    with Path(valid_yaml_dir / Path(yaml_path)).open() as yaml_fh:
+    with Path(VALID_YAML_DIR / Path(yaml_path)).open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
 
 
-def wtest_WorkflowTest():
-    with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
+def test_workflowtest():
+    with (VALID_YAML_DIR / Path("dream_file.yaml")).open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         tests = [WorkflowTest.from_schema(x) for x in test_yaml]
         assert tests[0].name == "simple echo"
@@ -68,7 +68,7 @@ def test_validate_schema_conflicting_keys():
                        " file: /some/path. Key = must_not_contain")
 
 
-contains_list = [
+CONTAINS_LIST = [
     """
     - name: bla
       command: bla
@@ -96,17 +96,18 @@ contains_list = [
 
 @pytest.mark.parametrize("instance",
                          [yaml.safe_load(workflow) for workflow in
-                          contains_list])
+                          CONTAINS_LIST])
 def test_validate_schema_contains_conflict(instance):
-    with pytest.raises(jsonschema.ValidationError) as e:
+    with pytest.raises(jsonschema.ValidationError) as errormsg:
         validate_schema(instance)
-    assert e.match("contains and must_not_contain are not allowed to have "
-                   "the same members for the same object.")
-    assert e.match(" Common members: {'bla'}")
+    assert errormsg.match(
+        "contains and must_not_contain are not allowed to have "
+        "the same members for the same object.")
+    assert errormsg.match(" Common members: {'bla'}")
 
 
 def test_workflow_tests_from_schema():
-    with (valid_yaml_dir / Path("dream_file.yaml")).open() as yaml_fh:
+    with (VALID_YAML_DIR / Path("dream_file.yaml")).open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         workflow_tests = workflow_tests_from_schema(test_yaml)
         assert len(workflow_tests) == 2

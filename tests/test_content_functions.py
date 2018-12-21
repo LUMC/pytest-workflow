@@ -27,7 +27,7 @@ LICENSE = Path(__file__).parent / Path("content_files") / Path("LICENSE")
 
 # Yes we are checking the AGPLv3+. I am pretty sure some strings will not be
 # there
-succeeding_tests = [
+SUCCEEDING_TESTS = [
     # Test both finding and not finding
     (["When we speak of free software"],
      ["All hail Google, Guardian of our privacy"]),
@@ -39,7 +39,7 @@ succeeding_tests = [
 
 
 @pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
-                         succeeding_tests)
+                         SUCCEEDING_TESTS)
 def test_check_content_succeeding(contains_strings, does_not_contain_strings):
     all_strings = set(contains_strings).union(set(does_not_contain_strings))
     found_strings = check_content(list(all_strings),
