@@ -14,10 +14,10 @@ Pytest-workflow aims to make testing as simple as possible so you can focus on d
 your pipeline.
 
 ## Installation
+Pytest-workflow is tested on python 3.5, 3.6 and 3.7. Python 2 is not supported.
 
 - Make sure your virtual environment is activated.
-- Install using pip `pip install git+https://github.com/lumc/pytest-workflow.git`
-for the latest development version. (Package is not published on PYPI yet.)
+- Install using pip `pip install pytest-workflow`
 - Create a `tests` directory in the root of your repository.
 - Create your test yaml files in the `tests` directory.
 
