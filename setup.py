@@ -27,6 +27,7 @@ setup(
     author="Leiden University Medical Center, various departments",
     author_email="sasc@lumc.nl",  # A placeholder for now
     long_description=long_description,
+    long_description_content_type="text/markdown",
     license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
