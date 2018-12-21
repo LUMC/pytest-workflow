@@ -18,7 +18,8 @@
 
 import os
 import tempfile
-from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401 # fpos.
+# Disable pylint here because of false positive
+from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
 
 import pytest
 
@@ -30,7 +31,8 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 
 
-def pytest_collect_file(path, parent):  # pylint: disable=R1710 #pytestspecific
+# Disable inconsistent-return-statements check for pylint specific function.
+def pytest_collect_file(path, parent):  # pylint: disable=R1710
     """Collection hook
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
