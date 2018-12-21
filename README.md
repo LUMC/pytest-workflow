@@ -20,21 +20,59 @@ your pipeline.
 - create a `tests` directory in the root of your repository.
 - Create your test yaml files in the test directory
 
-We aim to make pytest-workflow available on PYPI in the future  
+## Running pytest-workflow
+Run `pytest` from an environment with pytest-workflow installed. 
+Pytest will automatically gather files in the `tests` directory starting with 
+`test` and ending in `.yaml` or `.yml`. 
+
+The tests are run automatically.
 
 ## Writing tests with pytest-workflow
 
 Below is an example of a YAML file that defines a test:
 ```YAML
-executable: "touch"
-arguments: "test.file"
-results:
-    files:
-      - path: test.file
+- name: Touch a file
+  command: touch test.file
+  files:
+    - path: test.file
+```
+This will run `touch test.file` and check afterwards if a file with path: 
+`test.file` is present.
+
+A more advanced example:
+```YAML
+- name: moo file                     # The name of the workflow (required)
+  command: bash moo_workflow.sh      # The command to execute the workflow (required)
+  files:                             # A list of files to check (optional)
+    - path: "moo.txt"                # File path. (Required for each file)
+      contains:                      # A list of strings that should be in the file (optional)
+        - "moo"
+      must_not_contain:              # A list of strings that should NOT be in the file (optional)
+        - "Cock a doodle doo"  
+      md5sum: e583af1f8b00b53cda87ae9ead880224   # Md5sum of the file (optional)
+
+- name: simple echo                  # A second workflow. Notice the starting `-` which means 
+  command: "echo moo"                # that workflow items are in a list. You can add as much workflows as you want
+  files:
+    - path: "moo.txt"
+      should_exist: false            # Whether a file should be there or not. (optional, if not given defaults to true)
+  stdout:                            # Options for testing stdout (optional)
+    contains:                        # List of strings which should be in stdout (optional)
+      - "moo"
+    must_not_contain:                # List of strings that should NOT be in stout (optional)
+      - "Cock a doodle doo"
+
+- name: mission impossible           # Also failing workflows can be tested
+  command: bash impossible.sh 
+  exit_code: 2                       # What the exit code should be (optional, if not given defaults to 0)
+  files:
+    - path: "fail.log"               # Multiple files can be tested for each workflow
+    - path: "TomCruise.txt"
+  stderr:                            # Options for testing stderr (optional)
+    contains:                        # A list of strings which should be in stderr (optional)
+      - "BSOD error, please contact the IT crowd"
+    must_not_contain:                # A list of strings which should NOT be in stderr (optional)
+      - "Mission accomplished!"
 ```
 
-When `pytest` is run the `pytest-workflow` plugin will:
-1. Run whatever is in  `command` and capture its stdout and stderr.
-2. Test whether the outputs of `command` match with the requirements
-in the `results` section.
-
+The above YAML file contains all the possible options for a workflow test.
