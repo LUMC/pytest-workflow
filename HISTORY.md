@@ -8,6 +8,9 @@ that users understand how the changes affect the new version.
 --->
 
 ## Current development version
++ Our code base is now checked by pylint and bandit as part of our test
+procedure to ensure that our code adheres to python and security best 
+practices.
 + Add functionality to test whether certain strings exist in files, stdout and 
 stderr.
 + Enable easy to understand output when using pytest verbose mode 

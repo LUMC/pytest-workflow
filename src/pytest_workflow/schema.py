@@ -56,7 +56,7 @@ def validate_schema(instance):
         """
         contains = dictionary.get("contains", [])
         must_not_contain = dictionary.get("must_not_contain", [])
-        if len(contains) > 0 and len(must_not_contain) > 0:
+        if len(contains) > 0 and len(must_not_contain) > 0:  # noqa: E501; pylint: disable=len-as-condition; This is more explicit
             common_members = set(contains).intersection(set(must_not_contain))
             if common_members != set():
                 raise jsonschema.ValidationError(
@@ -97,7 +97,8 @@ class ContentTest(object):
     present in the file/text
     Everything in `must_not_contain` should not be present.
     """
-
+    # This is a value container. Disabled irrelevant pylint warning.
+    # pylint: disable=too-few-public-methods
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None):
         if contains:
@@ -119,6 +120,8 @@ class ContentTest(object):
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
+    # This is a value container. Disabled irrelevant pylint warning.
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
@@ -133,6 +136,8 @@ class FileTest(ContentTest):
         :param must_not_contain: a list of strings that should not be present
         in the file
         """
+        # This is a value container. Disabled irrelevant pylint warning.
+        # pylint: disable=too-many-arguments
         super().__init__(contains=contains, must_not_contain=must_not_contain)
         self.path = Path(path)
         self.md5sum = md5sum
@@ -158,6 +163,8 @@ class FileTest(ContentTest):
 
 class WorkflowTest(object):
     """A class that contains all properties of a to be tested workflow"""
+    # This is a value container. Disabled irrelevant pylint warning.
+    # pylint: disable=too-few-public-methods
 
     def __init__(self, name: str, command: str,
                  exit_code: int = DEFAULT_EXIT_CODE,
@@ -173,6 +180,8 @@ class WorkflowTest(object):
         :param stderr: a ContentTest object
         :param files: a list of FileTest objects
         """
+        # This is a value container. Disabled irrelevant pylint warning.
+        # pylint: disable=too-many-arguments
         self.name = name
         self.command = command
         self.exit_code = exit_code
