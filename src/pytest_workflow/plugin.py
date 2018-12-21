@@ -77,10 +77,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # test workflow output.
         tempdir = tempfile.mkdtemp(prefix="pytest_wf")
 
-        # Copy the project directory to the temporary directory. os.getcwd()
-        # is used here because it is assumed pytest is run from project root.
-        # Using the python git plugin was considered, as it can also give the
-        # project root. But this assumes git. So this choice is debatable.
+        # Copy the project directory to the temporary directory using pytest's
+        # rootdir.
         copy_tree(str(self.config.rootdir), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
