@@ -37,7 +37,9 @@ Below is an example of a YAML file that defines a test:
     - path: test.file
 ```
 This will run `touch test.file` and check afterwards if a file with path: 
-`test.file` is present.
+`test.file` is present. It will also check if the `command` has exited 
+with exit code `0`, which is the only default test that is run. Testing 
+workflows that exit with another exit code is also possible.
 
 A more advanced example:
 ```YAML
