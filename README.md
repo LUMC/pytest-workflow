@@ -9,16 +9,16 @@ by using yaml files for the test configuration.
 ## Introduction
 
 Writing workflows is hard. Testing if they are correct is even harder. Testing with
-bash scripts or other code has some flaws. Is this bug in the pipeline. or in my test-framework?
+bash scripts or other code has some flaws. Is this bug in the pipeline or in my test-framework?
 Pytest-workflow aims to make testing as simple as possible so you can focus on debugging
 your pipeline.
 
 ## Installation
 
-- make sure your virtual environment is activated
-- Install using pip `pip install git+https://github.com/lumc/pytest-workflow.git`
-- create a `tests` directory in the root of your repository.
-- Create your test yaml files in the test directory
+- Make sure your virtual environment is activated.
+- Install using pip `pip install pytest-workflow`.
+- Create a `tests` directory in the root of your repository.
+- Create your test yaml files in the `tests` directory.
 
 ## Running pytest-workflow
 Run `pytest` from an environment with pytest-workflow installed. 
