@@ -86,81 +86,73 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
             yield line
 
 
-# Technically the function below does the same as a pytest Collector. It
-# returns a list of pytest Items. The reason that a pytest Collector was not
-# chosen here is that this function performs only one test on a file. It reads
-# the file and checks the contents. Also a pytest Collector is a node that
-# needs to have parents and itself becomes a parent. This hierarchy was not
-# considered necessary, as it performs only one test.
-def generate_content_tests(
-        parent: pytest.Collector,
-        text_lines: Iterable[str],
-        contains: List[str],
-        must_not_contain: List[str],
-        test_name_prefix: str = "") -> List[pytest.Item]:
-    """
-    Checks text lines for content. Spawns test items that indicate whether
-    certain strings have been found or not.
-    :param parent: The parent for the test items.
-    :param text_lines: The lines of text to search.
-    :param contains: The strings that should be in the text lines
-    :param must_not_contain: The strings that should not be in the text lines
-    :param test_name_prefix: a text prefix for the test name.
-    :return: A list of pytest Items
-    """
-    found_strings = check_content(
-        contains + must_not_contain, text_lines)
-
-    test_items = []
-
-    test_items += [
-        GenericTest(
-            name="{0}contains '{1}'".format(test_name_prefix, string),
-            parent=parent,
-            result=string in found_strings
-        )
-        for string in contains]
-
-    test_items += [
-        GenericTest(
-            name="{0}does not contain '{1}".format(test_name_prefix, string),
-            parent=parent,
-            result=string not in found_strings
-        )
-        for string in must_not_contain]
-
-    return test_items
-
-
-def generate_log_tests(
-        parent: pytest.Collector,
-        log: bytes,
-        log_test: ContentTest,
-        prefix: str) -> List[pytest.Item]:
-    """A helper function that calls generate_content_tests and does
-    the necessary conversions for workflow log testing."""
-    return generate_content_tests(
-        parent=parent,
-        # Convert log bytestring to unicode strings
-        text_lines=log.decode().splitlines(),
-        contains=log_test.contains,
-        must_not_contain=log_test.must_not_contain,
-        test_name_prefix=prefix)
-
-
-class GenericTest(pytest.Item):
-    """Test that can be used to report a failing or succeeding test
-    in the log"""
-
-    def __init__(self, name: str, parent: pytest.Collector, result: bool):
-        """
-        Create a GenericTest item
-        :param name: The name of the test
-        :param parent: A pytest Collector from which the test originates
-        :param result: Whether the test has succeeded.
-        """
+class ContentTestCollector(pytest.Collector):
+    def __init__(self, name: str, parent: pytest.Collector,
+                 content: Iterable[str], content_test: ContentTest):
         super().__init__(name, parent=parent)
-        self.result = result
+        self.content = content
+        self.content_test = content_test
+
+    def collect(self):
+        found_strings = check_content(
+            self.content_test.contains + self.content_test.must_not_contain,
+            self.content)
+
+        test_items = []
+
+        test_items += [
+            ContentTestItem(
+                parent=self,
+                string=string,
+                should_contain=True,
+                contains=string in found_strings
+            )
+            for string in self.content_test.contains]
+
+        test_items += [
+            ContentTestItem(
+                parent=self,
+                string=string,
+                should_contain=False,
+                contains=string in found_strings
+            )
+            for string in self.content_test.must_not_contain]
+
+        return test_items
+
+
+class ContentTestItem(pytest.Item):
+    """Item that reports if a string has been found in content."""
+
+    def __init__(self, parent: pytest.Collector, string: str,
+                 should_contain: bool, contains: bool):
+        """
+        Create a ContentTestItem
+        :param parent: A pytest collector
+        :param string: The string that was searched for.
+        :param should_contain: Whether the string should have been there
+        :param result:
+        """
+        contain = "contains" if should_contain else "does not contain"
+        name = "{0} '{1}'".format(contain, string)
+        super().__init__(name, parent=parent)
+        self.should_contain = should_contain
+        self.string = string
+        self.contains = contains
 
     def runtest(self):
-        assert self.result
+        assert self.contains == self.should_contain
+
+    def repr_failure(self, excinfo):
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
+        message = (
+            "'{string}' was {found} in {content} "
+            "while it {should} be there."
+        ).format(
+            string=self.string,
+            found="not found" if self.should_contain else "found",
+            content=self.parent.name,
+            should="should" if self.should_contain else "should not"
+        )
+        return message

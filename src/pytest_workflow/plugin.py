@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from .content_tests import generate_log_tests
+from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
@@ -50,9 +50,8 @@ class YamlFile(pytest.File):
         super().__init__(path, parent=parent)
 
     def collect(self):
-        """This function now only returns one WorkflowTestsCollector,
-            but this might be increased later when we decide to put multiple
-            tests in one yaml. """
+        """This function collects all the workflow tests from a single
+        YAML file."""
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
 
@@ -94,13 +93,15 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
 
-        tests += generate_log_tests(parent=self, log=workflow.stdout,
-                                    log_test=self.workflow_test.stdout,
-                                    prefix="stdout ")
+        tests += [ContentTestCollector(
+            name="stdout", parent=self,
+            content=workflow.stdout.decode().splitlines(),
+            content_test=self.workflow_test.stdout)]
 
-        tests += generate_log_tests(parent=self, log=workflow.stderr,
-                                    log_test=self.workflow_test.stderr,
-                                    prefix="stderr ")
+        tests += [ContentTestCollector(
+            name="stderr", parent=self,
+            content=workflow.stderr.decode().splitlines(),
+            content_test=self.workflow_test.stderr)]
 
         return tests
         # TODO: Figure out proper cleanup.
@@ -108,11 +109,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # After yielding the tests this object is no longer needed, so
         # deleting the tempdir here does not work.
         # There is probably some fixture that can handle this.
-
-    def reportinfo(self):
-        # TODO: Figure out what reportinfo does
-        # This was copied from code example.
-        return self.fspath, None, self.name
 
 
 class ExitCodeTest(pytest.Item):
@@ -125,3 +121,11 @@ class ExitCodeTest(pytest.Item):
 
     def runtest(self):
         assert self.exit_code == self.desired_exit_code
+
+    def repr_failure(self, excinfo):
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
+        message = ("The workflow exited with exit code " +
+                   "'{0}' instead of '{1}'.".format(self.exit_code,
+                                                    self.desired_exit_code))
+        return message
