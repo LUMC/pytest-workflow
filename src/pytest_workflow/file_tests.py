@@ -123,8 +123,10 @@ class FileMd5(pytest.Item):
 
     def repr_failure(self, excinfo):
         # pylint: disable=W0613  # This argument is needed for pytest.
-        message = ("Observed md5sum '{observed}' not equal to expected md5sum "
-                   "'{expected}' for file '{path}'").format(
+        message = (
+            "Observed md5sum '{observed}' not equal to expected md5sum "
+            "'{expected}' for file '{path}'"
+        ).format(
             observed=self.observed_md5sum,
             expected=self.expected_md5sum,
             path=str(self.filepath)

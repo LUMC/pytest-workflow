@@ -19,20 +19,20 @@ from typing import List, Tuple  # noqa: F401  # Used in comments
 
 import pytest
 
-# message tests. Form: a tuple of a yaml file and expected message.
+# message tests. Form: a tuple of a yaml file and expected messages.
 MESSAGE_TESTS = [
     ("""\
     - name: fail_test
       command: grep
     """,
-     "The workflow exited with exit code '2' instead of '0'"),
+     ["The workflow exited with exit code '2' instead of '0'"]),
     ("""\
     - name: create file
       command: echo moo
       files:
         - path: moo
     """,
-     "moo' does not exist while it should"),
+     ["moo' does not exist while it should"]),
     ("""\
     - name: echo something
       command: touch moo
@@ -40,12 +40,23 @@ MESSAGE_TESTS = [
         - path: moo
           should_exist: false
     """,
-     "moo' does exist while it should not")
-]  # type: List[Tuple[str,str]]
+     ["moo' does exist while it should not"]),
+    ("""\
+    - name: moo file
+      command: bash -c 'echo moo > moo.txt'
+      files:
+        - path: moo.txt
+          md5sum: e583af1f8b00b53cda87ae9ead880225
+    """,
+     ["Observed md5sum 'e583af1f8b00b53cda87ae9ead880224' not equal to "
+      "expected md5sum 'e583af1f8b00b53cda87ae9ead880225' for file",
+      "moo.txt'"])
+]  # type: List[Tuple[str,List[str]]]
 
 
-@pytest.mark.parametrize(["test", "message"], MESSAGE_TESTS)
-def test_messages(test: str, message: str, testdir):
+@pytest.mark.parametrize(["test", "messages"], MESSAGE_TESTS)
+def test_messages(test: str, messages: List[str], testdir):
     testdir.makefile(".yml", textwrap.dedent(test))
     result = testdir.runpytest()
-    assert message in result.stdout.str()
+    for message in messages:
+        assert message in result.stdout.str()
