@@ -88,8 +88,9 @@ class FileExists(pytest.Item):
     def runtest(self):
         assert self.file.exists() == self.should_exist
 
-    def _repr_failure_py(self, excinfo, style=None):
-        message = "{path} does {exist} while it {should}".format(
+    def repr_failure(self, excinfo):
+        # pylint: disable=W0613  # This argument is needed for pytest.
+        message = "'{path}' does {exist} while it {should}".format(
             # self.file gives the actual path that was tested (including /tmp
             # bits). self.parent.filetest.path gives the path that the user
             # gave in the test yaml. self.file is probably more useful when

@@ -14,9 +14,38 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
+import textwrap
+from typing import List, Tuple  # noqa: F401  # Used in comments
 
-def test_exit_code_err_message(testdir):
-    testdir.makefile(".yml", "- name: fail_test", "  command: grep")
+import pytest
+
+# message tests. Form: a tuple of a yaml file and expected message.
+MESSAGE_TESTS = [
+    ("""\
+    - name: fail_test
+      command: grep
+    """,
+     "The workflow exited with exit code '2' instead of '0'"),
+    ("""\
+    - name: create file
+      command: echo moo
+      files:
+        - path: moo
+    """,
+     "moo' does not exist while it should"),
+    ("""\
+    - name: echo something
+      command: touch moo
+      files:
+        - path: moo
+          should_exist: false
+    """,
+     "moo' does exist while it should not")
+]  # type: List[Tuple[str,str]]
+
+
+@pytest.mark.parametrize(["test", "message"], MESSAGE_TESTS)
+def test_messages(test: str, message: str, testdir):
+    testdir.makefile(".yml", textwrap.dedent(test))
     result = testdir.runpytest()
-    assert ("The workflow exited with exit code '2' instead of '0'"
-            in result.stdout.str())
+    assert message in result.stdout.str()
