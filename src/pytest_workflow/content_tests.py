@@ -144,7 +144,8 @@ class ContentTestItem(pytest.Item):
         assert self.contains == self.should_contain
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument  # Argument needed for pytest.
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
         message = (
             "'{string}' was {found} in {content} "
             "while it {should} be there."

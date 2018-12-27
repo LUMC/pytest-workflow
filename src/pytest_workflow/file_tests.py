@@ -89,7 +89,8 @@ class FileExists(pytest.Item):
         assert self.file.exists() == self.should_exist
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument  # Argument needed for pytest.
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
         message = "'{path}' does {exist} while it {should}".format(
             # self.file gives the actual path that was tested (including /tmp
             # bits). self.parent.filetest.path gives the path that the user
@@ -122,7 +123,8 @@ class FileMd5(pytest.Item):
         assert self.observed_md5sum == self.expected_md5sum
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument  # Argument needed for pytest.
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
         message = (
             "Observed md5sum '{observed}' not equal to expected md5sum "
             "'{expected}' for file '{path}'"
