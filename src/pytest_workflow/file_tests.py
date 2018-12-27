@@ -90,6 +90,10 @@ class FileExists(pytest.Item):
 
     def _repr_failure_py(self, excinfo, style=None):
         message = "{path} does {exist} while it {should}".format(
+            # self.file gives the actual path that was tested (including /tmp
+            # bits). self.parent.filetest.path gives the path that the user
+            # gave in the test yaml. self.file is probably more useful when
+            # debugging.
             path=str(self.file),
             exist="not exist" if self.should_exist else "exist",
             should="should" if self.should_exist else "should not"
