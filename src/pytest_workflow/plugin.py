@@ -50,9 +50,8 @@ class YamlFile(pytest.File):
         super().__init__(path, parent=parent)
 
     def collect(self):
-        """This function now only returns one WorkflowTestsCollector,
-            but this might be increased later when we decide to put multiple
-            tests in one yaml. """
+        """This function collects all the workflow tests from a single
+        YAML file."""
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
 
