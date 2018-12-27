@@ -105,7 +105,7 @@ class ContentTestCollector(pytest.Collector):
                 parent=self,
                 string=string,
                 should_contain=True,
-                result=string in found_strings
+                contains=string in found_strings
             )
             for string in self.content_test.contains]
 
@@ -114,7 +114,7 @@ class ContentTestCollector(pytest.Collector):
                 parent=self,
                 string=string,
                 should_contain=False,
-                result=string not in found_strings
+                contains=string in found_strings
             )
             for string in self.content_test.must_not_contain]
 
@@ -125,17 +125,33 @@ class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
     def __init__(self, parent: pytest.Collector, string: str,
-                 should_contain: bool, result: bool):
+                 should_contain: bool, contains: bool):
         """
-        Create a GenericTest item
-        :param name: The name of the test
-        :param parent: A ContentTestCollector from which the test originates
-        :param result: Whether the test has succeeded.
+        Create a ContentTestItem
+        :param parent: A pytest collector
+        :param string: The string that was searched for.
+        :param should_contain: Whether the string should have been there
+        :param result:
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
-        self.result = result
+        self.should_contain = should_contain
+        self.string = string
+        self.contains = contains
 
     def runtest(self):
-        assert self.result
+        assert self.contains == self.should_contain
+
+    def repr_failure(self, excinfo):
+        # pylint: disable=unused-argument  # Argument needed for pytest.
+        message = (
+            "'{string}' was {found} in {content} "
+            "while it {should} be there."
+        ).format(
+            string=self.string,
+            found="not found" if self.should_contain else "found",
+            content=self.parent.name,
+            should="should" if self.should_contain else "should not"
+        )
+        return message
