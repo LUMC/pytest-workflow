@@ -25,14 +25,14 @@ FAILURE_MESSAGE_TESTS = [
     - name: fail_test
       command: grep
     """,
-     ["The workflow exited with exit code '2' instead of '0'"]),
+     "The workflow exited with exit code '2' instead of '0'"),
     ("""\
     - name: create file
       command: echo moo
       files:
         - path: moo
     """,
-     ["moo' does not exist while it should"]),
+     "moo' does not exist while it should"),
     ("""\
     - name: echo something
       command: touch moo
@@ -40,7 +40,7 @@ FAILURE_MESSAGE_TESTS = [
         - path: moo
           should_exist: false
     """,
-     ["moo' does exist while it should not"]),
+     "moo' does exist while it should not"),
     ("""\
     - name: moo file
       command: bash -c 'echo moo > moo.txt'
@@ -48,15 +48,31 @@ FAILURE_MESSAGE_TESTS = [
         - path: moo.txt
           md5sum: e583af1f8b00b53cda87ae9ead880225
     """,
-     ["Observed md5sum 'e583af1f8b00b53cda87ae9ead880224' not equal to "
-      "expected md5sum 'e583af1f8b00b53cda87ae9ead880225' for file",
-      "moo.txt'"])
-]  # type: List[Tuple[str,List[str]]]
+     "Observed md5sum 'e583af1f8b00b53cda87ae9ead880224' not equal to "
+     "expected md5sum 'e583af1f8b00b53cda87ae9ead880225' for file"),
+    ("""\
+    - name: moo file contains miaow
+      command: bash -c 'echo moo > moo.txt'
+      files:
+        - path: moo.txt
+          contains:
+            - miaow
+    """,
+     "'miaow' was not found in content while it should be there"),
+    ("""\
+    - name: moo file does not contain moo
+      command: bash -c 'echo moo > moo.txt'
+      files:
+        - path: moo.txt
+          must_not_contain:
+            - moo
+    """,
+     "'moo' was found in content while it should not be there")
+]  # type: List[Tuple[str,str]]
 
 
-@pytest.mark.parametrize(["test", "messages"], FAILURE_MESSAGE_TESTS)
-def test_messages(test: str, messages: List[str], testdir):
+@pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)
+def test_messages(test: str, message: str, testdir):
     testdir.makefile(".yml", textwrap.dedent(test))
     result = testdir.runpytest()
-    for message in messages:
-        assert message in result.stdout.str()
+    assert message in result.stdout.str()
