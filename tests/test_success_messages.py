@@ -61,7 +61,20 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
 """)
 
 SUCCESS_MESSAGES = [
-    ["test_succeeding.yml::"],
+    ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],
+    ["test_succeeding.yml::moo file::moo.txt::content::contains 'moo' PASSED"],
+    ["test_succeeding.yml::moo file::moo.txt::content::does not contain 'Cock a doodle doo' PASSED"],  # noqa: E501
+    ["test_succeeding.yml::moo file::moo.txt::md5sum PASSED"],
+    ["test_succeeding.yml::moo file::moo.txt::should exist PASSED"],
+    ["test_succeeding.yml::simple echo::exit code should be 0 PASSED"],
+    ["test_succeeding.yml::simple echo::moo.txt::should not exist PASSED"],
+    ["test_succeeding.yml::simple echo::stdout::contains 'moo' PASSED"],
+    ["test_succeeding.yml::simple echo::stdout::does not contain 'Cock a doodle doo' PASSED"],  # noqa: E501
+    ["test_succeeding.yml::simple echo::exit code should be 0 PASSED"],
+    ["test_succeeding.yml::failing grep::exit code should be 2 PASSED"],
+    ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
+    ["test_succeeding.yml::failing grep::stderr::contains 'Usage: grep' PASSED"],  # noqa: E501
+    ["test_succeeding.yml::failing grep::stderr::contains 'Try 'grep --help''"],  # noqa: E501
 ]
 
 
