@@ -22,7 +22,7 @@ from typing import List, Optional
 
 import jsonschema
 
-SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
+SCHEMA = Path(Path(__file__).parent / Path("schema") / Path("schema.json"))
 DEFAULT_EXIT_CODE = 0
 DEFAULT_FILE_SHOULD_EXIST = True
 
