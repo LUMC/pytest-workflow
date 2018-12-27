@@ -17,7 +17,7 @@
 from setuptools import find_packages, setup
 
 with open("README.md", "r") as readme_file:
-    long_description = readme_file.read()
+    LONG_DESCRIPTION = readme_file.read()
 
 setup(
     name="pytest-workflow",
@@ -26,7 +26,7 @@ setup(
                 "using YAML files",
     author="Leiden University Medical Center, various departments",
     author_email="sasc@lumc.nl",  # A placeholder for now
-    long_description=long_description,
+    long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml",
