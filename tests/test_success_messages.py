@@ -61,12 +61,17 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
 """)
 
 SUCCESS_MESSAGES = [
-    [""],
+    ["test_succeeding.yml::"],
 ]
 
 
 @pytest.fixture(scope="module")
 def succeeding_tests_output():
+    """This fixture was written because the testdir function has a default
+    scope of 'function'. This is very inefficient when testing multiple
+    success messages in the output as the whole test yaml with all commands
+    has to be run again.
+    This fixture runs the succeeding tests once with pytest -v"""
     tempdir = tempfile.mkdtemp()
     test_file = Path(Path(tempdir) / Path("test_succeeding.yml"))
     with test_file.open("w") as file_handler:
