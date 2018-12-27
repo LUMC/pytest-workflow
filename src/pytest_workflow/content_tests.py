@@ -102,7 +102,7 @@ class ContentTestCollector(pytest.Collector):
 
         test_items += [
             GenericTest(
-                name="{0} contains '{1}'".format(self.name, string),
+                name="contains '{0}'".format(string),
                 parent=self,
                 result=string in found_strings
             )
@@ -110,8 +110,7 @@ class ContentTestCollector(pytest.Collector):
 
         test_items += [
             GenericTest(
-                name="{0}does not contain '{1}".format(self.name,
-                                                       string),
+                name="does not contain '{0}".format(string),
                 parent=self,
                 result=string not in found_strings
             )
