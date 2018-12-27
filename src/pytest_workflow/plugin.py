@@ -110,11 +110,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # deleting the tempdir here does not work.
         # There is probably some fixture that can handle this.
 
-    def reportinfo(self):
-        # TODO: Figure out what reportinfo does
-        # This was copied from code example.
-        return self.fspath, None, self.name
-
 
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector, exit_code: int,
