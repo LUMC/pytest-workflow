@@ -93,13 +93,15 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
 
-        tests += [ContentTestCollector(name="stdout", parent=self,
-                                       content=workflow.stdout,
-                                       content_test=self.workflow_test.stdout)]
+        tests += [ContentTestCollector(
+            name="stdout", parent=self,
+            content=workflow.stdout.decode().splitlines(),
+            content_test=self.workflow_test.stdout)]
 
-        tests += [ContentTestCollector(name="stderr", parent=self,
-                                       content=workflow.stderr,
-                                       content_test=self.workflow_test.stderr)]
+        tests += [ContentTestCollector(
+            name="stderr", parent=self,
+            content=workflow.stderr.decode().splitlines(),
+            content_test=self.workflow_test.stderr)]
 
         return tests
         # TODO: Figure out proper cleanup.
