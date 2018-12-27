@@ -88,6 +88,14 @@ class FileExists(pytest.Item):
     def runtest(self):
         assert self.file.exists() == self.should_exist
 
+    def _repr_failure_py(self, excinfo, style=None):
+        message = "{path} does {exist} while it {should}".format(
+            path=str(self.file),
+            exist="not exist" if self.should_exist else "exist",
+            should="should" if self.should_exist else "should not"
+        )
+        return message
+
 
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
