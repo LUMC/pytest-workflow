@@ -93,10 +93,10 @@ class ContentTestCollector(pytest.Collector):
         self.content = content
         self.content_test = content_test
 
-
     def collect(self):
         found_strings = check_content(
-            self.content_test.contains + self.content_test.must_not_contain, self.content)
+            self.content_test.contains + self.content_test.must_not_contain,
+            self.content)
 
         test_items = []
 

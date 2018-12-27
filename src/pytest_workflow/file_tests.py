@@ -21,7 +21,7 @@ from typing import Union
 
 import pytest
 
-from .content_tests import file_to_string_generator, ContentTestCollector
+from .content_tests import ContentTestCollector, file_to_string_generator
 from .schema import FileTest
 
 
