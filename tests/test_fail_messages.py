@@ -75,7 +75,7 @@ FAILURE_MESSAGE_TESTS = [
         contains:
           - miaow
     """,
-     "miaow' was not found in stdout while it should be there"),
+     "'miaow' was not found in stdout while it should be there"),
     ("""\
     - name: echo does not contain moo
       command: echo moo
@@ -83,7 +83,23 @@ FAILURE_MESSAGE_TESTS = [
         must_not_contain:
           - moo
     """,
-     "moo' was found in stdout while it should not be there")
+     "moo' was found in stdout while it should not be there"),
+    ("""\
+    - name: fail_test
+      command: grep
+      stderr:
+        contains:
+          - "No arguments?"
+    """,
+     "'No arguments?' was not found in stderr while it should be there"),
+    ("""\
+    - name: fail_test
+      command: grep
+      stderr:
+        must_not_contain:
+          - "Usage:"
+    """,
+     "'Usage:' was found in stderr while it should not be there")
 ]  # type: List[Tuple[str,str]]
 
 
