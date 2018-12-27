@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
+"""Tests the failure messages"""
+
 import textwrap
 from typing import List, Tuple  # noqa: F401  # Used in comments
 
