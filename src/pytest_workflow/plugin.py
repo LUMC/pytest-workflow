@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from .content_tests import generate_log_tests
+from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
@@ -94,13 +94,13 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
 
-        tests += generate_log_tests(parent=self, log=workflow.stdout,
-                                    log_test=self.workflow_test.stdout,
-                                    prefix="stdout ")
+        tests += [ContentTestCollector(name="stdout", parent=self,
+                                       content=workflow.stdout,
+                                       content_test=self.workflow_test.stdout)]
 
-        tests += generate_log_tests(parent=self, log=workflow.stderr,
-                                    log_test=self.workflow_test.stderr,
-                                    prefix="stderr ")
+        tests += [ContentTestCollector(name="stderr", parent=self,
+                                       content=workflow.stderr,
+                                       content_test=self.workflow_test.stderr)]
 
         return tests
         # TODO: Figure out proper cleanup.
