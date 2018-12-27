@@ -114,10 +114,22 @@ class FileMd5(pytest.Item):
         name = "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
-        self.md5sum = md5sum
+        self.expected_md5sum = md5sum
+        self.observed_md5sum = None
 
     def runtest(self):
-        assert file_md5sum(self.filepath) == self.md5sum
+        self.observed_md5sum = file_md5sum(self.filepath)
+        assert self.observed_md5sum == self.expected_md5sum
+
+    def repr_failure(self, excinfo):
+        # pylint: disable=W0613  # This argument is needed for pytest.
+        message = ("Observed md5sum '{observed}' not equal to expected md5sum "
+                   "'{expected}' for file '{path}'").format(
+            observed=self.observed_md5sum,
+            expected=self.expected_md5sum,
+            path=str(self.filepath)
+        )
+        return message
 
 
 def file_md5sum(filepath: Path) -> str:
