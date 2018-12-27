@@ -17,10 +17,12 @@
 
 # This file contains tests for the schema for the yaml file
 
+import subprocess  # nosec
+import tempfile
 import textwrap
+from pathlib import Path
 
 import pytest
-
 
 SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
 - name: moo file
@@ -59,21 +61,24 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
 """)
 
 SUCCESS_MESSAGES = [
-    "bla",
+    [""],
 ]
 
 
-@pytest.fixture(scope="class")
-def succeeding_tests(testdir) -> str:
-    testdir.makefile(".yml", succeeding_tests=SUCCEEDING_TESTS_YAML)
-    result = testdir.runpytest("-v")
-    yield result.stdout.str()
+@pytest.fixture(scope="module")
+def succeeding_tests_output():
+    tempdir = tempfile.mkdtemp()
+    test_file = Path(Path(tempdir) / Path("test_succeeding.yml"))
+    with test_file.open("w") as file_handler:
+        file_handler.write(SUCCEEDING_TESTS_YAML)
+    process_out = subprocess.run(args=["pytest", "-v"],  # nosec
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE,
+                                 cwd=tempdir)
+    yield process_out.stdout.decode()
 
 
-class TestSuccessMessages:
-    def __init__(self, succeeding_tests):
-        self.results = succeeding_tests
-
-    @pytest.mark.parametrize(["message"], SUCCESS_MESSAGES)
-    def message_in_result(self, message: str):
-        assert message in self.results
+@pytest.mark.parametrize(["message"], SUCCESS_MESSAGES)
+def test_message_in_result(message: str, succeeding_tests_output):
+    # pylint: disable=redefined-outer-name
+    assert message in succeeding_tests_output
