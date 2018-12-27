@@ -67,7 +67,23 @@ FAILURE_MESSAGE_TESTS = [
           must_not_contain:
             - moo
     """,
-     "'moo' was found in content while it should not be there")
+     "'moo' was found in content while it should not be there"),
+    ("""\
+    - name: echo miaow
+      command: echo moo
+      stdout:
+        contains:
+          - miaow
+    """,
+     "miaow' was not found in stdout while it should be there"),
+    ("""\
+    - name: echo does not contain moo
+      command: echo moo
+      stdout:
+        must_not_contain:
+          - moo
+    """,
+     "moo' was found in stdout while it should not be there")
 ]  # type: List[Tuple[str,str]]
 
 
