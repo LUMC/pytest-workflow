@@ -20,7 +20,7 @@ from typing import List, Tuple  # noqa: F401  # Used in comments
 import pytest
 
 # message tests. Form: a tuple of a yaml file and expected messages.
-MESSAGE_TESTS = [
+FAILURE_MESSAGE_TESTS = [
     ("""\
     - name: fail_test
       command: grep
@@ -54,7 +54,7 @@ MESSAGE_TESTS = [
 ]  # type: List[Tuple[str,List[str]]]
 
 
-@pytest.mark.parametrize(["test", "messages"], MESSAGE_TESTS)
+@pytest.mark.parametrize(["test", "messages"], FAILURE_MESSAGE_TESTS)
 def test_messages(test: str, messages: List[str], testdir):
     testdir.makefile(".yml", textwrap.dedent(test))
     result = testdir.runpytest()
