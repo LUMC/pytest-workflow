@@ -20,5 +20,3 @@ def test_exit_code_err_message(testdir):
     result = testdir.runpytest()
     assert ("The workflow exited with exit code '2' instead of '0'"
             in result.stdout.str())
-
-
