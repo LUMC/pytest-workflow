@@ -101,17 +101,19 @@ class ContentTestCollector(pytest.Collector):
         test_items = []
 
         test_items += [
-            GenericTest(
-                name="contains '{0}'".format(string),
+            ContentTestItem(
                 parent=self,
+                string=string,
+                should_contain=True,
                 result=string in found_strings
             )
             for string in self.content_test.contains]
 
         test_items += [
-            GenericTest(
-                name="does not contain '{0}'".format(string),
+            ContentTestItem(
                 parent=self,
+                string=string,
+                should_contain=False,
                 result=string not in found_strings
             )
             for string in self.content_test.must_not_contain]
@@ -119,17 +121,19 @@ class ContentTestCollector(pytest.Collector):
         return test_items
 
 
-class GenericTest(pytest.Item):
-    """Test that can be used to report a failing or succeeding test
-    in the log"""
+class ContentTestItem(pytest.Item):
+    """Item that reports if a string has been found in content."""
 
-    def __init__(self, name: str, parent: pytest.Collector, result: bool):
+    def __init__(self, parent: pytest.Collector, string: str,
+                 should_contain: bool, result: bool):
         """
         Create a GenericTest item
         :param name: The name of the test
-        :param parent: A pytest Collector from which the test originates
+        :param parent: A ContentTestCollector from which the test originates
         :param result: Whether the test has succeeded.
         """
+        contain = "contains" if should_contain else "does not contain"
+        name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
         self.result = result
 
