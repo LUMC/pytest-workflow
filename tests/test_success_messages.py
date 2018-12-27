@@ -15,6 +15,7 @@
 
 """Tests the success messages"""
 
+import shutil
 import subprocess  # nosec
 import tempfile
 import textwrap
@@ -92,6 +93,7 @@ def succeeding_tests_output():
                                  stderr=subprocess.PIPE,
                                  cwd=tempdir)
     yield process_out.stdout.decode()
+    shutil.rmtree(tempdir)
 
 
 @pytest.mark.parametrize(["message"], SUCCESS_MESSAGES)
