@@ -41,16 +41,11 @@ class Workflow(object):
         self._proc_out = None
         self.cwd = cwd
 
-    def run(self) -> subprocess.CompletedProcess:
+    def run(self):
         sub_procces_args = shlex.split(self.command)
         self._proc_out = subprocess.run(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
-
-    def _log_to_file(self, log: bytes, output_file: Path) -> Path:
-        with output_file.open('wb') as file_handler:
-            file_handler.write(log)
-        return output_file
 
     def stdout_to_file(self) -> Path:
         return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.out"))
@@ -71,7 +66,7 @@ class Workflow(object):
         return self._proc_out.returncode
 
 
-def bytes_to_file(self, bytestring: bytes, output_file: Path) -> Path:
+def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
     with output_file.open('wb') as file_handler:
         file_handler.write(bytestring)
     return output_file
