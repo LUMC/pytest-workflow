@@ -8,6 +8,8 @@ that users understand how the changes affect the new version.
 --->
 
 ## Current development version
++ Save stdout and stderr of each workflow to a file and report their locations
+to stdout when running `pytest`.
 + Comprehensible failure messages were added to make debugging workflows
 easier.
 
