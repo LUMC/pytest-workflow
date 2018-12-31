@@ -20,10 +20,10 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen
 """
 
-from pathlib import Path
 import shlex
 import subprocess  # nosec: security implications have been considered
-from typing import Optional, Union
+from pathlib import Path
+from typing import Union
 
 
 class Workflow(object):
@@ -47,14 +47,16 @@ class Workflow(object):
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
 
-    def _log_to_file(self, log: bytes, output_file: Path):
-
-    def stdout_to_file(self, output_file: Optional[Path] = None):
-        if output_file is None:
-            output_file = Path(self.cwd) / Path("log.out")
-        with output_file.open("w") as file_handler:
-            file_handler.write(self.stdout)
+    def _log_to_file(self, log: bytes, output_file: Path) -> Path:
+        with output_file.open('wb') as file_handler:
+            file_handler.write(log)
         return output_file
+
+    def stdout_to_file(self) -> Path:
+        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.out"))
+
+    def stderr_to_file(self) -> Path:
+        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.err"))
 
     @property
     def stdout(self) -> bytes:
@@ -67,3 +69,9 @@ class Workflow(object):
     @property
     def exit_code(self) -> int:
         return self._proc_out.returncode
+
+
+def bytes_to_file(self, bytestring: bytes, output_file: Path) -> Path:
+    with output_file.open('wb') as file_handler:
+        file_handler.write(bytestring)
+    return output_file
