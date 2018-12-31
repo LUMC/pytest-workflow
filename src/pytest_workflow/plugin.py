@@ -83,10 +83,10 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
         name = self.workflow_test.name
-        # Use print statements here. Ideally this would be done by writing to
-        # the pytest internal log with modifiers for the verbosity level. But
-        # finding out how to do that properly is a hell of spaghetti code and
-        # poor documentation.
+        # Use print statements here. Using pytests internal logwriter has no
+        # added value. If there are wishes to do so in the future, the pytest
+        # terminal writer can be acquired with:
+        # self.config.pluginmanager.get_plugin("terminalreporter")
         # Name is included explicitly in each print command to avoid confusion
         # between workflows
         print("run '{name}' with command '{command}' in '{dir}".format(
