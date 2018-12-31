@@ -82,7 +82,16 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
+        print("run '{name}' with command '{command}' in '{dir}".format(
+            name=self.workflow_test.name,
+            command=self.workflow_test.command,
+            dir=tempdir))
         workflow.run()
+        print("run '{name}': done".format(name=self.workflow_test.name))
+        log_err = workflow.stderr_to_file()
+        log_out = workflow.stdout_to_file()
+        print("stdout saved in: {0}".format(str(log_out)))
+        print("stderr saved in: {0}".format(str(log_err)))
 
         # Below structure makes it easy to append tests
         tests = []
