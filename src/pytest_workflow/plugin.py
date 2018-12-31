@@ -89,7 +89,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # self.config.pluginmanager.get_plugin("terminalreporter")
         # Name is included explicitly in each print command to avoid confusion
         # between workflows
-        print("run '{name}' with command '{command}' in '{dir}".format(
+        print("run '{name}' with command '{command}' in '{dir}'".format(
             name=name,
             command=self.workflow_test.command,
             dir=tempdir))
