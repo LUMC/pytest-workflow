@@ -18,6 +18,9 @@
 
 # Disable pylint here because of false positive
 from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
+from pathlib import Path
+
+from _pytest.pathlib import create_cleanup_lock
 
 import pytest
 
@@ -79,6 +82,7 @@ class WorkflowTestsCollector(pytest.Collector):
             self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
                 self.name, numbered=False)
         )
+        create_cleanup_lock(Path(tempdir))
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         copy_tree(str(self.config.rootdir), tempdir)
