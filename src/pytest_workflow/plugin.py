@@ -20,6 +20,7 @@
 from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
 from pathlib import Path
 
+from _pytest.config import argparsing
 from _pytest.pathlib import create_cleanup_lock
 
 import pytest
@@ -30,6 +31,17 @@ from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
+
+
+def pytest_addoption(parser: argparsing.Parser):
+    parser.addoption(
+        "--keep-workflow-wd",
+        action="store_true",
+        help="Keep temporary directories where workflows are run for "
+             "debugging purposes. This also triggers saving of stdout and "
+             "stderr in the workflow directory",
+        dest="keep_workflow_wd"
+    )
 
 
 def pytest_collect_file(path, parent):
@@ -68,11 +80,7 @@ class WorkflowTestsCollector(pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
 
-    def collect(self):
-        """This runs the workflow and starts all the associated tests
-        The idea is that isolated parts of the yaml get their own collector or
-        item."""
-
+    def run_workflow(self):
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
         # test workflow output.
@@ -82,7 +90,7 @@ class WorkflowTestsCollector(pytest.Collector):
             self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
                 self.name, numbered=False)
         )
-        create_cleanup_lock(Path(tempdir))
+
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         copy_tree(str(self.config.rootdir), tempdir)
@@ -102,16 +110,28 @@ class WorkflowTestsCollector(pytest.Collector):
             dir=tempdir))
         workflow.run()
         print("run '{name}': done".format(name=name))
-        log_err = workflow.stderr_to_file()
-        log_out = workflow.stdout_to_file()
-        print("'{0}' stdout saved in: {1}".format(name, str(log_out)))
-        print("'{0}' stderr saved in: {1}".format(name, str(log_err)))
+
+        if self.config.keep_workflow_temp:
+            # Use pytest's internal pathlib to create a cleanup lock file.
+            create_cleanup_lock(Path(tempdir))
+            log_err = workflow.stderr_to_file()
+            log_out = workflow.stdout_to_file()
+            print("'{0}' stdout saved in: {1}".format(name, str(log_out)))
+            print("'{0}' stderr saved in: {1}".format(name, str(log_err)))
+        return workflow
+
+    def collect(self):
+        """This runs the workflow and starts all the associated tests
+        The idea is that isolated parts of the yaml get their own collector or
+        item."""
+
+        workflow = self.run_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, tempdir) for filetest in
-                  self.workflow_test.files]
+        tests += [FileTestCollector(self, filetest, workflow.cwd) for filetest
+                  in self.workflow_test.files]
 
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
