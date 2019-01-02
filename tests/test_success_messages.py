@@ -77,8 +77,6 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::failing grep::stderr::contains 'Try 'grep --help''"],  # noqa: E501
     ["run 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
     ["run 'moo file': done"],
-    ["'moo file' stdout saved in: "],
-    ["'moo file' stderr saved in: "]
 ]
 
 
