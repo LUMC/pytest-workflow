@@ -24,7 +24,7 @@ from _pytest.tmpdir import TempdirFactory
 
 import pytest
 
-SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
+MOO_FILE = textwrap.dedent("""\
 - name: moo file
   # Gruesome command injection here. This is for testing purposes only.
   # Do not try this at home.
@@ -36,7 +36,9 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
       must_not_contain:
         - "Cock a doodle doo"  # Unless our cow has severe identity disorders
       md5sum: e583af1f8b00b53cda87ae9ead880224
+""")
 
+SIMPLE_ECHO = textwrap.dedent("""\
 - name: simple echo
   command: "echo moo"
   files:
@@ -47,7 +49,9 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
       - "moo"
     must_not_contain:
       - "Cock a doodle doo"
+""")
 
+FAILING_GREP = textwrap.dedent("""\
 - name: failing grep
   command: "grep"
   stdout:
@@ -59,6 +63,8 @@ SUCCEEDING_TESTS_YAML = textwrap.dedent("""\
       - "Try 'grep --help'"
   exit_code: 2
 """)
+
+SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP
 
 SUCCESS_MESSAGES = [
     ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],

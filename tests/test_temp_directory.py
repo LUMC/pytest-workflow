@@ -18,25 +18,25 @@
 import re
 from pathlib import Path
 
-from .test_success_messages import SUCCEEDING_TESTS_YAML
+from .test_success_messages import SIMPLE_ECHO
 
 
 def test_log_messages(testdir):
-    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
-    assert "'moo file' stdout saved in: " in result.stdout.str()
-    assert "'moo file' stderr saved in: " in result.stdout.str()
+    assert "'simple echo' stdout saved in: " in result.stdout.str()
+    assert "'simple echo' stderr saved in: " in result.stdout.str()
 
 
 def test_not_log_messages(testdir):
-    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
-    assert "'moo file' stdout saved in: " not in result.stdout.str()
-    assert "'moo file' stderr saved in: " not in result.stdout.str()
+    assert "'simple echo' stdout saved in: " not in result.stdout.str()
+    assert "'simple echo' stderr saved in: " not in result.stdout.str()
 
 
 def test_directory_kept(testdir):
-    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
     working_dir = re.search(r"with command 'echo moo' in '(.*)'",
                             result.stdout.str()).group(1)
@@ -46,7 +46,7 @@ def test_directory_kept(testdir):
 
 
 def test_directory_not_kept(testdir):
-    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
     working_dir = re.search(r"with command 'echo moo' in '(.*)'",
                             result.stdout.str()).group(1)
