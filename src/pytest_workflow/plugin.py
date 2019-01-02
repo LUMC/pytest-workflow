@@ -98,7 +98,7 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
-        name = self.workflow_test.name
+
         # Use print statements here. Using pytests internal logwriter has no
         # added value. If there are wishes to do so in the future, the pytest
         # terminal writer can be acquired with:
@@ -106,19 +106,19 @@ class WorkflowTestsCollector(pytest.Collector):
         # Name is included explicitly in each print command to avoid confusion
         # between workflows
         print("run '{name}' with command '{command}' in '{dir}'".format(
-            name=name,
+            name=self.name,
             command=self.workflow_test.command,
             dir=tempdir))
         workflow.run()
-        print("run '{name}': done".format(name=name))
+        print("run '{name}': done".format(name=self.name))
 
         if self.config.getoption("keep_workflow_wd", False):
             # Use pytest's internal pathlib to create a cleanup lock file.
             create_cleanup_lock(Path(tempdir))
             log_err = workflow.stderr_to_file()
             log_out = workflow.stdout_to_file()
-            print("'{0}' stdout saved in: {1}".format(name, str(log_out)))
-            print("'{0}' stderr saved in: {1}".format(name, str(log_err)))
+            print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
+            print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
         return workflow
 
     def collect(self):
