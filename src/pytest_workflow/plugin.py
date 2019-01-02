@@ -15,8 +15,10 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import re
 
 from _pytest.config import argparsing
+from _pytest.tmpdir import TempdirFactory  # noqa: E501,F401 # used for type annotation
 
 from py._path.local import LocalPath  # noqa: F401 # used for type annotation
 
@@ -87,8 +89,14 @@ class WorkflowTestsCollector(pytest.Collector):
         # from getting filled up with test workflow output.
         # The temporary directory is produced from self.config._tmpdirhandler
         # which  does the same as using a `tmpdir` fixture.
-        tempdir = self.config._tmpdirhandler.mktemp(
-            self.name, numbered=False)  # type: LocalPath
+        tmpdirhandler = self.config._tmpdirhandler  # type: TempdirFactory
+        tempdir = tmpdirhandler.mktemp(
+            re.sub(r'\s+', '_', self.name),  # Replace whitespace with '_'
+            numbered=True  # This will prevent name collisions for tests
+            # with the same name by appending numbers to each dir. The
+            # alternative is overengineering some name checking stuff in
+            # schema.py.
+        )  # type: LocalPath
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
