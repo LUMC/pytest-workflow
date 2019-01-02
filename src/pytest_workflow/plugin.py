@@ -105,7 +105,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # pylint: disable=protected-access
         # Protected access needed to integrate tmpdir fixture functionality.
 
-
         tmpdirhandler = self.config._tmpdirhandler  # type: TempdirFactory
         tempdir = tmpdirhandler.mktemp(
             re.sub(r'\s+', '_', self.name),
