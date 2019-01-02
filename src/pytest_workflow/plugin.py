@@ -117,6 +117,8 @@ class WorkflowTestsCollector(pytest.Collector):
             print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
             print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
         else:
+            # addfinalizer adds a function that is run when the node tests are
+            # completed
             self.addfinalizer(tempdir_path.remove)
 
         return workflow
