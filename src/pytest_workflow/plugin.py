@@ -79,25 +79,24 @@ class WorkflowTestsCollector(pytest.Collector):
         super().__init__(workflow_test.name, parent=parent)
 
     def run_workflow(self):
-        # pylint: disable=protected-access
         """Runs the workflow in a temporary directory"""
+        # pylint: disable=protected-access
+        # Protected access needed to integrate tmpdir fixture functionality.
 
         # Running in a temporary directory will prevent the project repository
         # from getting filled up with test workflow output.
         # The temporary directory is produced from self.config._tmpdirhandler
         # which  does the same as using a `tmpdir` fixture.
-        tempdir_path = self.config._tmpdirhandler.mktemp(
+        tempdir = self.config._tmpdirhandler.mktemp(
             self.name, numbered=False)  # type: LocalPath
-
-        tempdir = str(tempdir_path)
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         rootdir = self.config.rootdir  # type: LocalPath
-        rootdir.copy(tempdir_path)
+        rootdir.copy(tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.workflow_test.command, tempdir)
+        workflow = Workflow(self.workflow_test.command, str(tempdir))
 
         # Use print statements here. Using pytests internal logwriter has no
         # added value. If there are wishes to do so in the future, the pytest
@@ -120,7 +119,7 @@ class WorkflowTestsCollector(pytest.Collector):
         else:
             # addfinalizer adds a function that is run when the node tests are
             # completed
-            self.addfinalizer(tempdir_path.remove)
+            self.addfinalizer(tempdir.remove)
 
         return workflow
 
