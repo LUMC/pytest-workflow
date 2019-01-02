@@ -51,5 +51,3 @@ def test_directory_not_kept(testdir):
     working_dir = re.search(r"with command 'echo moo' in '(.*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
-    assert not Path(working_dir / Path("log.out")).exists()
-    assert not Path(working_dir / Path("log.err")).exists()
