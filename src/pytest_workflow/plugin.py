@@ -82,7 +82,23 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
+        name = self.workflow_test.name
+        # Use print statements here. Using pytests internal logwriter has no
+        # added value. If there are wishes to do so in the future, the pytest
+        # terminal writer can be acquired with:
+        # self.config.pluginmanager.get_plugin("terminalreporter")
+        # Name is included explicitly in each print command to avoid confusion
+        # between workflows
+        print("run '{name}' with command '{command}' in '{dir}'".format(
+            name=name,
+            command=self.workflow_test.command,
+            dir=tempdir))
         workflow.run()
+        print("run '{name}': done".format(name=name))
+        log_err = workflow.stderr_to_file()
+        log_out = workflow.stdout_to_file()
+        print("'{0}' stdout saved in: {1}".format(name, str(log_out)))
+        print("'{0}' stderr saved in: {1}".format(name, str(log_err)))
 
         # Below structure makes it easy to append tests
         tests = []
