@@ -81,21 +81,35 @@ class WorkflowTestsCollector(pytest.Collector):
         super().__init__(workflow_test.name, parent=parent)
 
     def run_workflow(self):
-        """Runs the workflow in a temporary directory"""
+        """Runs the workflow in a temporary directory
+
+        Running in a temporary directory will prevent the project repository
+        from getting filled up with test workflow output.
+        The temporary directory is produced from self.config._tmpdirhandler
+        which  does the same as using a `tmpdir` fixture.
+
+        The temporary directory name is constructed from the test name by
+        replacing all whitespaces with '_'. Directory paths with whitespace in
+        them are very annoying to inspect.
+        Additionally the temporary directories are numbered. This prevents
+        name collisions if tests have the same name. The alternative is
+        overengineering some name collision checking stuff in schema.py.
+
+        Print statements are used to provide information to the user.  Using
+        pytests internal logwriter has no added value. If there are wishes to
+        do so in the future, the pytest terminal writer can be acquired with:
+        self.config.pluginmanager.get_plugin("terminalreporter")
+        Test name is included explicitly in each print command to avoid
+        confusion between workflows
+        """
         # pylint: disable=protected-access
         # Protected access needed to integrate tmpdir fixture functionality.
 
-        # Running in a temporary directory will prevent the project repository
-        # from getting filled up with test workflow output.
-        # The temporary directory is produced from self.config._tmpdirhandler
-        # which  does the same as using a `tmpdir` fixture.
+
         tmpdirhandler = self.config._tmpdirhandler  # type: TempdirFactory
         tempdir = tmpdirhandler.mktemp(
-            re.sub(r'\s+', '_', self.name),  # Replace whitespace with '_'
-            numbered=True  # This will prevent name collisions for tests
-            # with the same name by appending numbers to each dir. The
-            # alternative is overengineering some name checking stuff in
-            # schema.py.
+            re.sub(r'\s+', '_', self.name),
+            numbered=True
         )  # type: LocalPath
 
         # Copy the project directory to the temporary directory using pytest's
@@ -106,12 +120,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, str(tempdir))
 
-        # Use print statements here. Using pytests internal logwriter has no
-        # added value. If there are wishes to do so in the future, the pytest
-        # terminal writer can be acquired with:
-        # self.config.pluginmanager.get_plugin("terminalreporter")
-        # Name is included explicitly in each print command to avoid confusion
-        # between workflows
         print("run '{name}' with command '{command}' in '{dir}'".format(
             name=self.name,
             command=self.workflow_test.command,
