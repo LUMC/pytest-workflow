@@ -17,11 +17,9 @@
 """core functionality of pytest-workflow plugin"""
 
 # Disable pylint here because of false positive
-from pathlib import Path
 from shutil import copytree
 
 from _pytest.config import argparsing
-from _pytest.pathlib import create_cleanup_lock
 
 import pytest
 
@@ -114,8 +112,6 @@ class WorkflowTestsCollector(pytest.Collector):
         print("run '{name}': done".format(name=self.name))
 
         if self.config.getoption("keep_workflow_wd", False):
-            # Use pytest's internal pathlib to create a cleanup lock file.
-            create_cleanup_lock(Path(tempdir))
             log_err = workflow.stderr_to_file()
             log_out = workflow.stdout_to_file()
             print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
