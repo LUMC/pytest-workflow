@@ -16,7 +16,6 @@
 
 """core functionality of pytest-workflow plugin"""
 
-import tempfile
 # Disable pylint here because of false positive
 from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
 
@@ -74,8 +73,12 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a temporary directory where the workflow is run.
         # This will prevent the project repository from getting filled up with
         # test workflow output.
-        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
-
+        # The temporary directory is produced from self.config._tmpdirhandler
+        # which  does the same as using a `tmpdir` fixture.
+        tempdir = str(
+            self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
+                self.name, numbered=False)
+        )
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         copy_tree(str(self.config.rootdir), tempdir)
