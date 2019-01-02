@@ -92,8 +92,9 @@ class WorkflowTestsCollector(pytest.Collector):
         replacing all whitespaces with '_'. Directory paths with whitespace in
         them are very annoying to inspect.
         Additionally the temporary directories are numbered. This prevents
-        name collisions if tests have the same name. The alternative is
-        overengineering some name collision checking stuff in schema.py.
+        name collisions if tests have the same name (when whitespace is
+        replaced). The alternative is overengineering some name collision
+        checking stuff in schema.py. So this solution was preferred.
 
         Print statements are used to provide information to the user.  Using
         pytests internal logwriter has no added value. If there are wishes to
