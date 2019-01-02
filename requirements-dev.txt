@@ -1,4 +1,6 @@
+-r requirements.txt
 sphinx
+sphinx_rtd_theme
 tox
 coverage
 flake8
