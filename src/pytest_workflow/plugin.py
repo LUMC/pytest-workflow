@@ -148,11 +148,6 @@ class WorkflowTestsCollector(pytest.Collector):
             content_test=self.workflow_test.stderr)]
 
         return tests
-        # TODO: Figure out proper cleanup.
-        # If tempdir is removed here, all tests will fail.
-        # After yielding the tests this object is no longer needed, so
-        # deleting the tempdir here does not work.
-        # There is probably some fixture that can handle this.
 
 
 class ExitCodeTest(pytest.Item):
