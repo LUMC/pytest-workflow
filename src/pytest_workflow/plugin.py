@@ -16,10 +16,9 @@
 
 """core functionality of pytest-workflow plugin"""
 
-# Disable pylint here because of false positive
-from shutil import copytree
-
 from _pytest.config import argparsing
+
+from py._path.local import LocalPath  # noqa: F401 # used for type annotation
 
 import pytest
 
@@ -80,20 +79,22 @@ class WorkflowTestsCollector(pytest.Collector):
         super().__init__(workflow_test.name, parent=parent)
 
     def run_workflow(self):
-        # Create a temporary directory where the workflow is run.
-        # This will prevent the project repository from getting filled up with
-        # test workflow output.
+        # pylint: disable=protected-access
+        """Runs the workflow in a temporary directory"""
+
+        # Running in a temporary directory will prevent the project repository
+        # from getting filled up with test workflow output.
         # The temporary directory is produced from self.config._tmpdirhandler
         # which  does the same as using a `tmpdir` fixture.
-        tempdir_path = self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
-            self.name, numbered=False)
-        # Removal is needed for copytree to work.
-        tempdir_path.remove()
+        tempdir_path = self.config._tmpdirhandler.mktemp(
+            self.name, numbered=False)  # type: LocalPath
+
         tempdir = str(tempdir_path)
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        copytree(str(self.config.rootdir), tempdir)
+        rootdir = self.config.rootdir  # type: LocalPath
+        rootdir.copy(tempdir_path)
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
