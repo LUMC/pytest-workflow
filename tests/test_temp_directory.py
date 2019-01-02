@@ -15,28 +15,30 @@
 
 """Tests whether the temporary directories are correctly saved/destroyed"""
 
-import textwrap
+import re
+from pathlib import Path
 
-from _pytest.pytester import Testdir
-
-SIMPLE_TEST_YAML = textwrap.dedent("""\
-- name: simple echo
-  command: "echo moo"
-  files:
-    - path: "moo.txt"
-      should_exist: false
-  stdout:
-    contains:
-      - "moo"
-    must_not_contain:
-      - "Cock a doodle doo"
-""")
+from .test_success_messages import SUCCEEDING_TESTS_YAML
 
 
-def test_directory_saved(testdir: Testdir):
-    testdir.makefile(".yml", test=SIMPLE_TEST_YAML)
-    testdir.config
+def test_log_messages(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v", "--keep-workflow-wd")
+    assert "'moo file' stdout saved in: " in result.stdout.str()
+    assert "'moo file' stderr saved in: " in result.stdout.str()
 
 
-["'moo file' stdout saved in: "],
-["'moo file' stderr saved in: "]
+def test_not_log_messages(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v")
+    assert "'moo file' stdout saved in: " not in result.stdout.str()
+    assert "'moo file' stderr saved in: " not in result.stdout.str()
+
+
+def test_directory_kept(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v", "--keep-workflow-wd")
+    working_dir = re.search(r"with command 'echo moo' in '(.*)'",
+                            result.stdout.str()).group(1)
+    assert Path(working_dir).exists()
+
