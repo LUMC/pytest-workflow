@@ -37,6 +37,7 @@ def pytest_addoption(parser: argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
+        default=False,
         help="Keep temporary directories where workflows are run for "
              "debugging purposes. This also triggers saving of stdout and "
              "stderr in the workflow directory",
@@ -111,7 +112,7 @@ class WorkflowTestsCollector(pytest.Collector):
         workflow.run()
         print("run '{name}': done".format(name=name))
 
-        if self.config.keep_workflow_temp:
+        if self.config.getoption("keep_workflow_wd", False):
             # Use pytest's internal pathlib to create a cleanup lock file.
             create_cleanup_lock(Path(tempdir))
             log_err = workflow.stderr_to_file()
