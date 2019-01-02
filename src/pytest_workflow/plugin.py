@@ -17,8 +17,8 @@
 """core functionality of pytest-workflow plugin"""
 
 # Disable pylint here because of false positive
-from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
 from pathlib import Path
+from shutil import copytree
 
 from _pytest.config import argparsing
 from _pytest.pathlib import create_cleanup_lock
@@ -87,14 +87,15 @@ class WorkflowTestsCollector(pytest.Collector):
         # test workflow output.
         # The temporary directory is produced from self.config._tmpdirhandler
         # which  does the same as using a `tmpdir` fixture.
-        tempdir = str(
-            self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
-                self.name, numbered=False)
-        )
+        tempdir_path = self.config._tmpdirhandler.mktemp(  # noqa # pylint: disable=protected-access
+            self.name, numbered=False)
+        # Removal is needed for copytree to work.
+        tempdir_path.remove()
+        tempdir = str(tempdir_path)
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        copy_tree(str(self.config.rootdir), tempdir)
+        copytree(str(self.config.rootdir), tempdir)
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
@@ -119,6 +120,9 @@ class WorkflowTestsCollector(pytest.Collector):
             log_out = workflow.stdout_to_file()
             print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
             print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
+        else:
+            self.addfinalizer(tempdir_path.remove)
+
         return workflow
 
     def collect(self):
