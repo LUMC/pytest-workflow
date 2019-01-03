@@ -1,4 +1,3 @@
-sphinx
 tox
 coverage
 flake8
