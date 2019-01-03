@@ -1,6 +1,6 @@
-=========
+**********
 Changelog
-=========
+**********
 
 .. Newest changes should be on top.
 

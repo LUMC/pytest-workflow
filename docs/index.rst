@@ -1,24 +1,15 @@
-.. pytest-workflow documentation master file, created by
-   sphinx-quickstart on Wed Dec  5 16:23:20 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+******************************************
+pytest-workflow
+******************************************
 
-Welcome to pytest-workflow's documentation!
-===========================================
+.. contents:: Table of contents
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. include:: introduction.rst
 
-   installation
-   manual
-   HISTORY
+.. include:: installation.rst
 
-.. include:: introduction
+.. include:: manual.rst
 
-Indices and tables
-==================
+.. include:: HISTORY.rst
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+
