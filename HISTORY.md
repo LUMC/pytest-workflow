@@ -8,10 +8,11 @@ that users understand how the changes affect the new version.
 --->
 
 ## Current development version
-+ The temporary directories are run are automatically cleaned up at the end
-of each workflow test. You can change this behaviour by using the 
-`--keep-workflow-wd` flag. Which allows you to inspect the working directory
-for debugging after the workflow tests have run.
++ The temporary directories in which workflows are run are automatically 
+cleaned up at the end of each workflow test. You can disable this behaviour 
+by using the `--keep-workflow-wd` flag, which allows you to inspect the working 
+directory after the workflow tests have run. This is useful for debugging 
+workflows.
 + The temporary directories in which workflows are run can now be 
 changed by using the `--basetemp` flag. This is because pytest-workflow now 
 uses the built-in tmpdir capabilities of pytest.
