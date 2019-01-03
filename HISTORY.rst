@@ -10,7 +10,7 @@ Changelog
 
 Current development version
 ===========================
-## Current development version
++ Start using sphinx and readthedocs.org for creating project documentation.
 + The temporary directories in which workflows are run are automatically
   cleaned up at the end of each workflow test. You can disable this behaviour
   by using the `--keep-workflow-wd` flag, which allows you to inspect the working
