@@ -10,8 +10,8 @@ Welcome to pytest-workflow's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   readme
-   changelog
+   README
+   HISTORY
 
 Indices and tables
 ==================

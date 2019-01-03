@@ -1,6 +1,6 @@
-=============================
-Changelog for pytest-workflow
-=============================
+=========
+Changelog
+=========
 
 .. Newest changes should be on top.
 
@@ -11,7 +11,7 @@ Changelog for pytest-workflow
 Current development version
 ===========================
 + Save stdout and stderr of each workflow to a file and report their locations
-  to stdout when running `pytest`.
+  to stdout when running ``pytest``.
 + Comprehensible failure messages were added to make debugging workflows
   easier.
 
@@ -24,7 +24,7 @@ Version 0.1.0
 + Add functionality to test whether certain strings exist in files, stdout and
   stderr.
 + Enable easy to understand output when using pytest verbose mode
-  (`pytest -v`).
+  (``pytest -v``).
   The required code refactoring has simplified the code base and made it easier
   to maintain.
 + Enable the checking of non-existing files
