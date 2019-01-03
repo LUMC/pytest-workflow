@@ -92,8 +92,12 @@ class WorkflowTestsCollector(pytest.Collector):
         them are very annoying to inspect.
         Additionally the temporary directories are numbered. This prevents
         name collisions if tests have the same name (when whitespace is
-        replaced). The alternative is overengineering some name collision
-        checking stuff in schema.py. So this solution was preferred.
+        replaced). This is because pytest does not use the stdlib's tempfile
+        and instead uses its own solution. So directories with the same name
+        can have collisions unless numbered is used.
+        The alternative is overengineering some name collision
+        prevention stuff in schema.py. But that will be a lot of work to create
+        and maintain. So using numbers as a solution was preferred.
 
         Print statements are used to provide information to the user.  Using
         pytests internal logwriter has no added value. If there are wishes to
