@@ -16,7 +16,7 @@
 
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as readme_file:
+with open("README.rst", "r") as readme_file:
     LONG_DESCRIPTION = readme_file.read()
 
 setup(
