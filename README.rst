@@ -23,7 +23,7 @@ pytest-workflow
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
 by using yaml files for the test configuration.
 
-For advanced user documentation checkout our
+For our complete documentation checkout our
 `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
 
 
