@@ -3,6 +3,7 @@ pytest-workflow
 ===============
 
 .. Badges have empty alts. So nothing shows up if they do not work.
+.. This fixes readthedocs issues with badges.
 .. image:: https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59
   :target: https://www.codacy.com/app/LUMC/pytest-workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LUMC/pytest-workflow&amp;utm_campaign=Badge_Grade
   :alt:
