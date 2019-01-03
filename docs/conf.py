@@ -18,11 +18,12 @@
 
 import pkg_resources
 
+# Get package information from the installed package.
 pytest_workflow_pkg = pkg_resources.get_distribution("pytest_workflow")
 
 # -- Project information -----------------------------------------------------
 
-project = 'pytest-workflow'
+project = pytest_workflow_pkg.project_name
 copyright = '2018, Leiden University Medical Center'
 author = 'Leiden University Medical Center'
 
