@@ -16,6 +16,9 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import pkg_resources
+
+pytest_workflow_pkg = pkg_resources.get_distribution("pytest_workflow")
 
 # -- Project information -----------------------------------------------------
 
@@ -24,9 +27,9 @@ copyright = '2018, Leiden University Medical Center'
 author = 'Leiden University Medical Center'
 
 # The short X.Y version
-version = ''
+version = pytest_workflow_pkg.parsed_version.base_version
 # The full version, including alpha/beta/rc tags
-release = ''
+release = pytest_workflow_pkg.version
 
 
 # -- General configuration ---------------------------------------------------
