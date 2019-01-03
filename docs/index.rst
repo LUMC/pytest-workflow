@@ -10,6 +10,8 @@ pytest-workflow
 
 .. include:: manual.rst
 
+.. include:: CONTRIBUTING.rst
+
 .. include:: HISTORY.rst
 
 
