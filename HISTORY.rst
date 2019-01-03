@@ -4,12 +4,21 @@ Changelog
 
 .. Newest changes should be on top.
 
-.. NOTE: This document is user facing. Please word the changes in such a way 
+.. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
 
 Current development version
 ===========================
+## Current development version
++ The temporary directories in which workflows are run are automatically
+  cleaned up at the end of each workflow test. You can disable this behaviour
+  by using the `--keep-workflow-wd` flag, which allows you to inspect the working
+  directory after the workflow tests have run. This is useful for debugging
+  workflows.
++ The temporary directories in which workflows are run can now be
+  changed by using the `--basetemp` flag. This is because pytest-workflow now
+  uses the built-in tmpdir capabilities of pytest.
 + Save stdout and stderr of each workflow to a file and report their locations
   to stdout when running ``pytest``.
 + Comprehensible failure messages were added to make debugging workflows
