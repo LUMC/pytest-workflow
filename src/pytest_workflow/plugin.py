@@ -15,10 +15,12 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import re
 
-import tempfile
-# Disable pylint here because of false positive
-from distutils.dir_util import copy_tree  # pylint: disable=E0611,E0401
+from _pytest.config import argparsing
+from _pytest.tmpdir import TempdirFactory  # noqa: E501,F401 # used for type annotation
+
+from py._path.local import LocalPath  # noqa: F401 # used for type annotation
 
 import pytest
 
@@ -28,6 +30,17 @@ from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
+
+
+def pytest_addoption(parser: argparsing.Parser):
+    parser.addoption(
+        "--keep-workflow-wd",
+        action="store_true",
+        help="Keep temporary directories where workflows are run for "
+             "debugging purposes. This also triggers saving of stdout and "
+             "stderr in the workflow directory",
+        dest="keep_workflow_wd"
+    )
 
 
 def pytest_collect_file(path, parent):
@@ -66,45 +79,81 @@ class WorkflowTestsCollector(pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
 
+    def run_workflow(self):
+        """Runs the workflow in a temporary directory
+
+        Running in a temporary directory will prevent the project repository
+        from getting filled up with test workflow output.
+        The temporary directory is produced from self.config._tmpdirhandler
+        which  does the same as using a `tmpdir` fixture.
+
+        The temporary directory name is constructed from the test name by
+        replacing all whitespaces with '_'. Directory paths with whitespace in
+        them are very annoying to inspect.
+        Additionally the temporary directories are numbered. This prevents
+        name collisions if tests have the same name (when whitespace is
+        replaced). This is because pytest does not use the stdlib's tempfile
+        and instead uses its own solution. So directories with the same name
+        can have collisions unless numbered is used.
+        The alternative is overengineering some name collision
+        prevention stuff in schema.py. But that will be a lot of work to create
+        and maintain. So using numbers as a solution was preferred.
+
+        Print statements are used to provide information to the user.  Using
+        pytests internal logwriter has no added value. If there are wishes to
+        do so in the future, the pytest terminal writer can be acquired with:
+        self.config.pluginmanager.get_plugin("terminalreporter")
+        Test name is included explicitly in each print command to avoid
+        confusion between workflows
+        """
+        # pylint: disable=protected-access
+        # Protected access needed to integrate tmpdir fixture functionality.
+
+        tmpdirhandler = self.config._tmpdirhandler  # type: TempdirFactory
+        tempdir = tmpdirhandler.mktemp(
+            re.sub(r'\s+', '_', self.name),
+            numbered=True
+        )  # type: LocalPath
+
+        # Copy the project directory to the temporary directory using pytest's
+        # rootdir.
+        rootdir = self.config.rootdir  # type: LocalPath
+        rootdir.copy(tempdir)
+
+        # Create a workflow and make sure it runs in the tempdir
+        workflow = Workflow(self.workflow_test.command, str(tempdir))
+
+        print("run '{name}' with command '{command}' in '{dir}'".format(
+            name=self.name,
+            command=self.workflow_test.command,
+            dir=tempdir))
+        workflow.run()
+        print("run '{name}': done".format(name=self.name))
+
+        if self.config.getoption("keep_workflow_wd", False):
+            log_err = workflow.stderr_to_file()
+            log_out = workflow.stdout_to_file()
+            print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
+            print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
+        else:
+            # addfinalizer adds a function that is run when the node tests are
+            # completed
+            self.addfinalizer(tempdir.remove)
+
+        return workflow
+
     def collect(self):
         """This runs the workflow and starts all the associated tests
         The idea is that isolated parts of the yaml get their own collector or
         item."""
 
-        # Create a temporary directory where the workflow is run.
-        # This will prevent the project repository from getting filled up with
-        # test workflow output.
-        tempdir = tempfile.mkdtemp(prefix="pytest_wf")
-
-        # Copy the project directory to the temporary directory using pytest's
-        # rootdir.
-        copy_tree(str(self.config.rootdir), tempdir)
-
-        # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.workflow_test.command, tempdir)
-        name = self.workflow_test.name
-        # Use print statements here. Using pytests internal logwriter has no
-        # added value. If there are wishes to do so in the future, the pytest
-        # terminal writer can be acquired with:
-        # self.config.pluginmanager.get_plugin("terminalreporter")
-        # Name is included explicitly in each print command to avoid confusion
-        # between workflows
-        print("run '{name}' with command '{command}' in '{dir}'".format(
-            name=name,
-            command=self.workflow_test.command,
-            dir=tempdir))
-        workflow.run()
-        print("run '{name}': done".format(name=name))
-        log_err = workflow.stderr_to_file()
-        log_out = workflow.stdout_to_file()
-        print("'{0}' stdout saved in: {1}".format(name, str(log_out)))
-        print("'{0}' stderr saved in: {1}".format(name, str(log_err)))
+        workflow = self.run_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, tempdir) for filetest in
-                  self.workflow_test.files]
+        tests += [FileTestCollector(self, filetest, workflow.cwd) for filetest
+                  in self.workflow_test.files]
 
         tests += [ExitCodeTest(self, workflow.exit_code,
                                self.workflow_test.exit_code)]
@@ -120,11 +169,6 @@ class WorkflowTestsCollector(pytest.Collector):
             content_test=self.workflow_test.stderr)]
 
         return tests
-        # TODO: Figure out proper cleanup.
-        # If tempdir is removed here, all tests will fail.
-        # After yielding the tests this object is no longer needed, so
-        # deleting the tempdir here does not work.
-        # There is probably some fixture that can handle this.
 
 
 class ExitCodeTest(pytest.Item):
