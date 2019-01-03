@@ -39,10 +39,14 @@ setup(
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7"
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",
     ],
+    python_requires=">=3.5",  # Because we use type annotation.
     install_requires=[
         "pytest>=4",
         "pyyaml",
