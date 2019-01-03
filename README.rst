@@ -2,14 +2,18 @@
 pytest-workflow
 ===============
 
+.. Badges have empty alts. So nothing shows up if they do not work.
 .. image:: https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59
   :target: https://www.codacy.com/app/LUMC/pytest-workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LUMC/pytest-workflow&amp;utm_campaign=Badge_Grade
+  :alt:
 
 .. image:: https://travis-ci.org/LUMC/pytest-workflow.svg?branch=develop
   :target: https://travis-ci.org/LUMC/pytest-workflow
+  :alt:
 
 .. image:: https://codecov.io/gh/LUMC/pytest-workflow/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/LUMC/pytest-workflow
+  :alt:
 
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
 by using yaml files for the test configuration.
