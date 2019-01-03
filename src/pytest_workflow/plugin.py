@@ -36,7 +36,6 @@ def pytest_addoption(parser: argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
-        default=False,
         help="Keep temporary directories where workflows are run for "
              "debugging purposes. This also triggers saving of stdout and "
              "stderr in the workflow directory",
