@@ -8,7 +8,7 @@ Changelog
 .. that users understand how the changes affect the new version.
 
 
-Current development version
+Version 0.2.0
 ---------------------------
 + Cleanup the readme and move advanced usage documentation to our readthedocs
   page.
