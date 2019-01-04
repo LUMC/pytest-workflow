@@ -16,19 +16,9 @@
 """Tests whether the temporary directories are correctly saved/destroyed"""
 
 import re
-import textwrap
 from pathlib import Path
 
 from .test_success_messages import SIMPLE_ECHO
-
-NAME_COLLISSION = textwrap.dedent("""\
-- name: name collision
-  command: echo moo
-- name: name      collision
-  command: echo moo
-- name: name   collision
-  command: echo moo
-""")
 
 
 def test_log_messages(testdir):
