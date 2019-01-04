@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import random
 import re
 import shutil
 from pathlib import Path
@@ -105,11 +106,20 @@ class WorkflowTestsCollector(pytest.Collector):
         basetemp = Path(str(self.config._tmp_path_factory.getbasetemp()))
         tempdir = basetemp / Path(re.sub(r'\s+', '_', self.name))
 
+        if tempdir.exists():
+            new_tempdir = tempdir.with_name(
+                str(tempdir.name) + str(random.random().hex()))
+            self.warn(pytest.PytestWarning(
+                "'{0}' already exists. Check for name collissions in test "
+                "names. New directory created with name '{1}'"
+                .format(tempdir, new_tempdir)))
+            tempdir = new_tempdir
+
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         shutil.copytree(str(self.config.rootdir), str(tempdir))
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.workflow_test.command, str(tempdir))
+        workflow = Workflow(self.workflow_test.command, tempdir)
 
         print("run '{name}' with command '{command}' in '{dir}'".format(
             name=self.name,
