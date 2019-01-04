@@ -66,6 +66,18 @@ def test_validate_schema_conflicting_keys():
                        " file: /some/path. Key = must_not_contain")
 
 
+def test_validate_schema_colliding_names():
+    with pytest.raises(jsonschema.ValidationError) as error:
+        validate_schema([
+            dict(name="name collision", command="echo moo"),
+            dict(name="name    collision", command="echo moo"),
+            dict(name="name        collision", command="echo moo")
+        ])
+    assert error.match("Some names were not unique when whitespace was "
+                       "removed. Defined names:")
+    assert error.match("name_collision")
+
+
 CONTAINS_LIST = [
     """
     - name: bla

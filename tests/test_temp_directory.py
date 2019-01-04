@@ -61,10 +61,3 @@ def test_directory_not_kept(testdir):
     working_dir = re.search(r"with command 'echo moo' in '(.*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
-
-
-def test_directory_colliding_names(testdir):
-    testdir.makefile(".yml", test=NAME_COLLISSION)
-    result = testdir.runpytest("-v")
-    result.assert_outcomes(passed=3)
-    assert "2 warnings," in result.stdout.str()
