@@ -15,11 +15,11 @@ Version 0.2.0
 + Start using sphinx and readthedocs.org for creating project documentation.
 + The temporary directories in which workflows are run are automatically
   cleaned up at the end of each workflow test. You can disable this behaviour
-  by using the `--keep-workflow-wd` flag, which allows you to inspect the working
+  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the working
   directory after the workflow tests have run. This is useful for debugging
   workflows.
 + The temporary directories in which workflows are run can now be
-  changed by using the `--basetemp` flag. This is because pytest-workflow now
+  changed by using the ``--basetemp`` flag. This is because pytest-workflow now
   uses the built-in tmpdir capabilities of pytest.
 + Save stdout and stderr of each workflow to a file and report their locations
   to stdout when running ``pytest``.
