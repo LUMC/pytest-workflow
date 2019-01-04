@@ -15,7 +15,6 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
-import random
 import re
 import shutil
 from pathlib import Path
@@ -92,8 +91,11 @@ class WorkflowTestsCollector(pytest.Collector):
         The temporary directory name is constructed from the test name by
         replacing all whitespaces with '_'. Directory paths with whitespace in
         them are very annoying to inspect.
-        Tests that have colliding names will get a random hex attached to
-        their path and a warning will be used.
+        Tests should not have colliding names. This will lead to
+        WorkflowTestCollectors with the same internal names into pytest. This
+        causes pytest to crash during collection. Hence no action was taken
+        to prevent name collision in temporary paths. This is handled in the
+        schema instead.
 
         Print statements are used to provide information to the user.  Using
         pytests internal logwriter has no added value. If there are wishes to
@@ -107,16 +109,6 @@ class WorkflowTestsCollector(pytest.Collector):
 
         basetemp = Path(str(self.config._tmp_path_factory.getbasetemp()))
         tempdir = basetemp / Path(re.sub(r'\s+', '_', self.name))
-
-        if tempdir.exists():
-            new_tempdir = tempdir.with_name(
-                # Ignore bandit here. This is not for cryptographic purposes.
-                str(tempdir.name) + str(random.random().hex()))  # nosec
-            self.warn(pytest.PytestWarning(
-                "'{0}' already exists. Check for name collissions in test "
-                "names. New directory created with name '{1}'"
-                .format(tempdir, new_tempdir)))
-            tempdir = new_tempdir
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
