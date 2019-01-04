@@ -23,13 +23,12 @@ This file was created by A.H.B. Bollen
 import shlex
 import subprocess  # nosec: security implications have been considered
 from pathlib import Path
-from typing import Union
 
 
 class Workflow(object):
 
     def __init__(self, command: str,
-                 cwd: Union[bytes, str] = None):
+                 cwd: Path = Path("")):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
@@ -45,13 +44,13 @@ class Workflow(object):
         sub_procces_args = shlex.split(self.command)
         self._proc_out = subprocess.run(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, cwd=self.cwd)
+            stderr=subprocess.PIPE, cwd=str(self.cwd))
 
     def stdout_to_file(self) -> Path:
-        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.out"))
+        return bytes_to_file(self.stdout, self.cwd / Path("log.out"))
 
     def stderr_to_file(self) -> Path:
-        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.err"))
+        return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
 
     @property
     def stdout(self) -> bytes:
