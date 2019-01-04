@@ -1,20 +1,23 @@
-.. pytest-workflow documentation master file, created by
-   sphinx-quickstart on Wed Dec  5 16:23:20 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. Checkout the Readthedocs theme for an example structure
+.. https://github.com/rtfd/sphinx_rtd_theme/tree/master/docs/demo
 
-Welcome to pytest-workflow's documentation!
-===========================================
+================
+pytest-workflow
+================
+.. All the documentation will be in one page for now. With navigation on the
+.. side to allow quickly going to the section you want. The documentation is
+.. not yet big enough to be benefited by a nested structure.
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+.. contents:: Table of contents
 
+.. include:: introduction.rst
 
+.. include:: installation.rst
 
-Indices and tables
-==================
+.. include:: manual.rst
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+.. include:: known_issues.rst
+
+.. include:: CONTRIBUTING.rst
+
+.. include:: HISTORY.rst

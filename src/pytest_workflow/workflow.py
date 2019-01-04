@@ -19,8 +19,10 @@ Contains all functionality regarding the running of workflows and reporting
 on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen
 """
+
 import shlex
 import subprocess  # nosec: security implications have been considered
+from pathlib import Path
 from typing import Union
 
 
@@ -39,11 +41,17 @@ class Workflow(object):
         self._proc_out = None
         self.cwd = cwd
 
-    def run(self) -> subprocess.CompletedProcess:
+    def run(self):
         sub_procces_args = shlex.split(self.command)
         self._proc_out = subprocess.run(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=self.cwd)
+
+    def stdout_to_file(self) -> Path:
+        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.out"))
+
+    def stderr_to_file(self) -> Path:
+        return bytes_to_file(self.stdout, Path(self.cwd) / Path("log.err"))
 
     @property
     def stdout(self) -> bytes:
@@ -56,3 +64,9 @@ class Workflow(object):
     @property
     def exit_code(self) -> int:
         return self._proc_out.returncode
+
+
+def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
+    with output_file.open('wb') as file_handler:
+        file_handler.write(bytestring)
+    return output_file

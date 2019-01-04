@@ -21,7 +21,7 @@ from typing import Union
 
 import pytest
 
-from .content_tests import file_to_string_generator, generate_content_tests
+from .content_tests import ContentTestCollector, file_to_string_generator
 from .schema import FileTest
 
 
@@ -56,12 +56,13 @@ class FileTestCollector(pytest.Collector):
         tests += [FileExists(self, filepath, self.filetest.should_exist)]
 
         if self.filetest.contains or self.filetest.must_not_contain:
-            tests += generate_content_tests(
+            tests += [ContentTestCollector(
+                name="content",
                 parent=self,
-                text_lines=file_to_string_generator(filepath),
-                contains=self.filetest.contains,
-                must_not_contain=self.filetest.must_not_contain
-            )
+                content=file_to_string_generator(filepath),
+                content_test=self.filetest
+                # FileTest inherits from ContentTest. So this is valid.
+            )]
 
         if self.filetest.md5sum:
             tests += [FileMd5(self, filepath, self.filetest.md5sum)]
@@ -87,6 +88,20 @@ class FileExists(pytest.Item):
     def runtest(self):
         assert self.file.exists() == self.should_exist
 
+    def repr_failure(self, excinfo):
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
+        message = "'{path}' does {exist} while it {should}".format(
+            # self.file gives the actual path that was tested (including /tmp
+            # bits). self.parent.filetest.path gives the path that the user
+            # gave in the test yaml. self.file is probably more useful when
+            # debugging.
+            path=str(self.file),
+            exist="not exist" if self.should_exist else "exist",
+            should="should" if self.should_exist else "should not"
+        )
+        return message
+
 
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
@@ -100,10 +115,25 @@ class FileMd5(pytest.Item):
         name = "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
-        self.md5sum = md5sum
+        self.expected_md5sum = md5sum
+        self.observed_md5sum = None
 
     def runtest(self):
-        assert file_md5sum(self.filepath) == self.md5sum
+        self.observed_md5sum = file_md5sum(self.filepath)
+        assert self.observed_md5sum == self.expected_md5sum
+
+    def repr_failure(self, excinfo):
+        # pylint: disable=unused-argument
+        # excinfo needed for pytest.
+        message = (
+            "Observed md5sum '{observed}' not equal to expected md5sum "
+            "'{expected}' for file '{path}'"
+        ).format(
+            observed=self.observed_md5sum,
+            expected=self.expected_md5sum,
+            path=str(self.filepath)
+        )
+        return message
 
 
 def file_md5sum(filepath: Path) -> str:

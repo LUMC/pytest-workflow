@@ -16,18 +16,18 @@
 
 from setuptools import find_packages, setup
 
-with open("README.md", "r") as readme_file:
-    long_description = readme_file.read()
+with open("README.rst", "r") as readme_file:
+    LONG_DESCRIPTION = readme_file.read()
 
 setup(
     name="pytest-workflow",
-    version="0.1.0",
+    version="0.2.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center, various departments",
     author_email="sasc@lumc.nl",  # A placeholder for now
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description=LONG_DESCRIPTION,
+    long_description_content_type="text/x-rst",
     license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml",
     zip_safe=False,
@@ -38,11 +38,16 @@ setup(
     },
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",
     ],
+    python_requires=">=3.5",  # Because we use type annotation.
     install_requires=[
         "pytest>=4",
         "pyyaml",
