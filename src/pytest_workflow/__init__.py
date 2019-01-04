@@ -13,3 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+
+import re
+
+
+# This function was created to ensure the same conversion is used throughout
+# pytest-workflow.
+def whitespace_to_underscore(string: str) -> str:
+    """
+    Replaces all whitespace with `_`
+    :param string: input string
+    :return: The string with whitespace converted.
+    """
+    return re.sub(r'\s+', '_', string)

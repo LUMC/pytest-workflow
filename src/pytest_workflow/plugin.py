@@ -15,7 +15,6 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
-import re
 import shutil
 from pathlib import Path
 
@@ -25,6 +24,7 @@ import pytest
 
 import yaml
 
+from . import whitespace_to_underscore
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
@@ -108,7 +108,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # Protected access needed to get the basetemp value.
 
         basetemp = Path(str(self.config._tmp_path_factory.getbasetemp()))
-        tempdir = basetemp / Path(re.sub(r'\s+', '_', self.name))
+        tempdir = basetemp / Path(whitespace_to_underscore(self.name))
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
