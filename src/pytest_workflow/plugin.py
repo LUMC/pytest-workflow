@@ -92,6 +92,8 @@ class WorkflowTestsCollector(pytest.Collector):
         The temporary directory name is constructed from the test name by
         replacing all whitespaces with '_'. Directory paths with whitespace in
         them are very annoying to inspect.
+        Tests that have colliding names will get a random hex attached to
+        their path and a warning will be used.
 
         Print statements are used to provide information to the user.  Using
         pytests internal logwriter has no added value. If there are wishes to
