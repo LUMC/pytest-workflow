@@ -108,7 +108,8 @@ class WorkflowTestsCollector(pytest.Collector):
 
         if tempdir.exists():
             new_tempdir = tempdir.with_name(
-                str(tempdir.name) + str(random.random().hex()))
+                # Ignore bandit here. This is not for cryptographic purposes.
+                str(tempdir.name) + str(random.random().hex()))  # nosec
             self.warn(pytest.PytestWarning(
                 "'{0}' already exists. Check for name collissions in test "
                 "names. New directory created with name '{1}'"
