@@ -38,6 +38,7 @@ setup(
     },
     url="https://github.com/LUMC/pytest-workflow",
     classifiers=[
+        "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
