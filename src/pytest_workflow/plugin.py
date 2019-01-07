@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import functools
 import shutil
 from pathlib import Path
 
@@ -131,8 +132,7 @@ class WorkflowTestsCollector(pytest.Collector):
         else:
             # addfinalizer adds a function that is run when the node tests are
             # completed
-            def rm_tempdir():
-                shutil.rmtree(str(tempdir))
+            rm_tempdir = functools.partial(shutil.rmtree, str(tempdir))
             self.addfinalizer(rm_tempdir)
 
         return workflow
