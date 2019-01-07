@@ -19,10 +19,11 @@ import re
 
 # This function was created to ensure the same conversion is used throughout
 # pytest-workflow.
-def whitespace_to_underscore(string: str) -> str:
+def replace_whitespace(string: str, replace_with: str = '_') -> str:
     """
-    Replaces all whitespace with `_`
+    Replaces all whitespace with the string in replace_with.
     :param string: input string
+    :param replace_with: Replace whitespace with this string. Default: '_'
     :return: The string with whitespace converted.
     """
-    return re.sub(r'\s+', '_', string)
+    return re.sub(r'\s+', replace_with, string)

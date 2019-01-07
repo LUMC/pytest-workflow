@@ -22,7 +22,7 @@ from typing import List, Optional
 
 import jsonschema
 
-from . import whitespace_to_underscore
+from . import replace_whitespace
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
@@ -52,7 +52,7 @@ def validate_schema(instance):
     # Test if there are name collisions when whitespace is removed. This will
     # cause errors in pytest (collectors not having unique names) so has to
     # be avoided.
-    test_names = [whitespace_to_underscore(test['name']) for test in instance]
+    test_names = [replace_whitespace(test['name'], ' ') for test in instance]
     if len(test_names) != len(set(test_names)):
         raise jsonschema.ValidationError(
             "Some names were not unique when whitespace was removed. "

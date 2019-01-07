@@ -75,7 +75,7 @@ def test_validate_schema_colliding_names():
         ])
     assert error.match("Some names were not unique when whitespace was "
                        "removed. Defined names:")
-    assert error.match("name_collision")
+    assert error.match("name collision")
 
 
 CONTAINS_LIST = [

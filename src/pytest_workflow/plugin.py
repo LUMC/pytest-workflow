@@ -24,7 +24,7 @@ import pytest
 
 import yaml
 
-from . import whitespace_to_underscore
+from . import replace_whitespace
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
@@ -108,7 +108,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # Protected access needed to get the basetemp value.
 
         basetemp = Path(str(self.config._tmp_path_factory.getbasetemp()))
-        tempdir = basetemp / Path(whitespace_to_underscore(self.name))
+        tempdir = basetemp / Path(replace_whitespace(self.name, '_'))
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
