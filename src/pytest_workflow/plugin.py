@@ -18,7 +18,7 @@
 import shutil
 from pathlib import Path
 
-from _pytest.config import argparsing
+import _pytest
 
 import pytest
 
@@ -31,7 +31,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 
 
-def pytest_addoption(parser: argparsing.Parser):
+def pytest_addoption(parser: _pytest.config.argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
