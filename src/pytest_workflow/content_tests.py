@@ -131,7 +131,7 @@ class ContentTestItem(pytest.Item):
         :param parent: A pytest collector
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
-        :param result:
+        :param contains: Whether the string is there
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)

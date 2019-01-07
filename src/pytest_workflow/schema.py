@@ -22,6 +22,8 @@ from typing import List, Optional
 
 import jsonschema
 
+from . import replace_whitespace
+
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
 DEFAULT_FILE_SHOULD_EXIST = True
@@ -46,6 +48,16 @@ def validate_schema(instance):
     jsonschema.validate(instance, JSON_SCHEMA)
 
     # Some extra tests here below that can not be captured in jsonschema
+
+    # Test if there are name collisions when whitespace is removed. This will
+    # cause errors in pytest (collectors not having unique names) so has to
+    # be avoided.
+    test_names = [replace_whitespace(test['name'], ' ') for test in instance]
+    if len(test_names) != len(set(test_names)):
+        raise jsonschema.ValidationError(
+            "Some names were not unique when whitespace was removed. "
+            "Defined names: {0}".format(test_names))
+
     def test_contains_concordance(dictionary: dict, name: str):
         """
         Test whether contains and must not contain have the same members.

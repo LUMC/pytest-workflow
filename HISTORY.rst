@@ -7,6 +7,12 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 0.3.0-dev
+---------------------------
++ Made code easier to maintain by using stdlib instead of pytest's ``py`` lib
+  in all of the code.
++ Added a schema check to ensure that tests have unique names when whitespace
+  is removed.
 
 Version 0.2.0
 ---------------------------
