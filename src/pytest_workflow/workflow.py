@@ -27,8 +27,7 @@ from pathlib import Path
 
 class Workflow(object):
 
-    def __init__(self, command: str,
-                 cwd: Path = Path("")):
+    def __init__(self, command: str, cwd: Path = Path()):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
