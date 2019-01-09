@@ -108,5 +108,5 @@ FAILURE_MESSAGE_TESTS = [
 @pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)
 def test_messages(test: str, message: str, testdir):
     testdir.makefile(".yml", textwrap.dedent(test))
-    result = testdir.runpytest()
+    result = testdir.runpytest("-v")
     assert message in result.stdout.str()
