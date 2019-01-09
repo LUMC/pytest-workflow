@@ -163,18 +163,15 @@ class WorkflowTestsCollector(pytest.Collector):
                                desired_exit_code=self.workflow_test.exit_code,
                                workflow=workflow)]
 
-        def log_splitter(log: bytes):
-            return log.decode().splitlines()
-
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=functools.partial(log_splitter, workflow.stdout),
+            content_generator=workflow.stdout_lines,
             content_test=self.workflow_test.stdout,
             workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=functools.partial(log_splitter, workflow.stderr),
+            content_generator=workflow.stderr_lines,
             content_test=self.workflow_test.stderr,
             workflow=workflow)]
 
