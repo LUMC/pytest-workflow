@@ -159,8 +159,9 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [FileTestCollector(self, filetest, workflow.cwd) for filetest
                   in self.workflow_test.files]
 
-        tests += [ExitCodeTest(self, workflow.exit_code,
-                               self.workflow_test.exit_code)]
+        tests += [ExitCodeTest(parent=self,
+                               desired_exit_code=self.workflow_test.exit_code,
+                               workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
