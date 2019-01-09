@@ -44,6 +44,8 @@ class Workflow(object):
         self.lock = threading.Lock()
 
     def run(self):
+        """Runs the workflow in a subprocess in the background.
+        To make sure the workflow is finished use the `.wait()` method"""
         sub_procces_args = shlex.split(self.command)
         self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
@@ -58,6 +60,12 @@ class Workflow(object):
         return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
 
     def wait(self):
+        """Waits for the workflow to complete"""
+        # Lock the wait step. Only one waiter is allowed here to wait for
+        # the workflow to complete and write the stderr.
+        # A popen.stderr is a buffered reader and can only be read once.
+        # Once self._stderr and self._stdout are written the lock can be
+        # released
         self.lock.acquire()
         self._popen.wait()
         if self._stderr is None:
