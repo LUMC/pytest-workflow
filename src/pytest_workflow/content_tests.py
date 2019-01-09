@@ -20,6 +20,7 @@ and logs.
 The design philosophy here was that each piece of text should only be read
 once."""
 
+import threading
 from pathlib import Path
 from typing import Callable, Iterable, List, Set
 
@@ -98,27 +99,27 @@ class ContentTestCollector(pytest.Collector):
         self.content_generator = content_generator
         self.content_test = content_test
         self.workflow = workflow
+        self.found_strings = None
+        self.thread = None
 
-    def find_strings(self) -> Set[str]:
+    def find_strings(self):
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
-        found_strings = check_content(
+        self.found_strings = check_content(
             strings=strings_to_check,
             text_lines=self.content_generator())
-        return found_strings
 
     def collect(self):
-        found_strings = self.find_strings()
-
+        self.thread = threading.Thread(target=self.find_strings)
+        self.thread.start()
         test_items = []
 
         test_items += [
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=True,
-                contains=string in found_strings
+                should_contain=True
             )
             for string in self.content_test.contains]
 
@@ -126,8 +127,7 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=False,
-                contains=string in found_strings
+                should_contain=False
             )
             for string in self.content_test.must_not_contain]
 
@@ -137,24 +137,24 @@ class ContentTestCollector(pytest.Collector):
 class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
-    def __init__(self, parent: pytest.Collector, string: str,
-                 should_contain: bool, contains: bool):
+    def __init__(self, parent: ContentTestCollector, string: str,
+                 should_contain: bool):
         """
         Create a ContentTestItem
-        :param parent: A pytest collector
+        :param parent: A ContentTestCollector
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
-        :param contains: Whether the string is there
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
         self.should_contain = should_contain
         self.string = string
-        self.contains = contains
 
     def runtest(self):
-        assert self.contains == self.should_contain
+        self.parent.thread.join()
+        assert ((self.string in self.parent.found_strings) ==
+                self.should_contain)
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
