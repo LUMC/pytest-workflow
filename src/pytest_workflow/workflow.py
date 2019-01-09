@@ -62,12 +62,10 @@ class Workflow(object):
 
     @property
     def stdout(self) -> bytes:
-        self.wait()
         return self._stdout  # for testing log
 
     @property
     def stderr(self) -> bytes:
-        self.wait()
         return self._stderr  # for testing log
 
     @property
