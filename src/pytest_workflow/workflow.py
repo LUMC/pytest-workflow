@@ -23,6 +23,7 @@ This file was created by A.H.B. Bollen
 import shlex
 import subprocess  # nosec: security implications have been considered
 import threading
+import queue
 from pathlib import Path
 
 
@@ -105,3 +106,14 @@ def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
     with output_file.open('wb') as file_handler:
         file_handler.write(bytestring)
     return output_file
+
+
+class WorkflowQueue(queue.Queue):
+    """A Queue object that will keep running 'n' numbers of workflows
+    simultaneously until the queue is empty."""
+    def __init__(self, max_simultaneous: int = 1, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.running_queue=queue.Queue(max_simultaneous)
+
+    def process_queue(self):
+        pass
