@@ -124,7 +124,6 @@ class WorkflowTestsCollector(pytest.Collector):
             command=self.workflow_test.command,
             dir=str(tempdir)))
         workflow.run()
-        workflow.wait()
 
         if self.config.getoption("keep_workflow_wd"):
             def write_logs():
