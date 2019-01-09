@@ -78,6 +78,8 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
+        self.terminal_reporter = self.config.pluginmanager.get_plugin(
+            "terminalreporter")
 
     def run_workflow(self):
         """Runs the workflow in a temporary directory
@@ -123,13 +125,19 @@ class WorkflowTestsCollector(pytest.Collector):
             dir=str(tempdir)))
         workflow.run()
         workflow.wait()
-        print("run '{name}': done".format(name=self.name))
 
-        if self.config.getoption("keep_workflow_wd", False):
-            log_err = workflow.stderr_to_file()
-            log_out = workflow.stdout_to_file()
-            print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
-            print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
+        if self.config.getoption("keep_workflow_wd"):
+            def write_logs():
+                log_err = workflow.stderr_to_file()
+                log_out = workflow.stdout_to_file()
+                # Print statements do not work here.
+                self.terminal_reporter.write_line(
+                    "'{0}' stdout saved in: {1}".format(
+                        self.name, str(log_out)))
+                self.terminal_reporter.write_line(
+                    "'{0}' stderr saved in: {1}".format(
+                        self.name, str(log_err)))
+            self.addfinalizer(write_logs)
         else:
             # addfinalizer adds a function that is run when the node tests are
             # completed
