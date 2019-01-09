@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """All tests for workflow files"""
+import functools
 import hashlib
 from pathlib import Path
 
@@ -62,9 +63,11 @@ class FileTestCollector(pytest.Collector):
             tests += [ContentTestCollector(
                 name="content",
                 parent=self,
-                content=file_to_string_generator(filepath),
-                content_test=self.filetest
+                content_generator=functools.partial(file_to_string_generator,
+                                                    [filepath]),
+                content_test=self.filetest,
                 # FileTest inherits from ContentTest. So this is valid.
+                workflow=self.workflow
             )]
 
         if self.filetest.md5sum:

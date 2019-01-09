@@ -137,6 +137,7 @@ class WorkflowTestsCollector(pytest.Collector):
                 self.terminal_reporter.write_line(
                     "'{0}' stderr saved in: {1}".format(
                         self.name, str(log_err)))
+
             self.addfinalizer(write_logs)
         else:
             # addfinalizer adds a function that is run when the node tests are
@@ -163,15 +164,20 @@ class WorkflowTestsCollector(pytest.Collector):
                                desired_exit_code=self.workflow_test.exit_code,
                                workflow=workflow)]
 
+        def log_splitter(log: bytes):
+            return log.decode().splitlines()
+
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content=workflow.stdout.decode().splitlines(),
-            content_test=self.workflow_test.stdout)]
+            content_generator=functools.partial(log_splitter, workflow.stdout),
+            content_test=self.workflow_test.stdout,
+            workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content=workflow.stderr.decode().splitlines(),
-            content_test=self.workflow_test.stderr)]
+            content_generator=functools.partial(log_splitter, workflow.stderr),
+            content_test=self.workflow_test.stderr,
+            workflow=workflow)]
 
         return tests
 

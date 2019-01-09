@@ -21,11 +21,12 @@ The design philosophy here was that each piece of text should only be read
 once."""
 
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Callable, Iterable, List, Set
 
 import pytest
 
 from .schema import ContentTest
+from .workflow import Workflow
 
 
 def check_content(strings: List[str],
@@ -88,15 +89,27 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 content: Iterable[str], content_test: ContentTest):
+                 content_generator: Callable[[], Iterable[str]],
+                 content_test: ContentTest,
+                 workflow: Workflow):
+        # pylint: disable=too-many-arguments
+        # it is still only 5 not counting self.
         super().__init__(name, parent=parent)
-        self.content = content
+        self.content_generator = content_generator
         self.content_test = content_test
+        self.workflow = workflow
+
+    def find_strings(self) -> Set[str]:
+        self.workflow.wait()
+        strings_to_check = (self.content_test.contains +
+                            self.content_test.must_not_contain)
+        found_strings = check_content(
+            strings=strings_to_check,
+            text_lines=self.content_generator())
+        return found_strings
 
     def collect(self):
-        found_strings = check_content(
-            self.content_test.contains + self.content_test.must_not_contain,
-            self.content)
+        found_strings = self.find_strings()
 
         test_items = []
 
