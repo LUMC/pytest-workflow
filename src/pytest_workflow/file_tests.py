@@ -64,7 +64,7 @@ class FileTestCollector(pytest.Collector):
                 name="content",
                 parent=self,
                 content_generator=functools.partial(file_to_string_generator,
-                                                    [filepath]),
+                                                    filepath),
                 content_test=self.filetest,
                 # FileTest inherits from ContentTest. So this is valid.
                 workflow=self.workflow
