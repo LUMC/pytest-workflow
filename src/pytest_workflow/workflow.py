@@ -36,12 +36,14 @@ class Workflow(object):
         """
 
         self.command = command
-        self._proc_out = None
+        self._popen = None
+        self._stderr = None
+        self._stdout = None
         self.cwd = cwd
 
     def run(self):
         sub_procces_args = shlex.split(self.command)
-        self._proc_out = subprocess.run(  # nosec: Shell is not enabled.
+        self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=str(self.cwd))
 
@@ -51,17 +53,27 @@ class Workflow(object):
     def stderr_to_file(self) -> Path:
         return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
 
+    def wait(self):
+        self._popen.wait()
+        if self._stderr is None:
+            self._stderr = self._popen.stderr.read()
+        if self._stdout is None:
+            self._stdout = self._popen.stdout.read()
+
     @property
     def stdout(self) -> bytes:
-        return self._proc_out.stdout  # for testing log
+        self.wait()
+        return self._stdout  # for testing log
 
     @property
     def stderr(self) -> bytes:
-        return self._proc_out.stderr  # for testing log
+        self.wait()
+        return self._stderr  # for testing log
 
     @property
     def exit_code(self) -> int:
-        return self._proc_out.returncode
+        self.wait()
+        return self._popen.returncode
 
 
 def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:

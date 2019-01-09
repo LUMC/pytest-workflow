@@ -122,6 +122,7 @@ class WorkflowTestsCollector(pytest.Collector):
             command=self.workflow_test.command,
             dir=str(tempdir)))
         workflow.run()
+        workflow.wait()
         print("run '{name}': done".format(name=self.name))
 
         if self.config.getoption("keep_workflow_wd", False):
