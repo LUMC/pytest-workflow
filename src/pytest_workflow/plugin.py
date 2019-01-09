@@ -156,7 +156,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, workflow.cwd) for filetest
+        tests += [FileTestCollector(self, filetest, workflow) for filetest
                   in self.workflow_test.files]
 
         tests += [ExitCodeTest(parent=self,
