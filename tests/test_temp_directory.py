@@ -16,6 +16,7 @@
 """Tests whether the temporary directories are correctly saved/destroyed"""
 
 import re
+import tempfile
 from pathlib import Path
 
 from .test_success_messages import SIMPLE_ECHO
@@ -51,3 +52,10 @@ def test_directory_not_kept(testdir):
     working_dir = re.search(r"with command 'echo moo' in '(.*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
+
+
+def test_basetemp_correct(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    tempdir = tempfile.mkdtemp()
+    result = testdir.runpytest("-v", "--basetemp", tempdir)
+    assert str(tempdir) in result.stdout.str()
