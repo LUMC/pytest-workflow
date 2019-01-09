@@ -22,6 +22,7 @@ This file was created by A.H.B. Bollen
 
 import shlex
 import subprocess  # nosec: security implications have been considered
+import threading
 from pathlib import Path
 
 
@@ -40,6 +41,7 @@ class Workflow(object):
         self._stderr = None
         self._stdout = None
         self.cwd = cwd
+        self.lock = threading.Lock()
 
     def run(self):
         sub_procces_args = shlex.split(self.command)
@@ -56,11 +58,13 @@ class Workflow(object):
         return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
 
     def wait(self):
+        self.lock.acquire()
         self._popen.wait()
         if self._stderr is None:
             self._stderr = self._popen.stderr.read()
         if self._stdout is None:
             self._stdout = self._popen.stdout.read()
+        self.lock.release()
 
     @property
     def stdout(self) -> bytes:
