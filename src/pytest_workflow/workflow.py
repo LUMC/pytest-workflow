@@ -20,6 +20,7 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen
 """
 
+import io
 import shlex
 import subprocess  # nosec: security implications have been considered
 from pathlib import Path
@@ -48,9 +49,11 @@ class Workflow(object):
             stderr=subprocess.PIPE, cwd=str(self.cwd))
 
     def stdout_to_file(self) -> Path:
+        self.wait()
         return bytes_to_file(self.stdout, self.cwd / Path("log.out"))
 
     def stderr_to_file(self) -> Path:
+        self.wait()
         return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
 
     def wait(self):
