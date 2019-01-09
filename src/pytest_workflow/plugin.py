@@ -123,9 +123,13 @@ class WorkflowTestsCollector(pytest.Collector):
             name=self.name,
             command=self.workflow_test.command,
             dir=str(tempdir)))
+        # Start the workflow. This runs in the background.
         workflow.run()
 
         if self.config.getoption("keep_workflow_wd"):
+            # When we want to keep the workflow directory, write the logs to
+            # the workflow directory.
+            # TerminalReporter is used because print does not work.
             def write_logs():
                 log_err = workflow.stderr_to_file()
                 log_out = workflow.stdout_to_file()
@@ -151,6 +155,7 @@ class WorkflowTestsCollector(pytest.Collector):
         The idea is that isolated parts of the yaml get their own collector or
         item."""
 
+        # This runs in the background until workflow.wait() is called.
         workflow = self.run_workflow()
 
         # Below structure makes it easy to append tests

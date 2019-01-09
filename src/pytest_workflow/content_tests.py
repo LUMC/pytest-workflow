@@ -93,6 +93,15 @@ class ContentTestCollector(pytest.Collector):
                  content_generator: Callable[[], Iterable[str]],
                  content_test: ContentTest,
                  workflow: Workflow):
+        """
+        Creates a content test collector
+        :param name: Name of the thing which contents are tested
+        :param parent: a pytest.Collector object
+        :param content_generator: a function that should return the content as
+        lines
+        :param content_test: a ContentTest object.
+        :param workflow: the workflow is running.
+        """
         # pylint: disable=too-many-arguments
         # it is still only 5 not counting self.
         super().__init__(name, parent=parent)
@@ -103,6 +112,11 @@ class ContentTestCollector(pytest.Collector):
         self.thread = None
 
     def find_strings(self):
+        """Find the strings that are looked for in the given content
+        The content_generator function shines here. It only starts looking
+        for lines of text AFTER the workflow is finished. So that is why a
+        function is needed here and not just a variable containing lines of
+        text."""
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
@@ -111,6 +125,9 @@ class ContentTestCollector(pytest.Collector):
             text_lines=self.content_generator())
 
     def collect(self):
+        # A thread is started that looks for the strings and collection can go
+        # on without hindrance. The thread is passed to the items, so they can
+        # wait on the thread to complete.
         self.thread = threading.Thread(target=self.find_strings)
         self.thread.start()
         test_items = []
@@ -141,7 +158,10 @@ class ContentTestItem(pytest.Item):
                  should_contain: bool):
         """
         Create a ContentTestItem
-        :param parent: A ContentTestCollector
+        :param parent: A ContentTestCollector. We use a ContentTestCollector
+        here and not just any pytest collector because we now can wait on the
+        thread in the parent, and get its found strings when its thread is
+        finished.
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
         """
