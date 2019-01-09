@@ -176,20 +176,22 @@ class WorkflowTestsCollector(pytest.Collector):
 
 
 class ExitCodeTest(pytest.Item):
-    def __init__(self, parent: pytest.Collector, exit_code: int,
-                 desired_exit_code: int):
+    def __init__(self, parent: pytest.Collector,
+                 desired_exit_code: int,
+                 workflow: Workflow):
         name = "exit code should be {0}".format(desired_exit_code)
         super().__init__(name, parent=parent)
-        self.exit_code = exit_code
+        self.workflow = workflow
         self.desired_exit_code = desired_exit_code
 
     def runtest(self):
-        assert self.exit_code == self.desired_exit_code
+        # workflow.exit_code waits for workflow to finish.
+        assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
         message = ("The workflow exited with exit code " +
-                   "'{0}' instead of '{1}'.".format(self.exit_code,
+                   "'{0}' instead of '{1}'.".format(self.workflow.exit_code,
                                                     self.desired_exit_code))
         return message
