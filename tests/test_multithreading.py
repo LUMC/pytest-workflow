@@ -20,7 +20,7 @@ import pytest
 
 import yaml
 
-SLEEP_TIME = 0.25
+SLEEP_TIME = 1
 SLEEP_COMMAND = "sleep {0}".format(SLEEP_TIME)
 
 MULTHITHREADED_TEST = [
@@ -41,7 +41,7 @@ def test_multithreaded(threads, testdir):
     # For example: 4 tests with 2 threads. 2 can be finished simultaneously
     # then the next 2. That is 2 iterations. With 4 threads it is 1 iteration.
     # With 3 threads, it is also 2 iterations.
-    iterations = (test_number // threads if (test_number % threads != 0)
+    iterations = (test_number // threads if (test_number % threads == 0)
                   else test_number // threads + 1)
 
     start_time = time.time()
