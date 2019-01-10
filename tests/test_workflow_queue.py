@@ -41,7 +41,7 @@ def generate_sleep_workflows(number: int, sleep_time: float):
 
 
 QUEUE_TESTS = [
-    (5, 0.1, 1),
+    (2, 0.1, 1),
     (6, 0.1, 3)
 ]
 
@@ -57,7 +57,7 @@ def test_workflow_queue(workflow_number: int, sleep_time: float, threads: int):
     for workflow in workflows:
         workflow_queue.put(workflow)
     start_time = time.time()
-    workflow_queue.process_queue()
+    workflow_queue.process_queue(threads)
     end_time = time.time()
     completion_time = end_time - start_time
     assert completion_time > iterations * sleep_time

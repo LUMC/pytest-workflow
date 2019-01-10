@@ -145,7 +145,7 @@ class WorkflowQueue(queue.Queue):
             except queue.Empty:
                 break
             # Some reporting
-            print("run command: '{0}' in '{1}".format(
+            print("run command: '{0}' in '{1}'".format(
                 workflow.command, workflow.cwd))
             workflow.run()
             self.task_done()
