@@ -111,9 +111,13 @@ def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
 class WorkflowQueue(queue.Queue):
     """A Queue object that will keep running 'n' numbers of workflows
     simultaneously until the queue is empty."""
-    def __init__(self, max_simultaneous: int = 1, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.running_queue=queue.Queue(max_simultaneous)
+    def __init__(self):
+        # No argument for maxsize. This queue is infinite.
+        super().__init__()
 
-    def process_queue(self):
+    def process_queue(self, threads: int = 1):
+        """
+        Processes the workflow queue with a number of threads
+        :param threads: The number of threads
+        """
         pass
