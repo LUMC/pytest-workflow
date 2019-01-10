@@ -20,7 +20,11 @@ import pytest
 
 import yaml
 
-SLEEP_TIME = 1
+# Sleep time was chosen such that pytest-workflow overhead should not influence
+# the results. Running pytest with empty sleep commands takes about 0.444
+# seconds on pytest-workflow 0.2 (without multithreading. So we should be a
+# a safe margin above that.
+SLEEP_TIME = 0.75
 SLEEP_COMMAND = "sleep {0}".format(SLEEP_TIME)
 
 MULTHITHREADED_TEST = [
