@@ -22,14 +22,12 @@ from pytest_workflow.workflow import Workflow
 def test_stdout():
     workflow = Workflow("echo moo")
     workflow.run()
-    workflow.wait()
     assert workflow.stdout == b"moo\n"
 
 
 def test_exit_code():
     workflow = Workflow("echo moo")
     workflow.run()
-    workflow.wait()
     assert workflow.exit_code == 0
     workflow2 = Workflow("grep")
     workflow2.run()
@@ -40,5 +38,4 @@ def test_stderr():
     # This will fail and print a shortened grep usage.
     workflow = Workflow("grep")
     workflow.run()
-    workflow.wait()
     assert "grep" in workflow.stderr.decode()

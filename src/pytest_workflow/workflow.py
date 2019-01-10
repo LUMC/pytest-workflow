@@ -43,13 +43,18 @@ class Workflow(object):
         self.cwd = cwd
         self.lock = threading.Lock()
 
-    def run(self):
+    def start(self):
         """Runs the workflow in a subprocess in the background.
         To make sure the workflow is finished use the `.wait()` method"""
         sub_procces_args = shlex.split(self.command)
         self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
             sub_procces_args, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, cwd=str(self.cwd))
+
+    def run(self):
+        """Runs the workflow and blocks until it is finished"""
+        self.start()
+        self.wait()
 
     def stdout_to_file(self) -> Path:
         self.wait()

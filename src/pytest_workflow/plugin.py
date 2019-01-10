@@ -124,7 +124,7 @@ class WorkflowTestsCollector(pytest.Collector):
             command=self.workflow_test.command,
             dir=str(tempdir)))
         # Start the workflow. This runs in the background.
-        workflow.run()
+        workflow.start()
 
         if self.config.getoption("keep_workflow_wd"):
             # When we want to keep the workflow directory, write the logs to
