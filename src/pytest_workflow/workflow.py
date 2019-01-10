@@ -119,3 +119,11 @@ class WorkflowQueue(queue.Queue):
         Processes the workflow queue with a number of threads
         :param threads: The number of threads
         """
+
+    def put(self, item, **kwargs):
+        if isinstance(item, Workflow):
+            super().put(item, **kwargs)
+        else:
+            raise ValueError("Only Workflow type objects can be submitted to "
+                             "this queue.")
+
