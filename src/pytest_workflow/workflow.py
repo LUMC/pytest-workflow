@@ -124,7 +124,7 @@ class WorkflowQueue(queue.Queue):
 
     # Queue processing with workers example taken from
     # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
-    def process_queue(self, number_of_threads: int = 1):
+    def process(self, number_of_threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param threads: The number of threads

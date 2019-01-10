@@ -19,7 +19,8 @@ import functools
 import shutil
 from pathlib import Path
 
-from _pytest.config import argparsing
+from _pytest.config import Config, argparsing
+from _pytest.monkeypatch import MonkeyPatch
 
 import pytest
 
@@ -29,7 +30,7 @@ from . import replace_whitespace
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .workflow import Workflow
+from .workflow import Workflow, WorkflowQueue
 
 
 def pytest_addoption(parser: argparsing.Parser):
@@ -55,6 +56,28 @@ def pytest_collect_file(path, parent):
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
     return None
+
+
+def pytest_configure(config: Config):
+    """This runs before tests start and adds values to the config."""
+    # We need to add a workflow queue to some central variable. Instead of
+    # using a global variable we add a value to the config.
+    # Configuring was copied from _pytest/tmpdir.py. There they also add
+    # objects to the config.
+    # pylint: disable=protected-access
+    # protected access is needed here to do it the pytest way: ugly.
+    monkeypatch = MonkeyPatch()
+    config._cleanup.append(monkeypatch.undo)
+    workflow_queue = WorkflowQueue()
+    monkeypatch.setattr(config, "workflow_queue", workflow_queue,
+                        raising=False)
+
+
+def pytest_runtestloop(session):
+    """This runs after collection"""
+    session.config.workflow_queue.process(
+        session.config.getoption("workflow_threads")
+    )
 
 
 class YamlFile(pytest.File):
@@ -129,7 +152,7 @@ class WorkflowTestsCollector(pytest.Collector):
             command=self.workflow_test.command,
             dir=str(tempdir)))
         # Start the workflow. This runs in the background.
-        workflow.start()
+        self.config.workflow_queue.put(workflow)
 
         if self.config.getoption("keep_workflow_wd"):
             # When we want to keep the workflow directory, write the logs to
