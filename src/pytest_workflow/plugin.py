@@ -19,7 +19,7 @@ import functools
 import shutil
 from pathlib import Path
 
-import _pytest
+from _pytest.config import argparsing
 
 import pytest
 
@@ -32,15 +32,20 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow
 
 
-def pytest_addoption(parser: _pytest.config.argparsing.Parser):
+def pytest_addoption(parser: argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
         help="Keep temporary directories where workflows are run for "
              "debugging purposes. This also triggers saving of stdout and "
              "stderr in the workflow directory",
-        dest="keep_workflow_wd"
-    )
+        dest="keep_workflow_wd")
+    parser.addoption(
+        "--wt", "--workflow-threads",
+        dest="workflow_threads",
+        default=1,
+        type=int,
+        help="The number of workflows to run simeltaneously.")
 
 
 def pytest_collect_file(path, parent):

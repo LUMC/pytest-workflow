@@ -19,11 +19,10 @@ Contains all functionality regarding the running of workflows and reporting
 on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen
 """
-
+import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
 import threading
-import queue
 from pathlib import Path
 
 
@@ -120,4 +119,3 @@ class WorkflowQueue(queue.Queue):
         Processes the workflow queue with a number of threads
         :param threads: The number of threads
         """
-        pass

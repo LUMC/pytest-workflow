@@ -49,7 +49,7 @@ def test_multithreaded(threads, testdir):
                   else test_number // threads + 1)
 
     start_time = time.time()
-    testdir.runpytest("-v")
+    testdir.runpytest("-v", "--wt", str(threads))
     end_time = time.time()
     completion_time = end_time - start_time
     # If the completion time is shorter than (iterations * SLEEP_TIME), too
