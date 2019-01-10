@@ -14,9 +14,43 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
-import textwrap
+import time
 
-MULTHITHREADED_TEST = textwrap.dedent("""\
-- name: sleepy
+import pytest
 
-""")
+import yaml
+
+SLEEP_TIME = 0.25
+SLEEP_COMMAND = "sleep {0}".format(SLEEP_TIME)
+
+MULTHITHREADED_TEST = [
+    dict(name="Doornroosje", command=SLEEP_COMMAND),
+    dict(name="Dornröschen", command=SLEEP_COMMAND),
+    dict(name="Little Briar Rose", command=SLEEP_COMMAND),
+    dict(name="Rose d'épine", command=SLEEP_COMMAND),
+]
+
+
+@pytest.mark.parametrize(["threads"], [(1,), (2,), (4,)])
+def test_multithreaded(threads, testdir):
+    test = MULTHITHREADED_TEST
+    test_number = len(test)
+    testdir.makefile(".yml", test=yaml.safe_dump(test))
+
+    # Calculate how many iterations are needed to process all the tests
+    # For example: 4 tests with 2 threads. 2 can be finished simultaneously
+    # then the next 2. That is 2 iterations. With 4 threads it is 1 iteration.
+    # With 3 threads, it is also 2 iterations.
+    iterations = (test_number // threads if (test_number % threads != 0)
+                  else test_number // threads + 1)
+
+    start_time = time.time()
+    testdir.runpytest("-v")
+    end_time = time.time()
+    completion_time = end_time - start_time
+    # If the completion time is shorter than (iterations * SLEEP_TIME), too
+    # many threads are running.
+    assert completion_time > (iterations * SLEEP_TIME)
+    # If the completion time is longer than (iterations * SLEEP_TIME + 1) than
+    # The code is probably not threaded properly.
+    assert completion_time < ((iterations + 1) * SLEEP_TIME)
