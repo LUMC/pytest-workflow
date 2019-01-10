@@ -25,6 +25,7 @@ def test_workflow_queue_put():
     workflow_queue.put(workflow)
     assert workflow_queue.qsize() == 1
 
+
 def test_workflow_queue_put_faulty():
     workflow = 1231
     workflow_queue = WorkflowQueue()

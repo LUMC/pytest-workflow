@@ -114,16 +114,16 @@ class WorkflowQueue(queue.Queue):
         # No argument for maxsize. This queue is infinite.
         super().__init__()
 
+    def put(self, item, block=True, timeout=None):
+        """Like Queue.put() but tests if item is a Workflow"""
+        if isinstance(item, Workflow):
+            super().put(item, block, timeout)
+        else:
+            raise ValueError("Only Workflow type objects can be submitted to "
+                             "this queue.")
+
     def process_queue(self, threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param threads: The number of threads
         """
-
-    def put(self, item, **kwargs):
-        if isinstance(item, Workflow):
-            super().put(item, **kwargs)
-        else:
-            raise ValueError("Only Workflow type objects can be submitted to "
-                             "this queue.")
-
