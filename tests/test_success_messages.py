@@ -59,8 +59,7 @@ FAILING_GREP = textwrap.dedent("""\
       - "grep"  # stdout should be empty
   stderr:
     contains:
-      - 'Usage: grep'
-      - "Try 'grep --help'"
+      - "'grep --help'"
   exit_code: 2
 """)
 
@@ -79,8 +78,7 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::simple echo::exit code should be 0 PASSED"],
     ["test_succeeding.yml::failing grep::exit code should be 2 PASSED"],
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
-    ["test_succeeding.yml::failing grep::stderr::contains 'Usage: grep' PASSED"],  # noqa: E501
-    ["test_succeeding.yml::failing grep::stderr::contains 'Try 'grep --help''"],  # noqa: E501
+    ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],  # noqa: E501
     ["run 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
 ]
 
