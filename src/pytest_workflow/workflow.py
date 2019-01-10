@@ -122,8 +122,22 @@ class WorkflowQueue(queue.Queue):
             raise ValueError("Only Workflow type objects can be submitted to "
                              "this queue.")
 
+    # Queue processing with workers example taken from
+    # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
     def process_queue(self, threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param threads: The number of threads
         """
+
+    def worker(self):
+        """Run workflows until the queue is empty"""
+        while True:
+            try:
+                workflow = self.get_nowait()
+            except queue.Empty:
+                break
+            # Some reporting
+            print("run command: '{0}' in '{1}".format(
+                workflow.command, workflow.cwd))
+            workflow.run()
