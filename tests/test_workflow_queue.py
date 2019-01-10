@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
+import time
+
 import pytest
 
 from pytest_workflow.workflow import Workflow, WorkflowQueue
@@ -32,3 +34,31 @@ def test_workflow_queue_put_faulty():
     with pytest.raises(ValueError) as error:
         workflow_queue.put(workflow)
     error.match("Only Workflow type objects can be submitted to this queue")
+
+
+def generate_sleep_workflows(number: int, sleep_time: float):
+    return [Workflow("sleep {0}".format(sleep_time)) for i in range(number)]
+
+
+QUEUE_TESTS = [
+    (5, 0.1, 1),
+    (6, 0.1, 3)
+]
+
+
+@pytest.mark.parametrize(
+    ["workflow_number", "sleep_time", "threads"], QUEUE_TESTS)
+def test_workflow_queue(workflow_number: int, sleep_time: float, threads: int):
+    workflows = generate_sleep_workflows(workflow_number, sleep_time)
+    iterations = (
+        workflow_number // threads if (workflow_number % threads == 0)
+                  else workflow_number // threads + 1)
+    workflow_queue = WorkflowQueue()
+    for workflow in workflows:
+        workflow_queue.put(workflow)
+    start_time = time.time()
+    workflow_queue.process_queue()
+    end_time = time.time()
+    completion_time = end_time - start_time
+    assert completion_time > iterations * sleep_time
+    assert completion_time < (iterations + 1) * sleep_time
