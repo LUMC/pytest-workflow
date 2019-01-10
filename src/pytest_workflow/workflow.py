@@ -124,11 +124,18 @@ class WorkflowQueue(queue.Queue):
 
     # Queue processing with workers example taken from
     # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
-    def process_queue(self, threads: int = 1):
+    def process_queue(self, number_of_threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param threads: The number of threads
         """
+        threads = [threading.Thread(target=self.worker)
+                   for i in range(number_of_threads)]
+        for thread in threads:
+            thread.start()
+        self.join()
+        for thread in threads:
+            thread.join()
 
     def worker(self):
         """Run workflows until the queue is empty"""
@@ -141,3 +148,4 @@ class WorkflowQueue(queue.Queue):
             print("run command: '{0}' in '{1}".format(
                 workflow.command, workflow.cwd))
             workflow.run()
+            self.task_done()
