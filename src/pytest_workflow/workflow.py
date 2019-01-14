@@ -28,7 +28,8 @@ from pathlib import Path
 
 
 class Workflow(object):
-
+    # pylint: disable=too-many-instance-attributes
+    # Is there a better way of doing things, as pylint suggests?
     def __init__(self, command: str, cwd: Path = Path()):
         """
         Initiates a workflow object
@@ -36,7 +37,6 @@ class Workflow(object):
         :param cwd: The current working directory in which the command will
         be executed.
         """
-
         self.command = command
         self._popen = None
         self._stderr = None

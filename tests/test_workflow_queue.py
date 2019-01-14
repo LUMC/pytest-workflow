@@ -35,6 +35,7 @@ def test_workflow_queue_put_faulty():
         workflow_queue.put(workflow)
     error.match("Only Workflow type objects can be submitted to this queue")
 
+
 def test_workflow_queue_process_empty():
     workflow_queue = WorkflowQueue()
     workflow_queue.process()
