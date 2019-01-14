@@ -46,7 +46,7 @@ def pytest_addoption(parser: argparsing.Parser):
         dest="workflow_threads",
         default=1,
         type=int,
-        help="The number of workflows to run simeltaneously.")
+        help="The number of workflows to run simultaneously.")
 
 
 def pytest_collect_file(path, parent):
