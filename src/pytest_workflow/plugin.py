@@ -147,7 +147,9 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
 
-        print("run '{name}' with command '{command}' in '{dir}'".format(
+        # Add an extra print. As it looks better in the pytest output.
+        print()
+        print("'{name}' with command '{command}' in '{dir}' is queued.".format(
             name=self.name,
             command=self.workflow_test.command,
             dir=str(tempdir)))
