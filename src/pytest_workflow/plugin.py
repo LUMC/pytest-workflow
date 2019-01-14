@@ -109,7 +109,7 @@ class WorkflowTestsCollector(pytest.Collector):
         self.terminal_reporter = self.config.pluginmanager.get_plugin(
             "terminalreporter")
 
-    def run_workflow(self):
+    def queue_workflow(self):
         """Creates a temporary directory and add the workflow to the workflow
         queue.
 
@@ -183,8 +183,9 @@ class WorkflowTestsCollector(pytest.Collector):
         The idea is that isolated parts of the yaml get their own collector or
         item."""
 
-        # This runs in the background until workflow.wait() is called.
-        workflow = self.run_workflow()
+        # This creates a workflow that is queued for processing after the
+        # collection phase.
+        workflow = self.queue_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
