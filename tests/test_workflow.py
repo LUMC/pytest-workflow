@@ -16,6 +16,8 @@
 
 """Tests the Workflow class"""
 
+import pytest
+
 from pytest_workflow.workflow import Workflow
 
 
@@ -39,3 +41,16 @@ def test_stderr():
     workflow = Workflow("grep")
     workflow.run()
     assert "grep" in workflow.stderr.decode()
+
+
+def test_wait_timeout():
+    workflow = Workflow("echo moo")
+    workflow.wait_timeout_secs = 0.1
+    workflow.wait_interval_secs = 0.01
+    with pytest.raises(ValueError) as error:
+        workflow.wait()
+    assert workflow.wait_counter == int(0.1/0.01) + 1
+    assert error.match(
+        "Waiting on a workflow that has not started within the last 0.1 "
+        "seconds"
+    )
