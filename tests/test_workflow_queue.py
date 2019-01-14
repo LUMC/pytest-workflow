@@ -65,5 +65,9 @@ def test_workflow_queue(workflow_number: int, sleep_time: float, threads: int):
     workflow_queue.process(threads)
     end_time = time.time()
     completion_time = end_time - start_time
+    # If the completion time is shorter than (iterations * sleep_time), too
+    # many threads are running.
     assert completion_time > iterations * sleep_time
+    # If the completion time is longer than (iterations * sleep_time + 1) then
+    # the code is probably not threaded properly.
     assert completion_time < (iterations + 1) * sleep_time

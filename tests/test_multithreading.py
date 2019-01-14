@@ -55,6 +55,6 @@ def test_multithreaded(threads, testdir):
     # If the completion time is shorter than (iterations * SLEEP_TIME), too
     # many threads are running.
     assert completion_time > (iterations * SLEEP_TIME)
-    # If the completion time is longer than (iterations * SLEEP_TIME + 1) than
-    # The code is probably not threaded properly.
+    # If the completion time is longer than (iterations * SLEEP_TIME + 1) then
+    # the code is probably not threaded properly.
     assert completion_time < ((iterations + 1) * SLEEP_TIME)
