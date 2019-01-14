@@ -42,6 +42,7 @@ class Workflow(object):
         self._stderr = None
         self._stdout = None
         self.cwd = cwd
+        self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = 2.00
         self.wait_interval_secs = 0.01
@@ -50,10 +51,17 @@ class Workflow(object):
     def start(self):
         """Runs the workflow in a subprocess in the background.
         To make sure the workflow is finished use the `.wait()` method"""
-        sub_procces_args = shlex.split(self.command)
-        self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
-            sub_procces_args, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, cwd=str(self.cwd))
+        # The lock ensures that the workflow is started only once, even if it
+        # is started from multiple threads.
+        self.start_lock.acquire()
+        if self._popen is None:
+            sub_procces_args = shlex.split(self.command)
+            self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
+                sub_procces_args, stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, cwd=str(self.cwd))
+        else:
+            raise ValueError("Workflows can only be started once")
+        self.start_lock.release()
 
     def run(self):
         """Runs the workflow and blocks until it is finished"""
@@ -86,7 +94,7 @@ class Workflow(object):
             #    commands will fail instantly. Having all of these wait as well
             #    would be a waste of time.
             if self.wait_counter > (
-                    self.wait_timeout_secs / self. wait_interval_secs):
+                    self.wait_timeout_secs / self.wait_interval_secs):
                 # Release the lock before crashing, to prevent deadlocks!
                 self.wait_lock.release()
                 raise ValueError(
@@ -133,6 +141,7 @@ def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
 class WorkflowQueue(queue.Queue):
     """A Queue object that will keep running 'n' numbers of workflows
     simultaneously until the queue is empty."""
+
     def __init__(self):
         # No argument for maxsize. This queue is infinite.
         super().__init__()
