@@ -9,6 +9,8 @@ Changelog
 
 Version 0.3.0-dev
 ---------------------------
++ Added the possibility to run multiple workflows simultaneously with the
+  ``--workflow-threads`` or ``--wt`` flag.
 + Made code easier to maintain by using stdlib instead of pytest's ``py`` lib
   in all of the code.
 + Added a schema check to ensure that tests have unique names when whitespace
