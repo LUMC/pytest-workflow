@@ -23,6 +23,7 @@ import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
 import threading
+import time
 from pathlib import Path
 
 
@@ -41,7 +42,10 @@ class Workflow(object):
         self._stderr = None
         self._stdout = None
         self.cwd = cwd
-        self.lock = threading.Lock()
+        self.wait_lock = threading.Lock()
+        self.wait_timeout_secs = 2.00
+        self.wait_interval_secs = 0.01
+        self.wait_counter = 0
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -71,13 +75,32 @@ class Workflow(object):
         # A popen.stderr is a buffered reader and can only be read once.
         # Once self._stderr and self._stdout are written the lock can be
         # released
-        self.lock.acquire()
+        self.wait_lock.acquire()
+        while self._popen is None:
+            # This piece of code checks if a workflow has started yet. If it
+            # has not, it waits. A counter is implemented here because:
+            # 1. Incrementing a counter is much faster than checking system
+            #    time
+            # 2. The counter is linked to the self object. This means we wait
+            #    only once for the workflow to start. All consecutive wait
+            #    commands will fail instantly. Having all of these wait as well
+            #    would be a waste of time.
+            if self.wait_counter > (
+                    self.wait_timeout_secs / self. wait_interval_secs):
+                # Release the lock before crashing, to prevent deadlocks!
+                self.wait_lock.release()
+                raise ValueError(
+                    "Waiting on a workflow that has not started within the "
+                    "last {0} seconds".format(self.wait_timeout_secs))
+            time.sleep(self.wait_interval_secs)
+            self.wait_counter += 1
+
         self._popen.wait()
         if self._stderr is None:
             self._stderr = self._popen.stderr.read()
         if self._stdout is None:
             self._stdout = self._popen.stdout.read()
-        self.lock.release()
+        self.wait_lock.release()
 
     @property
     def stdout(self) -> bytes:
