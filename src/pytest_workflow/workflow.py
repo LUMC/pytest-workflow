@@ -25,6 +25,7 @@ import subprocess  # nosec: security implications have been considered
 import threading
 import time
 from pathlib import Path
+from typing import Optional  # noqa: F401  # used for typing
 
 
 class Workflow(object):
@@ -38,7 +39,7 @@ class Workflow(object):
         be executed.
         """
         self.command = command
-        self._popen = None
+        self._popen = None  # type: Optional[subprocess.Popen]
         self._stderr = None
         self._stdout = None
         self.cwd = cwd
@@ -102,10 +103,8 @@ class Workflow(object):
                 self.wait_counter += 1
 
             self._popen.wait()
-            if self._stderr is None:
-                self._stderr = self._popen.stderr.read()
-            if self._stdout is None:
-                self._stdout = self._popen.stdout.read()
+            if self._stderr is None and self._stdout is None:
+                self._stdout, self._stderr = self._popen.communicate()
 
     @property
     def stdout(self) -> bytes:
