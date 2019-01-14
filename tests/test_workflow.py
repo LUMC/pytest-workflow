@@ -54,3 +54,11 @@ def test_wait_timeout():
         "Waiting on a workflow that has not started within the last 0.1 "
         "seconds"
     )
+
+
+def test_start_lock():
+    workflow = Workflow("echo moo")
+    workflow.start()
+    with pytest.raises(ValueError) as error:
+        workflow.start()
+    assert error.match("Workflows can only be started once")
