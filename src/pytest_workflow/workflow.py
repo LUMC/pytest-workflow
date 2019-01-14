@@ -46,8 +46,8 @@ class Workflow(object):
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         # Wait 3 hours.
-        self.wait_timeout_secs = 10800.00
-        self.wait_interval_secs = 0.1
+        self.wait_timeout_secs = None
+        self.wait_interval_secs = 0.01
         self.wait_counter = 0
 
     def start(self):
@@ -94,7 +94,7 @@ class Workflow(object):
                 #    wait only once for the workflow to start. All consecutive
                 #    wait commands will fail instantly. Having all of these
                 #    wait as well would be a waste of time.
-                if self.wait_counter > (
+                if self.wait_timeout_secs is not None and self.wait_counter > (
                         self.wait_timeout_secs / self.wait_interval_secs):
                     raise ValueError(
                         "Waiting on a workflow that has not started within the"
