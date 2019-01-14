@@ -44,8 +44,9 @@ class Workflow(object):
         self.cwd = cwd
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
-        self.wait_timeout_secs = 30.00
-        self.wait_interval_secs = 0.01
+        # Wait 3 hours.
+        self.wait_timeout_secs = 10800.00
+        self.wait_interval_secs = 0.1
         self.wait_counter = 0
 
     def start(self):
