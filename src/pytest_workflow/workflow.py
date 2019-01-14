@@ -102,8 +102,11 @@ class Workflow(object):
                 time.sleep(self.wait_interval_secs)
                 self.wait_counter += 1
 
-            self._popen.wait()
-            if self._stderr is None and self._stdout is None:
+            # Wait for process to finish with _popen.communicate().
+            # _popen.wait() will block with stdout=pipe and stderr=pipe
+            if (self._popen.returncode is None and
+                    self._stderr is None and
+                    self._stdout is None):
                 self._stdout, self._stderr = self._popen.communicate()
 
     @property
