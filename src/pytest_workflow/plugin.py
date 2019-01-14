@@ -74,7 +74,7 @@ def pytest_configure(config: Config):
 
 
 def pytest_runtestloop(session):
-    """This runs after collection"""
+    """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
         session.config.getoption("workflow_threads")
     )
@@ -110,7 +110,8 @@ class WorkflowTestsCollector(pytest.Collector):
             "terminalreporter")
 
     def run_workflow(self):
-        """Runs the workflow in a temporary directory
+        """Creates a temporary directory and add the workflow to the workflow
+        queue.
 
         Running in a temporary directory will prevent the project repository
         from getting filled up with test workflow output.
@@ -128,10 +129,9 @@ class WorkflowTestsCollector(pytest.Collector):
         to prevent name collision in temporary paths. This is handled in the
         schema instead.
 
-        Print statements are used to provide information to the user.  Using
-        pytests internal logwriter has no added value. If there are wishes to
-        do so in the future, the pytest terminal writer can be acquired with:
-        self.config.pluginmanager.get_plugin("terminalreporter")
+        Print statements are used to provide information to the user, mostly
+        this is shorter than using pytests terminal reporter. The terminal
+        reporter is used in the finalizer, because print does not work here.
         Test name is included explicitly in each print command to avoid
         confusion between workflows
         """
@@ -151,7 +151,7 @@ class WorkflowTestsCollector(pytest.Collector):
             name=self.name,
             command=self.workflow_test.command,
             dir=str(tempdir)))
-        # Start the workflow. This runs in the background.
+        # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
         if self.config.getoption("keep_workflow_wd"):
