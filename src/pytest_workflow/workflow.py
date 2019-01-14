@@ -75,7 +75,7 @@ class Workflow(object):
 
     def stderr_to_file(self) -> Path:
         self.wait()
-        return bytes_to_file(self.stdout, self.cwd / Path("log.err"))
+        return bytes_to_file(self.stderr, self.cwd / Path("log.err"))
 
     def wait(self):
         """Waits for the workflow to complete"""
@@ -175,7 +175,8 @@ class WorkflowQueue(queue.Queue):
                 workflow = self.get_nowait()  # type: Workflow
             except queue.Empty:
                 break
-            workflow.run()
-            self.task_done()
-            # Some reporting
-            print("command: '{0}' done.".format(workflow.command))
+            else:
+                workflow.run()
+                self.task_done()
+                # Some reporting
+                print("command: '{0}' done.".format(workflow.command))
