@@ -174,11 +174,12 @@ class WorkflowQueue(queue.Queue):
         """Run workflows until the queue is empty"""
         while True:
             try:
-                workflow = self.get_nowait()
+                # We know the type is Workflow, because this was enforced in
+                # the put method.
+                workflow = self.get_nowait()  # type: Workflow
             except queue.Empty:
                 break
-            # Some reporting
-            print("run command: '{0}' in '{1}'".format(
-                workflow.command, workflow.cwd))
             workflow.run()
             self.task_done()
+            # Some reporting
+            print("command: '{0}' done.".format(workflow.command))
