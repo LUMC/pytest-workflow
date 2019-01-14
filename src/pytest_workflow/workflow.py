@@ -161,10 +161,11 @@ class WorkflowQueue(queue.Queue):
         Processes the workflow queue with a number of threads
         :param number_of_threads: The number of threads
         """
-        threads = [threading.Thread(target=self.worker)
-                   for _ in range(number_of_threads)]
-        for thread in threads:
+        threads = []
+        for _ in range(number_of_threads):
+            thread = threading.Thread(target=self.worker)
             thread.start()
+            threads.append(thread)
         self.join()
         for thread in threads:
             thread.join()
