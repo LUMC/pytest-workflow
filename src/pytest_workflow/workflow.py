@@ -102,7 +102,8 @@ class Workflow(object):
                 time.sleep(self.wait_interval_secs)
                 self.wait_counter += 1
 
-            # Wait for process to finish with _popen.communicate().
+            # Wait for process to finish with _popen.communicate(). This blocks
+            # until the command completes.
             # _popen.wait() will block with stdout=pipe and stderr=pipe
             if (self._popen.returncode is None and
                     self._stderr is None and
