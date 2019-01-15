@@ -20,6 +20,8 @@ import shutil
 from pathlib import Path
 
 import _pytest
+# Also do the from imports. Otherwise the IDE does not understand the types.
+from _pytest.config import Config, argparsing  # noqa: F401
 
 import pytest
 
@@ -29,7 +31,7 @@ from . import replace_whitespace
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .workflow import Workflow
+from .workflow import Workflow, WorkflowQueue
 
 
 def pytest_addoption(parser: _pytest.config.argparsing.Parser):
@@ -39,8 +41,13 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
         help="Keep temporary directories where workflows are run for "
              "debugging purposes. This also triggers saving of stdout and "
              "stderr in the workflow directory",
-        dest="keep_workflow_wd"
-    )
+        dest="keep_workflow_wd")
+    parser.addoption(
+        "--wt", "--workflow-threads",
+        dest="workflow_threads",
+        default=1,
+        type=int,
+        help="The number of workflows to run simultaneously.")
 
 
 def pytest_collect_file(path, parent):
@@ -50,6 +57,24 @@ def pytest_collect_file(path, parent):
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
         return YamlFile(path, parent)
     return None
+
+
+def pytest_configure(config: _pytest.config.Config):
+    """This runs before tests start and adds values to the config."""
+    # We need to add a workflow queue to some central variable. Instead of
+    # using a global variable we add a value to the config.
+    # Using setattr is not the nicest way of doing things, but having something
+    # in the globally used config is the easiest and least hackish way to get
+    # this going.
+    workflow_queue = WorkflowQueue()
+    setattr(config, "workflow_queue", workflow_queue)
+
+
+def pytest_runtestloop(session):
+    """This runs after collection, but before the tests."""
+    session.config.workflow_queue.process(
+        number_of_threads=session.config.getoption("workflow_threads")
+    )
 
 
 class YamlFile(pytest.File):
@@ -78,9 +103,12 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
+        self.terminal_reporter = self.config.pluginmanager.get_plugin(
+            "terminalreporter")
 
-    def run_workflow(self):
-        """Runs the workflow in a temporary directory
+    def queue_workflow(self):
+        """Creates a temporary directory and add the workflow to the workflow
+        queue.
 
         Running in a temporary directory will prevent the project repository
         from getting filled up with test workflow output.
@@ -98,10 +126,9 @@ class WorkflowTestsCollector(pytest.Collector):
         to prevent name collision in temporary paths. This is handled in the
         schema instead.
 
-        Print statements are used to provide information to the user.  Using
-        pytests internal logwriter has no added value. If there are wishes to
-        do so in the future, the pytest terminal writer can be acquired with:
-        self.config.pluginmanager.get_plugin("terminalreporter")
+        Print statements are used to provide information to the user, mostly
+        this is shorter than using pytests terminal reporter. The terminal
+        reporter is used in the finalizer, because print does not work here.
         Test name is included explicitly in each print command to avoid
         confusion between workflows
         """
@@ -117,18 +144,30 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(self.workflow_test.command, tempdir)
 
-        print("run '{name}' with command '{command}' in '{dir}'".format(
-            name=self.name,
-            command=self.workflow_test.command,
-            dir=str(tempdir)))
-        workflow.run()
-        print("run '{name}': done".format(name=self.name))
+        # Add an extra newline. As it looks better in the pytest output.
+        print("\n'{name}' with command '{command}' in '{dir}' is "
+              "queued.".format(name=self.name,
+                               command=self.workflow_test.command,
+                               dir=str(tempdir)))
+        # Add the workflow to the workflow queue.
+        self.config.workflow_queue.put(workflow)
 
-        if self.config.getoption("keep_workflow_wd", False):
-            log_err = workflow.stderr_to_file()
-            log_out = workflow.stdout_to_file()
-            print("'{0}' stdout saved in: {1}".format(self.name, str(log_out)))
-            print("'{0}' stderr saved in: {1}".format(self.name, str(log_err)))
+        if self.config.getoption("keep_workflow_wd"):
+            # When we want to keep the workflow directory, write the logs to
+            # the workflow directory.
+            # TerminalReporter is used because print does not work.
+            def write_logs():
+                log_err = workflow.stderr_to_file()
+                log_out = workflow.stdout_to_file()
+                # Print statements do not work here.
+                self.terminal_reporter.write_line(
+                    "'{0}' stdout saved in: {1}".format(
+                        self.name, str(log_out)))
+                self.terminal_reporter.write_line(
+                    "'{0}' stderr saved in: {1}".format(
+                        self.name, str(log_err)))
+
+            self.addfinalizer(write_logs)
         else:
             # addfinalizer adds a function that is run when the node tests are
             # completed
@@ -142,45 +181,52 @@ class WorkflowTestsCollector(pytest.Collector):
         The idea is that isolated parts of the yaml get their own collector or
         item."""
 
-        workflow = self.run_workflow()
+        # This creates a workflow that is queued for processing after the
+        # collection phase.
+        workflow = self.queue_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, workflow.cwd) for filetest
+        tests += [FileTestCollector(self, filetest, workflow) for filetest
                   in self.workflow_test.files]
 
-        tests += [ExitCodeTest(self, workflow.exit_code,
-                               self.workflow_test.exit_code)]
+        tests += [ExitCodeTest(parent=self,
+                               desired_exit_code=self.workflow_test.exit_code,
+                               workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content=workflow.stdout.decode().splitlines(),
-            content_test=self.workflow_test.stdout)]
+            content_generator=workflow.stdout_lines,
+            content_test=self.workflow_test.stdout,
+            workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content=workflow.stderr.decode().splitlines(),
-            content_test=self.workflow_test.stderr)]
+            content_generator=workflow.stderr_lines,
+            content_test=self.workflow_test.stderr,
+            workflow=workflow)]
 
         return tests
 
 
 class ExitCodeTest(pytest.Item):
-    def __init__(self, parent: pytest.Collector, exit_code: int,
-                 desired_exit_code: int):
+    def __init__(self, parent: pytest.Collector,
+                 desired_exit_code: int,
+                 workflow: Workflow):
         name = "exit code should be {0}".format(desired_exit_code)
         super().__init__(name, parent=parent)
-        self.exit_code = exit_code
+        self.workflow = workflow
         self.desired_exit_code = desired_exit_code
 
     def runtest(self):
-        assert self.exit_code == self.desired_exit_code
+        # workflow.exit_code waits for workflow to finish.
+        assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
         message = ("The workflow exited with exit code " +
-                   "'{0}' instead of '{1}'.".format(self.exit_code,
+                   "'{0}' instead of '{1}'.".format(self.workflow.exit_code,
                                                     self.desired_exit_code))
         return message

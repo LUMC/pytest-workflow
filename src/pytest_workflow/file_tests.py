@@ -15,32 +15,33 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """All tests for workflow files"""
+import functools
 import hashlib
 from pathlib import Path
-from typing import Union
 
 import pytest
 
 from .content_tests import ContentTestCollector, file_to_string_generator
 from .schema import FileTest
+from .workflow import Workflow
 
 
 class FileTestCollector(pytest.Collector):
     """This collector returns all tests for one particular file"""
 
     def __init__(self, parent: pytest.Collector, filetest: FileTest,
-                 cwd: Union[bytes, str]):
+                 workflow: Workflow):
         """
         Create a FiletestCollector
         :param parent: The collector that started this collector
         :param filetest: a FileTest object
-        :param cwd: the working directory from which relative filepaths should
-        be evaluated
+        :param workflow: the workflow that is running to generate this file
         """
         name = str(filetest.path)
         super().__init__(name, parent)
         self.filetest = filetest
-        self.cwd = Path(cwd)
+        self.cwd = workflow.cwd
+        self.workflow = workflow
 
     def collect(self):
         """Returns all tests for one file. Also the absolute path of the files
@@ -53,19 +54,28 @@ class FileTestCollector(pytest.Collector):
         # certain conditions are met.
         tests = []
 
-        tests += [FileExists(self, filepath, self.filetest.should_exist)]
+        tests += [FileExists(parent=self,
+                             filepath=filepath,
+                             should_exist=self.filetest.should_exist,
+                             workflow=self.workflow)]
 
         if self.filetest.contains or self.filetest.must_not_contain:
             tests += [ContentTestCollector(
                 name="content",
                 parent=self,
-                content=file_to_string_generator(filepath),
-                content_test=self.filetest
+                content_generator=functools.partial(file_to_string_generator,
+                                                    filepath),
+                content_test=self.filetest,
                 # FileTest inherits from ContentTest. So this is valid.
+                workflow=self.workflow
             )]
 
         if self.filetest.md5sum:
-            tests += [FileMd5(self, filepath, self.filetest.md5sum)]
+            tests += [FileMd5(
+                parent=self,
+                filepath=filepath,
+                md5sum=self.filetest.md5sum,
+                workflow=self.workflow)]
 
         return tests
 
@@ -74,18 +84,23 @@ class FileExists(pytest.Item):
     """A pytest file exists test."""
 
     def __init__(self, parent: pytest.Collector, filepath: Path,
-                 should_exist: bool):
+                 should_exist: bool, workflow: Workflow):
         """
         :param parent: Collector that started this test
         :param filepath: A path to the file
         :param should_exist: Whether the file should exist
+        :param workflow: The workflow running to generate the file
         """
         name = "should exist" if should_exist else "should not exist"
         super().__init__(name, parent)
         self.file = filepath
         self.should_exist = should_exist
+        self.workflow = workflow
 
     def runtest(self):
+        # Wait for the workflow process to finish before checking if the file
+        # exists.
+        self.workflow.wait()
         assert self.file.exists() == self.should_exist
 
     def repr_failure(self, excinfo):
@@ -105,20 +120,24 @@ class FileExists(pytest.Item):
 
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
-                 md5sum: str):
+                 md5sum: str, workflow: Workflow):
         """
         Create a tests for the file md5sum.
         :param parent: The collector that started this item
         :param filepath: The path to the file
         :param md5sum:  The expected md5sum
+        :param workflow: The workflow running to generate the file
         """
         name = "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
         self.expected_md5sum = md5sum
         self.observed_md5sum = None
+        self.workflow = workflow
 
     def runtest(self):
+        # Wait for the workflow to finish before we check the md5sum of a file.
+        self.workflow.wait()
         self.observed_md5sum = file_md5sum(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
 

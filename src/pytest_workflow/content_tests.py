@@ -20,12 +20,14 @@ and logs.
 The design philosophy here was that each piece of text should only be read
 once."""
 
+import threading
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Callable, Iterable, List, Set
 
 import pytest
 
 from .schema import ContentTest
+from .workflow import Workflow
 
 
 def check_content(strings: List[str],
@@ -88,24 +90,58 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 content: Iterable[str], content_test: ContentTest):
+                 content_generator: Callable[[], Iterable[str]],
+                 content_test: ContentTest,
+                 workflow: Workflow):
+        """
+        Creates a content test collector
+        :param name: Name of the thing which contents are tested
+        :param parent: a pytest.Collector object
+        :param content_generator: a function that should return the content as
+        lines. This function is a placeholder for the content itself. In other
+        words: instead of passing the contents of a file directly to the
+        ContentTestCollector, you pass a function that when called will return
+        the contents. This allows the pytest collection phase to finish before
+        the file is read. This is useful because the workflows are run after
+        the collection phase.
+        :param content_test: a ContentTest object.
+        :param workflow: the workflow is running.
+        """
+        # pylint: disable=too-many-arguments
+        # it is still only 5 not counting self.
         super().__init__(name, parent=parent)
-        self.content = content
+        self.content_generator = content_generator
         self.content_test = content_test
+        self.workflow = workflow
+        self.found_strings = None
+        self.thread = None
+
+    def find_strings(self):
+        """Find the strings that are looked for in the given content
+        The content_generator function shines here. It only starts looking
+        for lines of text AFTER the workflow is finished. So that is why a
+        function is needed here and not just a variable containing lines of
+        text."""
+        self.workflow.wait()
+        strings_to_check = (self.content_test.contains +
+                            self.content_test.must_not_contain)
+        self.found_strings = check_content(
+            strings=strings_to_check,
+            text_lines=self.content_generator())
 
     def collect(self):
-        found_strings = check_content(
-            self.content_test.contains + self.content_test.must_not_contain,
-            self.content)
-
+        # A thread is started that looks for the strings and collection can go
+        # on without hindrance. The thread is passed to the items, so they can
+        # wait on the thread to complete.
+        self.thread = threading.Thread(target=self.find_strings)
+        self.thread.start()
         test_items = []
 
         test_items += [
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=True,
-                contains=string in found_strings
+                should_contain=True
             )
             for string in self.content_test.contains]
 
@@ -113,8 +149,7 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=False,
-                contains=string in found_strings
+                should_contain=False
             )
             for string in self.content_test.must_not_contain]
 
@@ -124,24 +159,35 @@ class ContentTestCollector(pytest.Collector):
 class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
-    def __init__(self, parent: pytest.Collector, string: str,
-                 should_contain: bool, contains: bool):
+    def __init__(self, parent: ContentTestCollector, string: str,
+                 should_contain: bool):
         """
         Create a ContentTestItem
-        :param parent: A pytest collector
+        :param parent: A ContentTestCollector. We use a ContentTestCollector
+        here and not just any pytest collector because we now can wait on the
+        thread in the parent, and get its found strings when its thread is
+        finished.
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
-        :param contains: Whether the string is there
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
         self.should_contain = should_contain
         self.string = string
-        self.contains = contains
 
     def runtest(self):
-        assert self.contains == self.should_contain
+        """Only after a workflow is finished the contents of files and logs are
+        read. The ContentTestCollector parent reads each file/log once. This is
+        done in its thread. We wait for this thread to complete. Then we check
+        all the found strings in the parent.
+        This way we do not have to read each file one time per ContentTestItem
+        this makes content checking much faster on big files (NGS > 1 GB files)
+        were we are looking for multiple words (variants / sequences). """
+        # Wait for thread to complete.
+        self.parent.thread.join()
+        assert ((self.string in self.parent.found_strings) ==
+                self.should_contain)
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
