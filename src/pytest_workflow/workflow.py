@@ -26,7 +26,7 @@ import subprocess  # nosec: security implications have been considered
 import threading
 import time
 from pathlib import Path
-from typing import Optional  # noqa: F401  # used for typing
+from typing import List, Optional  # noqa: F401  # used for typing
 
 
 class Workflow(object):
@@ -125,11 +125,11 @@ class Workflow(object):
         self.wait()
         return self._popen.returncode
 
-    def stdout_lines(self):
+    def stdout_lines(self) -> List[str]:
         self.wait()
         return self._stdout.decode().splitlines()
 
-    def stderr_lines(self):
+    def stderr_lines(self) -> List[str]:
         self.wait()
         return self._stderr.decode().splitlines()
 
