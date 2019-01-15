@@ -177,6 +177,14 @@ class ContentTestItem(pytest.Item):
         self.string = string
 
     def runtest(self):
+        """Only after a workflow is finished the contents of files and logs are
+        read. The ContentTestCollector parent reads each file/log once. This is
+        done in its thread. We wait for this thread to complete. Then we check
+        all the found strings in the parent.
+        This way we do not have to read each file one time per ContentTestItem
+        this makes content checking much faster on big files (NGS > 1 GB files)
+        were we are looking for multiple words (variants / sequences). """
+        # Wait for thread to complete.
         self.parent.thread.join()
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
