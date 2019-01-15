@@ -62,3 +62,15 @@ def test_start_lock():
     with pytest.raises(ValueError) as error:
         workflow.start()
     assert error.match("Workflows can only be started once")
+
+
+def test_long_log():
+    """If stdout is longer than 65536 bytes then it completely fills up the
+    buffer on the linux kernel. If the buffer is not emptied, this will stall
+    the process that is writing to stdout. This test produces an output that is
+    bigger than 65536 bytes to make sure pytest-workflow handles these cases
+    correctly."""
+    workflow = Workflow(
+        "bash -c 'for i in {1..262144}; do echo \"this is a long log\"; done'")
+    workflow.run()
+    assert len(workflow.stdout) > 65536
