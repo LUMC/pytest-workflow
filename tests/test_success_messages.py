@@ -107,3 +107,8 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
 def test_message_in_result(message: str, succeeding_tests_output):
     # pylint: disable=redefined-outer-name
     assert message in succeeding_tests_output
+
+
+def test_message_success_no_errors(succeeding_tests_output):
+    # pylint: disable=redefined-outer-name
+    assert "ERROR" not in succeeding_tests_output
