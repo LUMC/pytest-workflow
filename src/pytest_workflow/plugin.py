@@ -19,8 +19,9 @@ import functools
 import shutil
 from pathlib import Path
 
-from _pytest.config import Config, argparsing
-from _pytest.monkeypatch import MonkeyPatch
+import _pytest
+# Also do the from imports. Otherwise the IDE does not understand the types.
+from _pytest.config import Config, argparsing  # noqa: F401
 
 import pytest
 
@@ -33,7 +34,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser: argparsing.Parser):
+def pytest_addoption(parser: _pytest.config.argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
@@ -58,19 +59,15 @@ def pytest_collect_file(path, parent):
     return None
 
 
-def pytest_configure(config: Config):
+def pytest_configure(config: _pytest.config.Config):
     """This runs before tests start and adds values to the config."""
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
-    # Configuring was copied from _pytest/tmpdir.py. There they also add
-    # objects to the config.
-    # pylint: disable=protected-access
-    # protected access is needed here to do it the pytest way: ugly.
-    monkeypatch = MonkeyPatch()
-    config._cleanup.append(monkeypatch.undo)
+    # Using setattr is not the nicest way of doing things, but having something
+    # in the globally used config is the easiest and least hackish way to get
+    # this going.
     workflow_queue = WorkflowQueue()
-    monkeypatch.setattr(config, "workflow_queue", workflow_queue,
-                        raising=False)
+    setattr(config, "workflow_queue", workflow_queue)
 
 
 def pytest_runtestloop(session):
