@@ -98,6 +98,8 @@ class FileExists(pytest.Item):
         self.workflow = workflow
 
     def runtest(self):
+        # Wait for the workflow process to finish before checking if the file
+        # exists.
         self.workflow.wait()
         assert self.file.exists() == self.should_exist
 
@@ -134,6 +136,7 @@ class FileMd5(pytest.Item):
         self.workflow = workflow
 
     def runtest(self):
+        # Wait for the workflow to finish before we check the md5sum of a file.
         self.workflow.wait()
         self.observed_md5sum = file_md5sum(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
