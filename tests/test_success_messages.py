@@ -112,3 +112,9 @@ def test_message_in_result(message: str, succeeding_tests_output):
 def test_message_success_no_errors(succeeding_tests_output):
     # pylint: disable=redefined-outer-name
     assert "ERROR" not in succeeding_tests_output
+
+
+def test_message_directory_kept_no_errors(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v", "--keep-workflow-wd")
+    assert "ERROR" not in result.stdout.str()
