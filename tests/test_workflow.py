@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """Tests the Workflow class"""
+import math
 
 import pytest
 
@@ -49,7 +50,7 @@ def test_wait_timeout():
     workflow.wait_interval_secs = 0.01
     with pytest.raises(ValueError) as error:
         workflow.wait()
-    assert workflow.wait_counter == int(0.1/0.01) + 1
+    assert math.isclose(workflow.wait_time_secs, 0.11)
     assert error.match(
         "Waiting on a workflow that has not started within the last 0.1 "
         "seconds"

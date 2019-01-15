@@ -47,8 +47,8 @@ class Workflow(object):
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = None
-        self.wait_interval_secs = 0.01
-        self.wait_counter = 0
+        self.wait_time_secs = 0.0
+        self.wait_interval_secs = 0.0
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -94,13 +94,13 @@ class Workflow(object):
                 #    wait only once for the workflow to start. All consecutive
                 #    wait commands will fail instantly. Having all of these
                 #    wait as well would be a waste of time.
-                if self.wait_timeout_secs is not None and self.wait_counter > (
-                        self.wait_timeout_secs / self.wait_interval_secs):
+                if (self.wait_timeout_secs is not None
+                        and self.wait_time_secs > self.wait_timeout_secs):
                     raise ValueError(
                         "Waiting on a workflow that has not started within the"
                         " last {0} seconds".format(self.wait_timeout_secs))
                 time.sleep(self.wait_interval_secs)
-                self.wait_counter += 1
+                self.wait_time_secs += self.wait_interval_secs
 
             # Wait for process to finish with _popen.communicate(). This blocks
             # until the command completes.
