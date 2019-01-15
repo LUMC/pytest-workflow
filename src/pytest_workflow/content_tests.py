@@ -98,7 +98,12 @@ class ContentTestCollector(pytest.Collector):
         :param name: Name of the thing which contents are tested
         :param parent: a pytest.Collector object
         :param content_generator: a function that should return the content as
-        lines
+        lines. This function is a placeholder for the content itself. In other
+        words: instead of passing the contents of a file directly to the
+        ContentTestCollector, you pass a function that when called will return
+        the contents. This allows the pytest collection phase to finish before
+        the file is read. This is useful because the workflows are run after
+        the collection phase.
         :param content_test: a ContentTest object.
         :param workflow: the workflow is running.
         """
