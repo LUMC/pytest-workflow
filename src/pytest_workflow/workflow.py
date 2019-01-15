@@ -17,7 +17,8 @@
 """
 Contains all functionality regarding the running of workflows and reporting
 on stdout, stderr and exit code.
-This file was created by A.H.B. Bollen
+This file was created by A.H.B. Bollen. Multithreading functionality was added
+later.
 """
 import queue
 import shlex
