@@ -15,9 +15,9 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
-import functools
 import shutil
 from pathlib import Path
+from typing import Optional  # noqa: F401 needed for typing.
 
 import _pytest
 # Also do the from imports. Otherwise the IDE does not understand the types.
@@ -105,6 +105,9 @@ class WorkflowTestsCollector(pytest.Collector):
         super().__init__(workflow_test.name, parent=parent)
         self.terminal_reporter = self.config.pluginmanager.get_plugin(
             "terminalreporter")
+        # These below variables store values for cleanup with teardown().
+        self.tempdir = None  # type: Optional[Path]
+        self.workflow = None  # type: Optional[Workflow]
 
     def queue_workflow(self):
         """Creates a temporary directory and add the workflow to the workflow
@@ -136,45 +139,21 @@ class WorkflowTestsCollector(pytest.Collector):
         # Protected access needed to get the basetemp value.
 
         basetemp = Path(str(self.config._tmp_path_factory.getbasetemp()))
-        tempdir = basetemp / Path(replace_whitespace(self.name, '_'))
+        self.tempdir = basetemp / Path(replace_whitespace(self.name, '_'))
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        shutil.copytree(str(self.config.rootdir), str(tempdir))
+        shutil.copytree(str(self.config.rootdir), str(self.tempdir))
         # Create a workflow and make sure it runs in the tempdir
-        workflow = Workflow(self.workflow_test.command, tempdir)
+        self.workflow = Workflow(self.workflow_test.command, self.tempdir)
 
         # Add an extra newline. As it looks better in the pytest output.
         print("\n'{name}' with command '{command}' in '{dir}' is "
               "queued.".format(name=self.name,
                                command=self.workflow_test.command,
-                               dir=str(tempdir)))
+                               dir=str(self.tempdir)))
         # Add the workflow to the workflow queue.
-        self.config.workflow_queue.put(workflow)
-
-        if self.config.getoption("keep_workflow_wd"):
-            # When we want to keep the workflow directory, write the logs to
-            # the workflow directory.
-            # TerminalReporter is used because print does not work.
-            def write_logs():
-                log_err = workflow.stderr_to_file()
-                log_out = workflow.stdout_to_file()
-                # Print statements do not work here.
-                self.terminal_reporter.write_line(
-                    "'{0}' stdout saved in: {1}".format(
-                        self.name, str(log_out)))
-                self.terminal_reporter.write_line(
-                    "'{0}' stderr saved in: {1}".format(
-                        self.name, str(log_err)))
-
-            self.addfinalizer(write_logs)
-        else:
-            # addfinalizer adds a function that is run when the node tests are
-            # completed
-            rm_tempdir = functools.partial(shutil.rmtree, str(tempdir))
-            self.addfinalizer(rm_tempdir)
-
-        return workflow
+        self.config.workflow_queue.put(self.workflow)
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
@@ -183,31 +162,48 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
-        workflow = self.queue_workflow()
+        self.queue_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, workflow) for filetest
+        tests += [FileTestCollector(self, filetest, self.workflow) for filetest
                   in self.workflow_test.files]
 
         tests += [ExitCodeTest(parent=self,
                                desired_exit_code=self.workflow_test.exit_code,
-                               workflow=workflow)]
+                               workflow=self.workflow)]
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=workflow.stdout_lines,
+            content_generator=self.workflow.stdout_lines,
             content_test=self.workflow_test.stdout,
-            workflow=workflow)]
+            workflow=self.workflow)]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=workflow.stderr_lines,
+            content_generator=self.workflow.stderr_lines,
             content_test=self.workflow_test.stderr,
-            workflow=workflow)]
+            workflow=self.workflow)]
 
         return tests
+
+    def teardown(self):
+        if self.config.getoption("keep_workflow_wd"):
+            # When we want to keep the workflow directory, write the logs to
+            # the workflow directory.
+            # TerminalReporter is used because print does not work.
+            log_err = self.workflow.stderr_to_file()
+            log_out = self.workflow.stdout_to_file()
+            # Print statements do not work here.
+            self.terminal_reporter.write_line(
+                "'{0}' stdout saved in: {1}".format(
+                    self.name, str(log_out)))
+            self.terminal_reporter.write_line(
+                "'{0}' stderr saved in: {1}".format(
+                    self.name, str(log_err)))
+        else:
+            shutil.rmtree(str(self.tempdir))
 
 
 class ExitCodeTest(pytest.Item):
