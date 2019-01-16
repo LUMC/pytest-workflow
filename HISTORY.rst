@@ -9,6 +9,9 @@ Changelog
 
 Version 0.3.0-dev
 ---------------------------
++ Fixed an error that polluted the log message with a pytest stacktrace when
+  running more than one workflow. Measures are taken in our test framework to
+  detect such issues in the future.
 + Added the possibility to run multiple workflows simultaneously with the
   ``--workflow-threads`` or ``--wt`` flag.
 + Made code easier to maintain by using stdlib instead of pytest's ``py`` lib
