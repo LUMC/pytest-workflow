@@ -197,11 +197,10 @@ class WorkflowQueue(queue.Queue):
                 workflow.run()
                 self.task_done()
                 # Some reporting
-                workflow_alias = ("'{0}'".format(workflow.name)
-                                  if workflow.name is not None
-                                  else
-                                  "command: '{0}'".format(workflow.command))
-                print("{0} done.".format(workflow_alias))
+                if workflow.name is not None:
+                    print("'{0}' done".format(workflow.name))
+                else:
+                    print("command: '{0}' done".format(workflow.command))
                 if save_logs:
                     log_err = workflow.stderr_to_file()
                     log_out = workflow.stdout_to_file()
