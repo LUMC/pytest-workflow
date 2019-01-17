@@ -76,10 +76,10 @@ def pytest_collection(session):
     # needed for pytest
     # We print an empty line here to make the report look slightly better.
     # Without it pytest will output "Collecting ... " and the workflow commands
-    # will be immediately after this: "Collecting ... queue (etc.) """
+    # will be immediately after this: "Collecting ... queue (etc.) "
     # the prevent provides a newline. So it will look like:
     # Collecting ...
-    # queue (etc)
+    # queue (etc.)
     print()
 
 
