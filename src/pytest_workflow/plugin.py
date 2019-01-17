@@ -70,6 +70,14 @@ def pytest_configure(config: _pytest.config.Config):
     setattr(config, "workflow_queue", workflow_queue)
 
 
+def pytest_collection(session):
+    """This function is started at the beginning of collection"""
+    # pylint: disable=unused-argument
+    # needed for pytest
+    # We print an empty line here to make the report look slightly better.
+    print()
+
+
 def pytest_runtestloop(session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
@@ -145,10 +153,10 @@ class WorkflowTestsCollector(pytest.Collector):
                                  cwd=self.tempdir,
                                  name=self.workflow_test.name)
 
-        print("'{name}' with command '{command}' in '{dir}' is "
-              "queued.".format(name=self.name,
-                               command=self.workflow_test.command,
-                               dir=str(self.tempdir)))
+        print("queue '{name}' with command '{command}' in '{dir}'".format(
+            name=self.name,
+            command=self.workflow_test.command,
+            dir=str(self.tempdir)))
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(self.workflow)
 
