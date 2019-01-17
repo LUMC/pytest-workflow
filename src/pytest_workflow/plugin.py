@@ -189,9 +189,9 @@ class WorkflowTestsCollector(pytest.Collector):
     def teardown(self):
         """This function is executed after all tests from this collector have
         finished. It is used to cleanup the tempdir."""
-        if not self.config.getoption("keep_workflow_wd"):
-            if self.tempdir is not None:
-                shutil.rmtree(str(self.tempdir))
+        if (not self.config.getoption("keep_workflow_wd")
+                and self.tempdir is not None):
+            shutil.rmtree(str(self.tempdir))
 
 
 class ExitCodeTest(pytest.Item):
