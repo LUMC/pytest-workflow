@@ -74,7 +74,7 @@ def pytest_runtestloop(session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
         number_of_threads=session.config.getoption("workflow_threads"),
-        save_logs=session.config.get_option("keep_workflow_wd")
+        save_logs=session.config.getoption("keep_workflow_wd")
     )
 
 

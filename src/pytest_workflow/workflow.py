@@ -186,7 +186,6 @@ class WorkflowQueue(queue.Queue):
         :param save_logs: Whether to save the logs of the workflows that have
         run
         """
-
         while True:
             try:
                 # We know the type is Workflow, because this was enforced in
@@ -202,7 +201,7 @@ class WorkflowQueue(queue.Queue):
                                   if workflow.name is not None
                                   else
                                   "command: '{0}'".format(workflow.command))
-                print("{0} done".format(workflow_alias))
+                print("{0} done.".format(workflow_alias))
                 if save_logs:
                     log_err = workflow.stderr_to_file()
                     log_out = workflow.stdout_to_file()
