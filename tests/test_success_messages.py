@@ -59,8 +59,7 @@ FAILING_GREP = textwrap.dedent("""\
       - "grep"  # stdout should be empty
   stderr:
     contains:
-      - 'Usage: grep'
-      - "Try 'grep --help'"
+      - "'grep --help'"
   exit_code: 2
 """)
 
@@ -79,10 +78,9 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::simple echo::exit code should be 0 PASSED"],
     ["test_succeeding.yml::failing grep::exit code should be 2 PASSED"],
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
-    ["test_succeeding.yml::failing grep::stderr::contains 'Usage: grep' PASSED"],  # noqa: E501
-    ["test_succeeding.yml::failing grep::stderr::contains 'Try 'grep --help''"],  # noqa: E501
-    ["run 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
-    ["run 'moo file': done"],
+    ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],  # noqa: E501
+    ["'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
+    ["'moo file' done."]
 ]
 
 
@@ -109,3 +107,16 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
 def test_message_in_result(message: str, succeeding_tests_output):
     # pylint: disable=redefined-outer-name
     assert message in succeeding_tests_output
+
+
+def test_message_success_no_errors_or_fails(succeeding_tests_output):
+    # pylint: disable=redefined-outer-name
+    assert "ERROR" not in succeeding_tests_output
+    assert "FAIL" not in succeeding_tests_output
+
+
+def test_message_directory_kept_no_errors_or_fails(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v", "--keep-workflow-wd")
+    assert "ERROR" not in result.stdout.str()
+    assert "FAIL" not in result.stdout.str()

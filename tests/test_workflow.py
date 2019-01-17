@@ -15,6 +15,9 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """Tests the Workflow class"""
+import math
+
+import pytest
 
 from pytest_workflow.workflow import Workflow
 
@@ -38,4 +41,37 @@ def test_stderr():
     # This will fail and print a shortened grep usage.
     workflow = Workflow("grep")
     workflow.run()
-    assert "grep" in str(workflow.stderr)
+    assert "grep" in workflow.stderr.decode()
+
+
+def test_wait_timeout():
+    workflow = Workflow("echo moo")
+    workflow.wait_timeout_secs = 0.1
+    workflow.wait_interval_secs = 0.01
+    with pytest.raises(ValueError) as error:
+        workflow.wait()
+    assert math.isclose(workflow.wait_time_secs, 0.11)
+    assert error.match(
+        "Waiting on a workflow that has not started within the last 0.1 "
+        "seconds"
+    )
+
+
+def test_start_lock():
+    workflow = Workflow("echo moo")
+    workflow.start()
+    with pytest.raises(ValueError) as error:
+        workflow.start()
+    assert error.match("Workflows can only be started once")
+
+
+def test_long_log():
+    """If stdout is longer than 65536 bytes then it completely fills up the
+    buffer on the linux kernel. If the buffer is not emptied, this will stall
+    the process that is writing to stdout. This test produces an output that is
+    bigger than 65536 bytes to make sure pytest-workflow handles these cases
+    correctly."""
+    workflow = Workflow(
+        "bash -c 'for i in {1..262144}; do echo \"this is a long log\"; done'")
+    workflow.run()
+    assert len(workflow.stdout) > 65536

@@ -13,3 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+
+import re
+
+
+# This function was created to ensure the same conversion is used throughout
+# pytest-workflow.
+def replace_whitespace(string: str, replace_with: str = '_') -> str:
+    """
+    Replaces all whitespace with the string in replace_with.
+    :param string: input string
+    :param replace_with: Replace whitespace with this string. Default: '_'
+    :return: The string with whitespace converted.
+    """
+    return re.sub(r'\s+', replace_with, string)

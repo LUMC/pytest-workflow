@@ -21,10 +21,10 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="0.2.0",
+    version="0.3.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
-    author="Leiden University Medical Center, various departments",
+    author="Leiden University Medical Center",
     author_email="sasc@lumc.nl",  # A placeholder for now
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",

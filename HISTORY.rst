@@ -7,6 +7,19 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 0.3.0
+---------------------------
++ Improved the log output to look nicer and make workflow log paths easier to
+  find in the test output.
++ Fixed an error that polluted the log message with a pytest stacktrace when
+  running more than one workflow. Measures are taken in our test framework to
+  detect such issues in the future.
++ Added the possibility to run multiple workflows simultaneously with the
+  ``--workflow-threads`` or ``--wt`` flag.
++ Made code easier to maintain by using stdlib instead of pytest's ``py`` lib
+  in all of the code.
++ Added a schema check to ensure that tests have unique names when whitespace
+  is removed.
 
 Version 0.2.0
 ---------------------------
@@ -15,11 +28,11 @@ Version 0.2.0
 + Start using sphinx and readthedocs.org for creating project documentation.
 + The temporary directories in which workflows are run are automatically
   cleaned up at the end of each workflow test. You can disable this behaviour
-  by using the `--keep-workflow-wd` flag, which allows you to inspect the working
+  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the working
   directory after the workflow tests have run. This is useful for debugging
   workflows.
 + The temporary directories in which workflows are run can now be
-  changed by using the `--basetemp` flag. This is because pytest-workflow now
+  changed by using the ``--basetemp`` flag. This is because pytest-workflow now
   uses the built-in tmpdir capabilities of pytest.
 + Save stdout and stderr of each workflow to a file and report their locations
   to stdout when running ``pytest``.

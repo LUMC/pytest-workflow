@@ -14,6 +14,11 @@ the ``--keep-workflow-wd`` flag to disable cleanup.
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
 
+To run multiple workflows simultaneously you can use
+``--workflow-threads <int>`` or ``--wt <int>`` flag. This defines the number
+of workflows that can be run simultaneously. This will speed up things if
+you have enough resources to process these workflows simultaneously.
+
 ==================================
 Writing tests with pytest-workflow
 ==================================

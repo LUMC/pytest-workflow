@@ -99,14 +99,16 @@ FAILURE_MESSAGE_TESTS = [
       command: grep
       stderr:
         must_not_contain:
-          - "Usage:"
+          - "grep --help"
     """,
-     "'Usage:' was found in stderr while it should not be there")
+     "'grep --help' was found in stderr while it should not be there")
 ]  # type: List[Tuple[str,str]]
 
 
 @pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)
 def test_messages(test: str, message: str, testdir):
     testdir.makefile(".yml", textwrap.dedent(test))
-    result = testdir.runpytest()
+    # Ideally this should be run in a LC_ALL=C environment. But this is not
+    # possible due to multiple levels of process launching.
+    result = testdir.runpytest("-v")
     assert message in result.stdout.str()
