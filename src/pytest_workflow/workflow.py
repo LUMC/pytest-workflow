@@ -63,9 +63,9 @@ class Workflow(object):
         # is started from multiple threads.
         with self.start_lock:
             if self._popen is None:
-                sub_procces_args = shlex.split(self.command)
+                sub_process_args = shlex.split(self.command)
                 self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
-                    sub_procces_args, stdout=subprocess.PIPE,
+                    sub_process_args, stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE, cwd=str(self.cwd))
             else:
                 raise ValueError("Workflows can only be started once")
