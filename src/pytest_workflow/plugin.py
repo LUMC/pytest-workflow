@@ -191,13 +191,7 @@ class WorkflowTestsCollector(pytest.Collector):
     def teardown(self):
         """This function is executed after all tests from this collector have
         finished. It is used to cleanup the tempdir."""
-        if self.config.getoption("keep_workflow_wd"):
-            # When we want to keep the workflow directory, write the logs to
-            # the workflow directory.
-            # TerminalReporter is used because print does not work.
-            if self.workflow is not None:
-                pass
-        else:
+        if not self.config.getoption("keep_workflow_wd"):
             if self.tempdir is not None:
                 shutil.rmtree(str(self.tempdir))
 
