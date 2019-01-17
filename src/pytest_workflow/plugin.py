@@ -128,8 +128,8 @@ class WorkflowTestsCollector(pytest.Collector):
         to prevent name collision in temporary paths. This is handled in the
         schema instead.
 
-        Print statements are used to provide information to the user, mostly
-        this is shorter than using pytests terminal reporter.
+        Print statements are used to provide information to the user.
+        This is shorter than using pytest's terminal reporter.
         """
         # pylint: disable=protected-access
         # Protected access needed to get the basetemp value.
