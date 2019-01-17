@@ -32,23 +32,29 @@ from typing import List, Optional  # noqa: F401  # used for typing
 class Workflow(object):
     # pylint: disable=too-many-instance-attributes
     # Is there a better way of doing things, as pylint suggests?
-    def __init__(self, command: str, cwd: Path = Path()):
+    def __init__(self,
+                 command: str,
+                 cwd: Path = Path(),
+                 name: Optional[str] = None):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
         :param cwd: The current working directory in which the command will
         be executed.
+        :param name: An alias for the workflow. This looks nicer than a printed
+        command.
         """
         self.command = command
+        self.name = name
+        self.cwd = cwd
         self._popen = None  # type: Optional[subprocess.Popen]
         self._stderr = None
         self._stdout = None
-        self.cwd = cwd
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = None
         self.wait_time_secs = 0.0
-        self.wait_interval_secs = 0.0
+        self.wait_interval_secs = 0.01
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -57,9 +63,9 @@ class Workflow(object):
         # is started from multiple threads.
         with self.start_lock:
             if self._popen is None:
-                sub_procces_args = shlex.split(self.command)
+                sub_process_args = shlex.split(self.command)
                 self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
-                    sub_procces_args, stdout=subprocess.PIPE,
+                    sub_process_args, stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE, cwd=str(self.cwd))
             else:
                 raise ValueError("Workflows can only be started once")
@@ -158,22 +164,28 @@ class WorkflowQueue(queue.Queue):
 
     # Queue processing with workers example taken from
     # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
-    def process(self, number_of_threads: int = 1):
+    def process(self, number_of_threads: int = 1, save_logs: bool = False):
         """
         Processes the workflow queue with a number of threads
         :param number_of_threads: The number of threads
+        :param save_logs: Whether to save the logs of the workflows that have
+        run
         """
         threads = []
         for _ in range(number_of_threads):
-            thread = threading.Thread(target=self.worker)
+            thread = threading.Thread(target=self.worker, args=(save_logs,))
             thread.start()
             threads.append(thread)
         self.join()
         for thread in threads:
             thread.join()
 
-    def worker(self):
-        """Run workflows until the queue is empty"""
+    def worker(self, save_logs: bool = False):
+        """
+        Run workflows until the queue is empty
+        :param save_logs: Whether to save the logs of the workflows that have
+        run
+        """
         while True:
             try:
                 # We know the type is Workflow, because this was enforced in
@@ -185,4 +197,14 @@ class WorkflowQueue(queue.Queue):
                 workflow.run()
                 self.task_done()
                 # Some reporting
-                print("command: '{0}' done.".format(workflow.command))
+                if workflow.name is not None:
+                    print("'{0}' done.".format(workflow.name))
+                else:
+                    print("command: '{0}' done.".format(workflow.command))
+                if save_logs:
+                    log_err = workflow.stderr_to_file()
+                    log_out = workflow.stdout_to_file()
+                    print("'{0}' stdout saved in: {1}".format(
+                        workflow.name or workflow.command, str(log_out)))
+                    print("'{0}' stderr saved in: {1}".format(
+                        workflow.name or workflow.command, str(log_err)))

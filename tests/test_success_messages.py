@@ -80,7 +80,7 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
     ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],  # noqa: E501
     ["'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
-    ["command: 'bash -c 'echo moo > moo.txt'' done."]
+    ["'moo file' done."]
 ]
 
 
@@ -107,3 +107,16 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
 def test_message_in_result(message: str, succeeding_tests_output):
     # pylint: disable=redefined-outer-name
     assert message in succeeding_tests_output
+
+
+def test_message_success_no_errors_or_fails(succeeding_tests_output):
+    # pylint: disable=redefined-outer-name
+    assert "ERROR" not in succeeding_tests_output
+    assert "FAIL" not in succeeding_tests_output
+
+
+def test_message_directory_kept_no_errors_or_fails(testdir):
+    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = testdir.runpytest("-v", "--keep-workflow-wd")
+    assert "ERROR" not in result.stdout.str()
+    assert "FAIL" not in result.stdout.str()
