@@ -191,4 +191,8 @@ class WorkflowQueue(queue.Queue):
                 workflow.run()
                 self.task_done()
                 # Some reporting
-                print("command: '{0}' done.".format(workflow.command))
+                workflow_alias = ("'{0}'".format(workflow.name)
+                                  if workflow.name is not None
+                                  else
+                                  "command: '{0}'".format(workflow.command))
+                print("{0} done".format(workflow_alias))
