@@ -104,8 +104,6 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
-        self.terminal_reporter = self.config.pluginmanager.get_plugin(
-            "terminalreporter")
         # These below variables store values for cleanup with teardown().
         self.tempdir = None  # type: Optional[Path]
         self.workflow = None  # type: Optional[Workflow]
@@ -131,10 +129,7 @@ class WorkflowTestsCollector(pytest.Collector):
         schema instead.
 
         Print statements are used to provide information to the user, mostly
-        this is shorter than using pytests terminal reporter. The terminal
-        reporter is used in the finalizer, because print does not work here.
-        Test name is included explicitly in each print command to avoid
-        confusion between workflows
+        this is shorter than using pytests terminal reporter.
         """
         # pylint: disable=protected-access
         # Protected access needed to get the basetemp value.
