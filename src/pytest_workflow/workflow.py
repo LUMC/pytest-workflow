@@ -32,18 +32,24 @@ from typing import List, Optional  # noqa: F401  # used for typing
 class Workflow(object):
     # pylint: disable=too-many-instance-attributes
     # Is there a better way of doing things, as pylint suggests?
-    def __init__(self, command: str, cwd: Path = Path()):
+    def __init__(self,
+                 command: str,
+                 cwd: Path = Path(),
+                 name: Optional[str] = None):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
         :param cwd: The current working directory in which the command will
         be executed.
+        :param name: An alias for the workflow. This looks nicer than a printed
+        command.
         """
         self.command = command
+        self.name = name
+        self.cwd = cwd
         self._popen = None  # type: Optional[subprocess.Popen]
         self._stderr = None
         self._stdout = None
-        self.cwd = cwd
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = None
