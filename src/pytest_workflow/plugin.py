@@ -196,15 +196,7 @@ class WorkflowTestsCollector(pytest.Collector):
             # the workflow directory.
             # TerminalReporter is used because print does not work.
             if self.workflow is not None:
-                log_err = self.workflow.stderr_to_file()
-                log_out = self.workflow.stdout_to_file()
-                # Print statements do not work here.
-                self.terminal_reporter.write_line(
-                    "'{0}' stdout saved in: {1}".format(
-                        self.name, str(log_out)))
-                self.terminal_reporter.write_line(
-                    "'{0}' stderr saved in: {1}".format(
-                        self.name, str(log_err)))
+                pass
         else:
             if self.tempdir is not None:
                 shutil.rmtree(str(self.tempdir))
