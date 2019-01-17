@@ -54,7 +54,7 @@ class Workflow(object):
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = None
         self.wait_time_secs = 0.0
-        self.wait_interval_secs = 0.0
+        self.wait_interval_secs = 0.01
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
