@@ -9,6 +9,8 @@ Changelog
 
 Version 0.3.0-dev
 ---------------------------
++ Improved the log output to look nicer and make workflow log paths easier to
+  find in the test output.
 + Fixed an error that polluted the log message with a pytest stacktrace when
   running more than one workflow. Measures are taken in our test framework to
   detect such issues in the future.
