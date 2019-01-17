@@ -145,8 +145,7 @@ class WorkflowTestsCollector(pytest.Collector):
                                  cwd=self.tempdir,
                                  name=self.workflow_test.name)
 
-        # Add an extra newline. As it looks better in the pytest output.
-        print("\n'{name}' with command '{command}' in '{dir}' is "
+        print("'{name}' with command '{command}' in '{dir}' is "
               "queued.".format(name=self.name,
                                command=self.workflow_test.command,
                                dir=str(self.tempdir)))
