@@ -73,7 +73,8 @@ def pytest_configure(config: _pytest.config.Config):
 def pytest_runtestloop(session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
-        number_of_threads=session.config.getoption("workflow_threads")
+        number_of_threads=session.config.getoption("workflow_threads"),
+        save_logs=session.config.get_option("keep_workflow_wd")
     )
 
 
@@ -145,7 +146,9 @@ class WorkflowTestsCollector(pytest.Collector):
         # rootdir.
         shutil.copytree(str(self.config.rootdir), str(self.tempdir))
         # Create a workflow and make sure it runs in the tempdir
-        self.workflow = Workflow(self.workflow_test.command, self.tempdir)
+        self.workflow = Workflow(command=self.workflow_test.command,
+                                 cwd=self.tempdir,
+                                 name=self.workflow_test.name)
 
         # Add an extra newline. As it looks better in the pytest output.
         print("\n'{name}' with command '{command}' in '{dir}' is "
