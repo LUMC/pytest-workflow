@@ -173,7 +173,7 @@ class WorkflowQueue(queue.Queue):
         """
         threads = []
         for _ in range(number_of_threads):
-            thread = threading.Thread(target=self.worker, args=(save_logs))
+            thread = threading.Thread(target=self.worker, args=(save_logs,))
             thread.start()
             threads.append(thread)
         self.join()
@@ -207,6 +207,6 @@ class WorkflowQueue(queue.Queue):
                     log_err = workflow.stderr_to_file()
                     log_out = workflow.stdout_to_file()
                     print("'{0}' stdout saved in: {1}".format(
-                            workflow.name or workflow.command, str(log_out)))
+                        workflow.name or workflow.command, str(log_out)))
                     print("'{0}' stderr saved in: {1}".format(
-                            workflow.name or workflow.command, str(log_err)))
+                        workflow.name or workflow.command, str(log_err)))
