@@ -18,6 +18,7 @@ matrix:
       dist: xenial
       env: TOX_ENV=py37
     - python: 3.5
+      dist: xenial
       env: TOX_ENV=py3-docs
 script:
     - tox -e $TOX_ENV

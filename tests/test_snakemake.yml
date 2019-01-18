@@ -54,6 +54,6 @@
     - path: all_data.gz
   stderr:
     contains:
-      - "Building DAG of jobs..."
+     # - "Building DAG of jobs..." FIXME: re-enable in more recent versions of snakemake
       - "(100%) done"
-      - "Complete log:"
+     # - "Complete log:" FIXME: re-enable in more recent versions of snakemake

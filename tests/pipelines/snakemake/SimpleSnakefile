@@ -24,7 +24,10 @@ n_lines_to_read = config.get("N_LINES_TO_READ")
 if n_lines_to_read is None:
     raise ValueError("You must set --config N_LINES_TO_READ=<a value>.")
 
-if not isinstance(n_lines_to_read, int):
+# compatibility with really old versions of snakemake
+try:
+    n_lines_to_read = int(n_lines_to_read)
+except (ValueError, TypeError):
     raise ValueError("N_LINES_TO_READ must be an integer.")
 
 if n_lines_to_read < 1:
