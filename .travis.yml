@@ -1,4 +1,6 @@
 language: python
+before_install:
+  - sudo apt-get install -y snakemake
 install:
   - pip install tox
   - pip install codacy-coverage
@@ -7,8 +9,10 @@ matrix:
   include:
     # Test most recent editions of python 3
     - python: 3.5
+      dist: xenial
       env: TOX_ENV=py35
     - python: 3.6
+      dist: xenial
       env: TOX_ENV=py36
     - python: 3.7
       dist: xenial
