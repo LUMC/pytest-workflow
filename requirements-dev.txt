@@ -5,3 +5,4 @@ flake8-import-order
 mypy
 bandit
 pylint
+snakemake
