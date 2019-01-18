@@ -18,3 +18,42 @@
   stdout:
     contains:
       - "N_LINES_TO_READ must at least be 1."
+- name: test-snakemake-run
+  command: snakemake -r -p -s tests/pipelines/snakemake/SimpleSnakefile --config N_LINES_TO_READ=500
+  files:
+    - path: rand/0.txt
+    - path: rand/1.txt
+    - path: rand/2.txt
+    - path: rand/3.txt
+    - path: rand/4.txt
+    - path: rand/5.txt
+    - path: rand/6.txt
+    - path: rand/7.txt
+    - path: rand/8.txt
+    - path: rand/9.txt
+    - path: b64/0.txt
+    - path: b64/1.txt
+    - path: b64/2.txt
+    - path: b64/3.txt
+    - path: b64/4.txt
+    - path: b64/5.txt
+    - path: b64/6.txt
+    - path: b64/7.txt
+    - path: b64/8.txt
+    - path: b64/9.txt
+    - path: randgz/0.txt.gz
+    - path: randgz/1.txt.gz
+    - path: randgz/2.txt.gz
+    - path: randgz/3.txt.gz
+    - path: randgz/4.txt.gz
+    - path: randgz/5.txt.gz
+    - path: randgz/6.txt.gz
+    - path: randgz/7.txt.gz
+    - path: randgz/8.txt.gz
+    - path: randgz/9.txt.gz
+    - path: all_data.gz
+  stderr:
+    contains:
+      - "Building DAG of jobs..."
+      - "(100%) done"
+      - "Complete log:"
