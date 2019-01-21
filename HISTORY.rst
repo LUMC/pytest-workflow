@@ -7,6 +7,11 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 0.4.0-dev
+---------------------------
++ Added ``--tag`` flag to allow for easier selection of workflows during
+  testing.
+
 Version 0.3.0
 ---------------------------
 + Improved the log output to look nicer and make workflow log paths easier to
@@ -28,9 +33,9 @@ Version 0.2.0
 + Start using sphinx and readthedocs.org for creating project documentation.
 + The temporary directories in which workflows are run are automatically
   cleaned up at the end of each workflow test. You can disable this behaviour
-  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the working
-  directory after the workflow tests have run. This is useful for debugging
-  workflows.
+  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the
+  working directory after the workflow tests have run. This is useful for
+  debugging workflows.
 + The temporary directories in which workflows are run can now be
   changed by using the ``--basetemp`` flag. This is because pytest-workflow now
   uses the built-in tmpdir capabilities of pytest.
