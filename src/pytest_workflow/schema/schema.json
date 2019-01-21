@@ -10,6 +10,13 @@
         "description": "Name of the test",
         "type": "string"
       },
+      "tags": {
+        "description": "Tags for the workflow test",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "command": {
         "description": "The command that is run for the workflow",
         "type": "string"

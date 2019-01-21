@@ -1,4 +1,7 @@
 - name: simple echo
+  tags:
+    - "simple"
+    - "use_echo"
   files:
     - path: "log.file"
       md5sum: "e583af1f8b00b53cda87ae9ead880224"

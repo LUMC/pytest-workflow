@@ -49,6 +49,31 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
         type=int,
         help="The number of workflows to run simultaneously.")
 
+    # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
+    # `-m` uses a "mark expression". So you have to type a piece of python
+    # code instead of just supplying the tags you want. This is fine for the
+    # user interface. But this is not fine for the plugin implementation. If
+    # `-m` is used we need to evaluate the mark expression and make sure it
+    # applies to the marks of the workflow. This requires reusing of the pytest
+    # code, which is a hell to implement.
+    # Additionally, markers can not have whitespace. So using the name of a
+    # workflow as a default tag is not possible. Unless you first replace
+    # whitespace for both command line and the test_.yml to make sure the marks
+    # are correct. This is non-trivial. Alternatively, the schema could not
+    # allow whitespace in names. That is just being plain annoying to the user
+    # for no good reason. Maybe the user does not want to use tags, and then it
+    # is extra hassle for a feature that is not even used.
+    # So using pytest `-m` to select workflows is an implementation nightmare.
+    # `--tag` is an easier solution.
+    parser.addoption(
+        "--tag",
+        dest="workflow_tags",
+        action="append",
+        type=str,
+        # Otherwise default is None and this does not work with list operations
+        default=[]
+    )
+
 
 def pytest_collect_file(path, parent):
     """Collection hook
@@ -121,6 +146,9 @@ class WorkflowTestsCollector(pytest.Collector):
         self.tempdir = None  # type: Optional[Path]
         self.workflow = None  # type: Optional[Workflow]
 
+        # Attach tags to this node for easier workflow selection
+        self.tags = [self.workflow_test.name] + self.workflow_test.tags
+
     def queue_workflow(self):
         """Creates a temporary directory and add the workflow to the workflow
         queue.
@@ -169,6 +197,15 @@ class WorkflowTestsCollector(pytest.Collector):
         """This runs the workflow and starts all the associated tests
         The idea is that isolated parts of the yaml get their own collector or
         item."""
+
+        # If tags specified on the command line are not a subset of the tags on
+        # this node, do not collect tests and do not queue the workflow.
+        # NOTE: an empty set is always a subset of any other set. So if no tags
+        # are given on the command line all workflow tests are run. (This is
+        # the least unexpected behaviour.)
+        if not (set(self.config.getoption("workflow_tags")
+                    ).issubset(set(self.tags))):
+            return []
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
