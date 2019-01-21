@@ -46,6 +46,7 @@ def test_name_tag_with_space(testdir):
     assert "four" not in result
     assert "nine" not in result
 
+
 def test_name_tag(testdir):
     testdir.makefile(".yml", test_tags=TAG_TESTS)
     result = testdir.runpytest("-v", "--tag", "three").stdout.str()
@@ -54,6 +55,7 @@ def test_name_tag(testdir):
     assert "four" not in result
     assert "nine" not in result
 
+
 def test_category_tag(testdir):
     testdir.makefile(".yml", test_tags=TAG_TESTS)
     result = testdir.runpytest("-v", "--tag", "odd").stdout.str()
@@ -61,6 +63,7 @@ def test_category_tag(testdir):
     assert "three again" in result
     assert "nine" in result
     assert "four" not in result
+
 
 def test_category_tag2(testdir):
     testdir.makefile(".yml", test_tags=TAG_TESTS)
