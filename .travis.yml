@@ -1,13 +1,14 @@
 language: python
 install:
   - pip install tox
-  - pip install codacy-coverage
-  - pip install codecov
 matrix:
   include:
     # Test most recent editions of python 3
     - python: 3.5
       dist: xenial
+      after_install:
+        - pip install codacy-coverage
+        - pip install codecov
       env: TOX_ENV=py35
       after_success:
         # Correct coverage xml for coverage services.
