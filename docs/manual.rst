@@ -76,3 +76,23 @@ A more advanced example:
 
 
 The above YAML file contains all the possible options for a workflow test.
+
+
+-----------------
+Snakemake example
+-----------------
+
+An example yaml file that could be used to test a snakemake pipeline is listed
+below.
+
+.. code-block:: yaml
+
+    - name: test-dry-run
+      command: snakemake -n -r -p -s Snakefile
+    - name: test-full-run
+      command: snakemake -r -p -s Snakefile
+      files:
+        - "my_output.txt"
+      stderr:
+        contains:
+         - "(100%) done"

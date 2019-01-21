@@ -7,14 +7,23 @@ matrix:
   include:
     # Test most recent editions of python 3
     - python: 3.5
+      dist: xenial
       env: TOX_ENV=py35
     - python: 3.6
+      dist: xenial
       env: TOX_ENV=py36
     - python: 3.7
       dist: xenial
       env: TOX_ENV=py37
     - python: 3.5
+      dist: xenial
       env: TOX_ENV=py3-docs
+    - python: 3.5
+      dist: xenial
+      env: TOX_ENV=py3-snakemake
+    - python: 3.6
+      dist: xenial
+      env: TOX_ENV=py3-snakemake
 script:
     - tox -e $TOX_ENV
 
