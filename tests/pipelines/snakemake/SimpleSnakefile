@@ -1,0 +1,60 @@
+# Copyright (C) 2018 Leiden University Medical Center
+# This file is part of pytest-workflow
+#
+# pytest-workflow is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# pytest-workflow is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+
+"""
+Just a simple dummy snakemake pipeline that reads some data from /dev/urandom,
+and does some transformations on it. It also reads a config value, and does
+some sanity checking on this value.
+"""
+n_lines_to_read = config.get("N_LINES_TO_READ")
+
+if n_lines_to_read is None:
+    raise ValueError("You must set --config N_LINES_TO_READ=<a value>.")
+
+# compatibility with really old versions of snakemake
+try:
+    n_lines_to_read = int(n_lines_to_read)
+except (ValueError, TypeError):
+    raise ValueError("N_LINES_TO_READ must be an integer.")
+
+if n_lines_to_read < 1:
+    raise ValueError("N_LINES_TO_READ must at least be 1.")
+
+iterations = list(range(10))  # dummy wildcard
+
+rule all:
+    input: "all_data.gz"
+
+rule read_random:
+    output: "rand/{iter}.txt"
+    params:
+        n_lines=n_lines_to_read
+    shell: "head -n {params.n_lines} /dev/urandom > {output}"
+
+rule base64_random:
+    input: "rand/{iter}.txt"
+    output: "b64/{iter}.txt"
+    shell: "cat {input} | base64 > {output}"
+
+rule gzip_b64:
+    input: "b64/{iter}.txt"
+    output: "randgz/{iter}.txt.gz"
+    shell: "cat {input} | gzip -c > {output}"
+
+rule concat_gzip:
+    input: expand("randgz/{iter}.txt.gz", iter=iterations)
+    output: "all_data.gz"
+    shell: "cat {input} > {output}"
