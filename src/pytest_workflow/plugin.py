@@ -63,8 +63,8 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
     # allow whitespace in names. That is just being plain annoying to the user
     # for no good reason. Maybe the user does not want to use tags, and then it
     # is extra hassle for a feature that is not even used.
-    # So using pytest `-m` is an implementation nightmare. `--tag` is not just
-    # here for "not invented here" reasons.
+    # So using pytest `-m` to select workflows is an implementation nightmare.
+    # `--tag` is an easier solution.
     parser.addoption(
         "--tag",
         dest="workflow_tags",
