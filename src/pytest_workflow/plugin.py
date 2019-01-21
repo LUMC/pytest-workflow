@@ -129,9 +129,6 @@ class WorkflowTestsCollector(pytest.Collector):
         self.tempdir = None  # type: Optional[Path]
         self.workflow = None  # type: Optional[Workflow]
 
-        # Attach a marker to this node to distinguish from other python tests
-        self.add_marker("workflow")
-
         # Attach tags to this node for easier workflow selection
         self.tags = [self.workflow_test.name] + self.workflow_test.tags
 
