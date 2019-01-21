@@ -179,6 +179,7 @@ class WorkflowTest(object):
     # pylint: disable=too-few-public-methods
 
     def __init__(self, name: str, command: str,
+                 markers: Optional[List[str]],
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
                  stderr: ContentTest = ContentTest(),
@@ -199,10 +200,8 @@ class WorkflowTest(object):
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
-        if files:
-            self.files = files
-        else:
-            self.files = []
+        self.files = files if files is not None else []
+        self.markers = markers if markers is not None else []
 
     @classmethod
     def from_schema(cls, schema: dict):
@@ -213,6 +212,7 @@ class WorkflowTest(object):
         return cls(
             name=schema["name"],
             command=schema["command"],
+            markers=schema.get("markers"),
             exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
             stdout=ContentTest.from_dict(schema.get("stdout", {})),
             stderr=ContentTest.from_dict(schema.get("stderr", {})),

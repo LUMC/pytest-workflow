@@ -49,6 +49,7 @@ def test_workflowtest():
         assert len(tests[0].files) == 1
         assert tests[0].stdout.contains == ["bla"]
         assert tests[0].exit_code == 127
+        assert tests[0].markers == ["simple", "use_echo"]
 
 
 def test_validate_schema_conflicting_keys():
