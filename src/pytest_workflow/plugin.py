@@ -53,6 +53,8 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
         dest="workflow_tags",
         action="append",
         type=str,
+        # Otherwise default is None and this does not work with list operations
+        default=[]
     )
 
 
@@ -181,6 +183,15 @@ class WorkflowTestsCollector(pytest.Collector):
         """This runs the workflow and starts all the associated tests
         The idea is that isolated parts of the yaml get their own collector or
         item."""
+
+        # If tags specified on the command line are not a subset of the tags on
+        # this node, do not collect tests and do not queue the workflow.
+        # NOTE: an empty set is always a subset of any other set. So if no tags
+        # are given on the command line all workflow tests are run. (This is
+        # the least unexpected behaviour.)
+        if not (set(self.config.getoption("workflow_tags")
+                    ).issubset(set(self.tags))):
+            return []
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
