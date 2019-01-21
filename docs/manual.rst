@@ -46,6 +46,19 @@ workflow will run. Multiple tags can be used like this:
 ``pytest --tag 'rooster sound' --tag animal`` This will run all workflows that
 have both 'rooster sound' and 'animal'.
 
+Internally names and tags are handled the same so if the following tests:
+
+.. code-block:: yaml
+
+  - name: hello
+    command: echo 'hello'
+  - name: hello2
+    command: echo 'hello2'
+    tags:
+      - hello
+
+are run with ``pytest --tag hello`` then both ``hello`` and ``hello2`` are run.
+
 ==================================
 Writing tests with pytest-workflow
 ==================================
@@ -107,7 +120,6 @@ A more advanced example:
 The above YAML file contains all the possible options for a workflow test.
 
 
------------------
 Snakemake example
 -----------------
 
