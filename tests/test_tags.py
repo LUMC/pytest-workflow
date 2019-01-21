@@ -16,36 +16,32 @@
 
 import textwrap
 
-import pytest
-
 MARKER_TESTS = textwrap.dedent("""\
 - name: three
   command: echo 3
-  markers:
+  tags:
     - odd
     - prime
 - name: three again
   command: echo 3
-  markers:
+  tags:
     - odd
     - prime
     - again
 - name: four
   command: echo 4
-  markers:
+  tags:
     - even
 - name: nine
   command: echo 9
-  markers:
+  tags:
     - odd
 """)
 
 
-def test_name_marker_with_space(testdir):
+def test_name_tag_with_space(testdir):
     testdir.makefile(".yml", test_markers=MARKER_TESTS)
-    result = testdir.runpytest("-v", "-m", "three_again").stdout.str()
+    result = testdir.runpytest("-v", "--tag", "three again").stdout.str()
     assert "three again" in result
     assert "four" not in result
     assert "nine" not in result
-
-

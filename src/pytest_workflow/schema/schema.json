@@ -10,8 +10,8 @@
         "description": "Name of the test",
         "type": "string"
       },
-      "markers": {
-        "description": "Markers for the workflow test",
+      "tags": {
+        "description": "Tags for the workflow test",
         "type": "array",
         "items": {
           "type": "string"

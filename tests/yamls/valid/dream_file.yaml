@@ -1,5 +1,5 @@
 - name: simple echo
-  markers:
+  tags:
     - "simple"
     - "use_echo"
   files:

@@ -48,6 +48,12 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
         default=1,
         type=int,
         help="The number of workflows to run simultaneously.")
+    parser.addoption(
+        "--tag",
+        dest="workflow_tags",
+        action="append",
+        type=str,
+    )
 
 
 def pytest_collect_file(path, parent):
@@ -121,12 +127,11 @@ class WorkflowTestsCollector(pytest.Collector):
         self.tempdir = None  # type: Optional[Path]
         self.workflow = None  # type: Optional[Workflow]
 
-        # Attach markers to this node to allow for easier test selection when
-        # running pytest.
-        self.add_marker("workflow")  # To distinguish from other python tests
-        self.add_marker(self.workflow_test.name)
-        for marker in self.workflow_test.markers:
-            self.add_marker(marker)
+        # Attach a marker to this node to distinguish from other python tests
+        self.add_marker("workflow")
+
+        # Attach tags to this node for easier workflow selection
+        self.tags = [self.workflow_test.name] + self.workflow_test.tags
 
     def queue_workflow(self):
         """Creates a temporary directory and add the workflow to the workflow
