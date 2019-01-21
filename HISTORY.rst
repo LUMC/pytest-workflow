@@ -9,6 +9,7 @@ Changelog
 
 Version 0.4.0-dev
 ---------------------------
+
 + Added ``--tag`` flag to allow for easier selection of workflows during
   testing.
 + Adds additional test cases for snakemake pipelines.
