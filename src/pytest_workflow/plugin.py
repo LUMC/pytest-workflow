@@ -48,6 +48,23 @@ def pytest_addoption(parser: _pytest.config.argparsing.Parser):
         default=1,
         type=int,
         help="The number of workflows to run simultaneously.")
+
+    # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
+    # `-m` uses a "mark expression". So you have to type a piece of python
+    # code instead of just supplying the tags you want. This is fine for the
+    # user interface. But this is not fine for the plugin implementation. If
+    # `-m` is used we need to evaluate the mark expression and make sure it
+    # applies to the marks of the workflow. This requires reusing of the pytest
+    # code, which is a hell to implement.
+    # Additionally, markers can not have whitespace. So using the name of a
+    # workflow as a default tag is not possible. Unless you first replace
+    # whitespace for both command line and the test_.yml to make sure the marks
+    # are correct. This is non-trivial. Alternatively, the schema could not
+    # allow whitespace in names. That is just being plain annoying to the user
+    # for no good reason. Maybe the user does not want to use tags, and then it
+    # is extra hassle for a feature that is not even used.
+    # So using pytest `-m` is an implementation nightmare. `--tag` is not just
+    # here for "not invented here" reasons.
     parser.addoption(
         "--tag",
         dest="workflow_tags",
