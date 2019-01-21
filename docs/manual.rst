@@ -27,16 +27,24 @@ its own name and additional tags in the ``tags`` key of the yaml.
 .. code-block:: yaml
 
   - name: moo
+    tags:
+      - animal
     command: echo moo
   - name: cock-a-doodle-doo
     tags:
       - rooster sound
+      - animal
     command: echo cock-a-doodle-doo
+  - name: vroom vroom
+    tags:
+      - car
+    command: echo vroom croom
 
 With the command ``pytest --tag moo`` only the workflow named 'moo' will be
 run. With ``pytest --tag 'rooster sound'`` only the 'cock-a-doodle-doo'
 workflow will run. Multiple tags can be used like this:
-``pytest --tag moo --tag 'rooster sound'``.
+``pytest --tag 'rooster sound' --tag animal`` This will run all workflows that
+have both 'rooster sound' and 'animal'.
 
 ==================================
 Writing tests with pytest-workflow
