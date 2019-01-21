@@ -121,6 +121,13 @@ class WorkflowTestsCollector(pytest.Collector):
         self.tempdir = None  # type: Optional[Path]
         self.workflow = None  # type: Optional[Workflow]
 
+        # Attach markers to this node to allow for easier test selection when
+        # running pytest.
+        self.add_marker("workflow")  # To distinguish from other python tests
+        self.add_marker(self.workflow_test.name)
+        for marker in self.workflow_test.markers:
+            self.add_marker(marker)
+
     def queue_workflow(self):
         """Creates a temporary directory and add the workflow to the workflow
         queue.
