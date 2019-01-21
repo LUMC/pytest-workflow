@@ -16,7 +16,7 @@
 
 import textwrap
 
-MARKER_TESTS = textwrap.dedent("""\
+TAG_TESTS = textwrap.dedent("""\
 - name: three
   command: echo 3
   tags:
@@ -40,8 +40,32 @@ MARKER_TESTS = textwrap.dedent("""\
 
 
 def test_name_tag_with_space(testdir):
-    testdir.makefile(".yml", test_markers=MARKER_TESTS)
+    testdir.makefile(".yml", test_tags=TAG_TESTS)
     result = testdir.runpytest("-v", "--tag", "three again").stdout.str()
     assert "three again" in result
     assert "four" not in result
+    assert "nine" not in result
+
+def test_name_tag(testdir):
+    testdir.makefile(".yml", test_tags=TAG_TESTS)
+    result = testdir.runpytest("-v", "--tag", "three").stdout.str()
+    assert "three" in result
+    assert "three again" not in result
+    assert "four" not in result
+    assert "nine" not in result
+
+def test_category_tag(testdir):
+    testdir.makefile(".yml", test_tags=TAG_TESTS)
+    result = testdir.runpytest("-v", "--tag", "odd").stdout.str()
+    assert "three" in result
+    assert "three again" in result
+    assert "nine" in result
+    assert "four" not in result
+
+def test_category_tag2(testdir):
+    testdir.makefile(".yml", test_tags=TAG_TESTS)
+    result = testdir.runpytest("-v", "--tag", "even").stdout.str()
+    assert "three" not in result
+    assert "three again" not in result
+    assert "four" in result
     assert "nine" not in result
