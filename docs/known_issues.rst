@@ -6,7 +6,7 @@ Known issues
   due to the temporary directory creating nature of ``pytest-workflow``.
   This can be solved by using:
 
-  .. code-block::
+  .. code-block:: bash
 
     coverage run --source=<your source here> -m py.test <your test dir>
 
