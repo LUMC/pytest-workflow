@@ -12,8 +12,7 @@ matrix:
     - env: TOX_ENV=py3-lint
 
     # UNIT TESTS
-    # On most recent versions of python.
-    #
+    # On most recent versions of python.W
     - env: TOX_ENV=py36
     - python: 3.7
       env: TOX_ENV=py37
