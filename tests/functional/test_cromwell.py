@@ -33,8 +33,16 @@ def simple_wdl_contents():
         return wdl_handle.read()
 
 
+@pytest.fixture
+def simple_wdl_json():
+    json_path = (Path(__file__).parent.parent / Path("pipelines") /
+                 Path("wdl") / Path("simple.json"))
+
+
 @pytest.mark.functional
-def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents):
+def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
+                  simple_wdl_json):
+    testdir.makefile(ext=".json", simple=simple_wdl_json)
     testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
     testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
     result = testdir.runpytest("-v")

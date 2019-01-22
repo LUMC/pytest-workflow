@@ -1,7 +1,7 @@
 - name: simple wdl
   command: >-
     bash -c '
-    TEST_JSON=tests/pipelines/wdl/simple.json
+    TEST_JSON=simple.json ;
     sed -i "2i\"string_to_zip.out_path\":\"$PWD/moo.txt.gz\"," $TEST_JSON ;
     cromwell run -i $TEST_JSON pipeline.wdl'
   files:
