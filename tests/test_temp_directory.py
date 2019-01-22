@@ -72,4 +72,6 @@ def test_basetemp_can_be_used_twice(testdir):
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
                                tempdir)
     exit_code = result.ret
+    assert "'{0}/simple_echo' already exists. Deleting ...".format(
+        tempdir) in result.stdout.str()
     assert exit_code == 0

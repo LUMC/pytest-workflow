@@ -17,6 +17,7 @@
 """core functionality of pytest-workflow plugin"""
 import shutil
 import tempfile
+import warnings
 from pathlib import Path
 from typing import Optional  # noqa: F401 needed for typing.
 
@@ -190,6 +191,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # Remove the tempdir if it exists. This is needed for shutil.copytree
         # to work properly.
         if self.tempdir.exists():
+            warnings.warn(
+                "'{0}' already exists. Deleting ...".format(self.tempdir))
             shutil.rmtree(str(self.tempdir))
 
         # Copy the project directory to the temporary directory using pytest's
