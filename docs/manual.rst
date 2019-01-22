@@ -15,9 +15,12 @@ flag is highly recommended when debugging pipelines.
 
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
-WARNING: directories defined as ``basetemp`` will have content deleted if it
-has the same name as any of the workflows you are running. DO NOT use
-``--basetemp`` on directories you care about.
+
+.. container:: warning
+
+  WARNING: Directories defined as ``basetemp`` will have content deleted if it
+  has the same name as any of the workflows you are running. DO NOT use
+  ``--basetemp`` on directories you care about.
 
 To run multiple workflows simultaneously you can use
 ``--workflow-threads <int>`` or ``--wt <int>`` flag. This defines the number
