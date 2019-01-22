@@ -28,7 +28,7 @@ def simple_wdl_yaml():
 @pytest.fixture
 def simple_wdl_contents():
     wdl_path = (Path(__file__).parent.parent / Path("pipelines") /
-                  Path("wdl") / Path("simple.wdl"))
+                Path("wdl") / Path("simple.wdl"))
     with wdl_path.open("r") as wdl_handle:
         return wdl_handle.read()
 

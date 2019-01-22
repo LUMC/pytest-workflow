@@ -1,15 +1,23 @@
 language: python
 install:
   - pip install tox
+dist: xenial
+python: 3.5
+script:
+    - tox -e $TOX_ENV
 matrix:
   include:
-    # Test most recent editions of python 3
-    - python: 3.5
-      dist: xenial
+    # TEST DOCS AND LINTING
+    - env: TOX_ENV=py3-docs
+    - env: TOX_ENV=py3-lint
+
+    # UNIT TESTS
+    # On most recent versions of python.
+    #
+    - env: TOX_ENV=py35
       after_install:
         - pip install codacy-coverage
         - pip install codecov
-      env: TOX_ENV=py35
       after_success:
         # Correct coverage xml for coverage services.
         - >
@@ -22,23 +30,15 @@ matrix:
           fi'
         - codecov
     - python: 3.6
-      dist: xenial
       env: TOX_ENV=py36
     - python: 3.7
-      dist: xenial
       env: TOX_ENV=py37
-    - python: 3.5
-      dist: xenial
-      env: TOX_ENV=py3-docs
-    - python: 3.5
-      dist: xenial
-      env: TOX_ENV=py3-snakemake
+
+    # FUNCTIONAL TESTS
+    - env: TOX_ENV=py3-snakemake
     - python: 3.6
-      dist: xenial
       env: TOX_ENV=py3-snakemake
-    - python: 3.6
-      dist: xenial
-      env: TOX_ENV=py3-cromwell
+    - env: TOX_ENV=py3-cromwell
       before_install:
         # Install conda
         - export MINICONDA=${HOME}/miniconda
@@ -51,6 +51,3 @@ matrix:
         - conda config --add channels conda-forge
         - conda env create -n my_env cromwell
         - source activate my_env
-script:
-    - tox -e $TOX_ENV
-
