@@ -1,14 +1,24 @@
 language: python
 install:
   - pip install tox
-  - pip install codacy-coverage
-  - pip install codecov
+dist: xenial
+python: 3.5
+script:
+    - tox -e $TOX_ENV
 matrix:
   include:
-    # Test most recent editions of python 3
-    - python: 3.5
-      dist: xenial
-      env: TOX_ENV=py35
+    # TEST DOCS AND LINTING
+    - env: TOX_ENV=py3-docs
+    - env: TOX_ENV=py3-lint
+
+    # UNIT TESTS
+    # On most recent versions of python.
+    #
+    - env: TOX_ENV=py35
+      install:
+        - pip install codacy-coverage
+        - pip install codecov
+        - pip install tox
       after_success:
         # Correct coverage xml for coverage services.
         - >
@@ -19,22 +29,26 @@ matrix:
           bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
           python-codacy-coverage -r coverage.xml;
           fi'
-        - codecov
+        - codecov -v  # -v to make sure coverage upload works.
     - python: 3.6
-      dist: xenial
       env: TOX_ENV=py36
     - python: 3.7
-      dist: xenial
       env: TOX_ENV=py37
-    - python: 3.5
-      dist: xenial
-      env: TOX_ENV=py3-docs
-    - python: 3.5
-      dist: xenial
-      env: TOX_ENV=py3-snakemake
-    - python: 3.6
-      dist: xenial
-      env: TOX_ENV=py3-snakemake
-script:
-    - tox -e $TOX_ENV
 
+    # FUNCTIONAL TESTS
+    - env: TOX_ENV=py3-snakemake
+    - python: 3.6
+      env: TOX_ENV=py3-snakemake
+    - env: TOX_ENV=py3-cromwell
+      before_install:
+        # Install conda
+        - export MINICONDA=${HOME}/miniconda
+        - export PATH=${MINICONDA}/bin:${PATH}
+        - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+        - bash miniconda.sh -b -f -p ${MINICONDA}
+        - conda config --set always_yes yes
+        - conda config --add channels defaults
+        - conda config --add channels bioconda
+        - conda config --add channels conda-forge
+        - conda create -n my_env cromwell
+        - source activate my_env
