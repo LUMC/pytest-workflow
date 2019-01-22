@@ -141,19 +141,19 @@ below.
 WDL with Cromwell example
 -------------------------
 
-An example yaml file that could be used to test a WDL pipeline that is run with
-Cromwell is explained below.
+Below an example yaml file is explained which can be used to test a WDL
+pipeline run through Cromwell.
 
 One problem with Cromwell is the way it handles relative paths and how it
 handles the input file:
 
-+ Relative paths are written only within the ``cromwell-executions`` folder
-  if you want to write outside this folder you need absolute paths. This is
++ Relative paths are written only within the ``cromwell-executions`` folder.
+  If you want to write outside this folder you need absolute paths. This is
   fine but for testing your pipeline ``pytest-workflow`` creates a temporary
-  folder from which the pipeline is run. You don't know before which path this
-  is, but you could use environment variable ``$PWD``.
-+ However problem two is that inputs can only be supplied to Cromwell in a
-  json file, not on the command line. So you cannot dynamically choose an
+  folder from which the pipeline is run. You don't know beforehand which path
+  this is, but you could use the environment variable ``$PWD``.
++ However the second problem is that inputs can only be supplied to Cromwell in
+  a json file, not on the command line. So you cannot dynamically choose an
   output folder. You have to rewrite the input file.
 
 To fix this problem you can write ``command`` to be a bash script that injects
