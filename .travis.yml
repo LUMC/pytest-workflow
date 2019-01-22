@@ -2,7 +2,7 @@ language: python
 install:
   - pip install tox
 dist: xenial
-python: 3.5
+python: 3.6  # 3.6 is available in the xenial image by default.
 script:
     - tox -e $TOX_ENV
 matrix:
@@ -14,7 +14,11 @@ matrix:
     # UNIT TESTS
     # On most recent versions of python.
     #
-    - env: TOX_ENV=py35
+    - env: TOX_ENV=py36
+    - python: 3.7
+      env: TOX_ENV=py37
+    - python: 3.5
+      env: TOX_ENV=py35
       install:
         - pip install codacy-coverage
         - pip install codecov
@@ -30,14 +34,11 @@ matrix:
           python-codacy-coverage -r coverage.xml;
           fi'
         - codecov -v  # -v to make sure coverage upload works.
-    - python: 3.6
-      env: TOX_ENV=py36
-    - python: 3.7
-      env: TOX_ENV=py37
+
 
     # FUNCTIONAL TESTS
     - env: TOX_ENV=py3-snakemake
-    - python: 3.6
+    - python: 3.5
       env: TOX_ENV=py3-snakemake
     - env: TOX_ENV=py3-cromwell
       before_install:
