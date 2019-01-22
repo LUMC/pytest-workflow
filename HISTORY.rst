@@ -9,10 +9,12 @@ Changelog
 
 Version 0.4.0-dev
 ---------------------------
-
++ Added a test case for WDL pipelines run with Cromwell and wrote an example
+  for using WDL+Cromwell in the manual.
 + Added ``--tag`` flag to allow for easier selection of workflows during
   testing.
-+ Adds additional test cases for snakemake pipelines.
++ Added a test case for snakemake pipelines and wrote an example for using
+  pytest-workflow with snakemake in the manual.
 
 Version 0.3.0
 ---------------------------
