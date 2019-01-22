@@ -37,6 +37,8 @@ def simple_wdl_contents():
 def simple_wdl_json():
     json_path = (Path(__file__).parent.parent / Path("pipelines") /
                  Path("wdl") / Path("simple.json"))
+    with json_path.open("r") as json_handle:
+        return json_handle.read()
 
 
 @pytest.mark.functional

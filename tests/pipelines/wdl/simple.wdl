@@ -18,9 +18,13 @@ task zip {
         String out_path
     }
     command {
-        gzip -c ~{in_file} > out_file
+        # Do not keep timestamp and original name. So md5sum will evaluate
+        # contents only.
+        gzip -nc ~{in_file} > ~{out_path}
     }
-    File out_file = out_path
+    output {
+      File out_file = out_path
+    }
 }
 
 workflow string_to_zip {
