@@ -15,9 +15,10 @@ matrix:
     # On most recent versions of python.
     #
     - env: TOX_ENV=py35
-      after_install:
+      install:
         - pip install codacy-coverage
         - pip install codecov
+        - pip install tox
       after_success:
         # Correct coverage xml for coverage services.
         - >
