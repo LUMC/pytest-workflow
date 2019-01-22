@@ -1,0 +1,12 @@
+- name: simple wdl
+  command: >-
+    bash -c '
+    TEST_JSON=tests/pipelines/wdl/simple.json
+    sed -i "2i\"string_to_zip.out_path\":\"$PWD/moo.txt.gz\"," $TEST_JSON ;
+    cromwell run -i $TEST_JSON pipeline.wdl'
+  files:
+    - path: moo.txt.gz
+      md5sum: 34aa0f164e21f4b4cf6e81b9e280e593
+  stdout:
+    contains:
+      - "WorkflowSucceededState"
