@@ -9,6 +9,11 @@ Changelog
 
 Version 0.4.0-dev
 ---------------------------
++ Reworked code to use ``tempfile.mkdtemp`` to create a truly unique
+  temporary working directory if the ``--basetemp`` flag is not used. This
+  replaces the old code which dependeded on pytest internal code which was
+  flagged as deprecated. Also more information was added to the manual about
+  the use of ``--basetemp``.
 + Added a test case for WDL pipelines run with Cromwell and wrote an example
   for using WDL+Cromwell in the manual.
 + Added ``--tag`` flag to allow for easier selection of workflows during
