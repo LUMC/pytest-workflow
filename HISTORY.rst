@@ -7,7 +7,7 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-Version 0.4.0-dev
+Version 0.4.0
 ---------------------------
 + Added more information to the manual on how to debug pipelines and use
   ``pytest-workflow`` outside a virtual environment.
