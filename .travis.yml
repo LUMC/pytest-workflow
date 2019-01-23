@@ -1,31 +1,56 @@
 language: python
 install:
   - pip install tox
-  - pip install codacy-coverage
-  - pip install codecov
+dist: xenial
+python: 3.5  # Use the oldest supported version of python as default.
+script:
+    - tox -e $TOX_ENV
 matrix:
   include:
-    # Test most recent editions of python 3
-    - python: 3.5
-      env: TOX_ENV=py35
+    # TEST DOCS AND LINTING
+    # Use default python3 version here.
+    - env: TOX_ENV=py3-docs
+    - env: TOX_ENV=py3-lint
+
+    # UNIT TESTS
+    # On most recent versions of python.
     - python: 3.6
       env: TOX_ENV=py36
     - python: 3.7
-      dist: xenial
       env: TOX_ENV=py37
     - python: 3.5
-      env: TOX_ENV=py3-docs
-script:
-    - tox -e $TOX_ENV
+      env: TOX_ENV=py35
+      install:
+        - pip install codacy-coverage
+        - pip install codecov
+        - pip install tox
+      after_success:
+        # Correct coverage xml for coverage services.
+        - >
+          bash -c 'set -eux;
+          pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
+          sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml'
+        - >
+          bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
+          python-codacy-coverage -r coverage.xml;
+          fi'
+        - codecov -v  # -v to make sure coverage upload works.
 
-after_success:
-  # Correct coverage xml for coverage services.
-  - >
-    bash -c 'set -eux;
-    pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
-    sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml'
-  - >
-    bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
-    python-codacy-coverage -r coverage.xml;
-    fi'
-  - codecov
+    # FUNCTIONAL TESTS
+    - python: 3.5
+      env: TOX_ENV=py3-snakemake
+    - python: 3.6
+      env: TOX_ENV=py3-snakemake
+    - env: TOX_ENV=py3-cromwell
+      before_install:
+        # Install conda
+        - export MINICONDA=${HOME}/miniconda
+        - export PATH=${MINICONDA}/bin:${PATH}
+        - wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+        - bash miniconda.sh -b -f -p ${MINICONDA}
+        - conda config --set always_yes yes
+        - conda config --add channels defaults
+        - conda config --add channels bioconda
+        - conda config --add channels conda-forge
+        - conda create -n my_env cromwell
+        - source activate my_env

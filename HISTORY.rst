@@ -7,6 +7,22 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 0.4.0
+---------------------------
++ Added more information to the manual on how to debug pipelines and use
+  ``pytest-workflow`` outside a virtual environment.
++ Reworked code to use ``tempfile.mkdtemp`` to create a truly unique
+  temporary working directory if the ``--basetemp`` flag is not used. This
+  replaces the old code which dependeded on pytest internal code which was
+  flagged as deprecated. Also more information was added to the manual about
+  the use of ``--basetemp``.
++ Added a test case for WDL pipelines run with Cromwell and wrote an example
+  for using WDL+Cromwell in the manual.
++ Added ``--tag`` flag to allow for easier selection of workflows during
+  testing.
++ Added a test case for snakemake pipelines and wrote an example for using
+  pytest-workflow with snakemake in the manual.
+
 Version 0.3.0
 ---------------------------
 + Improved the log output to look nicer and make workflow log paths easier to
@@ -28,9 +44,9 @@ Version 0.2.0
 + Start using sphinx and readthedocs.org for creating project documentation.
 + The temporary directories in which workflows are run are automatically
   cleaned up at the end of each workflow test. You can disable this behaviour
-  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the working
-  directory after the workflow tests have run. This is useful for debugging
-  workflows.
+  by using the ``--keep-workflow-wd`` flag, which allows you to inspect the
+  working directory after the workflow tests have run. This is useful for
+  debugging workflows.
 + The temporary directories in which workflows are run can now be
   changed by using the ``--basetemp`` flag. This is because pytest-workflow now
   uses the built-in tmpdir capabilities of pytest.
