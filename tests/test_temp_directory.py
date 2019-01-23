@@ -59,3 +59,33 @@ def test_basetemp_correct(testdir):
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
     assert str(tempdir) in result.stdout.str()
+
+
+def test_basetemp_can_be_used_twice(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    tempdir = tempfile.mkdtemp()
+    # First run to fill up tempdir
+    testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp", tempdir)
+    # Make sure directory is there.
+    assert (Path(tempdir) / Path("simple_echo")).exists()
+    # Run again with same basetemp.
+    result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
+                               tempdir)
+    exit_code = result.ret
+    assert "'{0}/simple_echo' already exists. Deleting ...".format(
+        tempdir) in result.stdout.str()
+    assert exit_code == 0
+
+
+def test_basetemp_will_be_created(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    # This creates an empty dir
+    tempdir_base = tempfile.mkdtemp()
+    # This path should not exist
+    tempdir = Path(tempdir_base) / Path("non") / Path("existing")
+    # If pytest-workflow does not handle non-existing nested directories well
+    # it should crash.
+    result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
+                               str(tempdir))
+    assert tempdir.exists()
+    assert result.ret == 0
