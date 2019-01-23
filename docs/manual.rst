@@ -10,8 +10,10 @@ The workflows are run automatically. Each workflow gets its own temporary
 directory to run. These directories are cleaned up after the tests are
 completed. If you wish to inspect the output of a failing workflow you can use
 the ``--keep-workflow-wd`` flag to disable cleanup. This will also make sure
-the logs of the pipeline are saved in the temporary directory. The
-``--keep-workflow-wd`` flag is highly recommended when debugging pipelines.
+the logs of the pipeline are saved in the temporary directory. When
+``--keep-workflow-wd`` is set, the paths to the logs and the temporary
+directory are reported in pytest's output. The `--keep-workflow-wd`` flag is
+highly recommended when debugging pipelines.
 
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
@@ -19,8 +21,11 @@ use ``--basetemp <dir>`` to change pytest's base temp directory.
 .. container:: warning
 
   WARNING: When a directory is passed to ``--basetemp`` some of the directory
-  contents will be deleted if they have the same name as any of the workflows
-  you are running. DO NOT use ``--basetemp`` on directories where none of the
+  contents will be deleted. For example: if your workflow is named
+  ``"my workflow"`` then any file or directory named ``my_workflow`` will be
+  deleted. This makes sure you start with a clean slate if you run pytest
+  again with the same ``basetemp`` directory.
+  DO NOT use ``--basetemp`` on directories where none of the
   contents should be deleted.
 
 To run multiple workflows simultaneously you can use
