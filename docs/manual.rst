@@ -1,7 +1,8 @@
 =======================
 Running pytest-workflow
 =======================
-Run ``pytest`` from an environment with pytest-workflow installed.
+Run ``pytest`` from an environment with pytest-workflow installed or
+``python3 -m pytest`` if using a system-wide or user-wide installation.
 Pytest will automatically gather files in the ``tests`` directory starting with
 ``test`` and ending in ``.yaml`` or ``.yml``.
 
@@ -69,6 +70,13 @@ are run with ``pytest --tag hello`` then both ``hello`` and ``hello2`` are run.
 ==================================
 Writing tests with pytest-workflow
 ==================================
+
+In order to write tests that are discoverable by the plugin you need to
+complete the following steps.
+
+- Create a ``tests`` directory in the root of your repository.
+- Create your test yaml files in the ``tests`` directory. The files need to
+  start with ``test`` and have a ``.yml`` or ``.yaml`` extension.
 
 Below is an example of a YAML file that defines a test:
 
