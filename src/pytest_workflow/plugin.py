@@ -21,10 +21,6 @@ import warnings
 from pathlib import Path
 from typing import Optional  # noqa: F401 needed for typing.
 
-import _pytest
-# Also do the from imports. Otherwise the IDE does not understand the types.
-from _pytest.config import Config, argparsing  # noqa: F401
-
 import pytest
 
 import yaml
@@ -36,7 +32,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser: _pytest.config.argparsing.Parser):
+def pytest_addoption(parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
@@ -86,7 +82,7 @@ def pytest_collect_file(path, parent):
     return None
 
 
-def pytest_configure(config: _pytest.config.Config):
+def pytest_configure(config):
     """This runs before tests start and adds values to the config."""
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
