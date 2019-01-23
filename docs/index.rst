@@ -14,7 +14,11 @@ pytest-workflow
 
 .. include:: installation.rst
 
-.. include:: manual.rst
+.. include:: writing_tests.rst
+
+.. include:: running_pytest_workflow.rst
+
+.. include:: examples.rst
 
 .. include:: known_issues.rst
 
