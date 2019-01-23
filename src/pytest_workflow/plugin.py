@@ -144,9 +144,8 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
-        # These below variables store values for cleanup with teardown().
+        # Tempdir is stored for cleanup with teardown().
         self.tempdir = None  # type: Optional[Path]
-        self.workflow = None  # type: Optional[Workflow]
 
         # Attach tags to this node for easier workflow selection
         self.tags = [self.workflow_test.name] + self.workflow_test.tags
@@ -199,16 +198,18 @@ class WorkflowTestsCollector(pytest.Collector):
         # rootdir.
         shutil.copytree(str(self.config.rootdir), str(self.tempdir))
         # Create a workflow and make sure it runs in the tempdir
-        self.workflow = Workflow(command=self.workflow_test.command,
-                                 cwd=self.tempdir,
-                                 name=self.workflow_test.name)
+        workflow = Workflow(command=self.workflow_test.command,
+                            cwd=self.tempdir,
+                            name=self.workflow_test.name)
 
         print("queue '{name}' with command '{command}' in '{dir}'".format(
             name=self.name,
             command=self.workflow_test.command,
             dir=str(self.tempdir)))
         # Add the workflow to the workflow queue.
-        self.config.workflow_queue.put(self.workflow)
+        self.config.workflow_queue.put(workflow)
+
+        return workflow
 
     def collect(self):
         """This runs the workflow and starts all the associated tests
@@ -226,29 +227,29 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
-        self.queue_workflow()
+        workflow = self.queue_workflow()
 
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, self.workflow) for filetest
+        tests += [FileTestCollector(self, filetest, workflow) for filetest
                   in self.workflow_test.files]
 
         tests += [ExitCodeTest(parent=self,
                                desired_exit_code=self.workflow_test.exit_code,
-                               workflow=self.workflow)]
+                               workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=self.workflow.stdout_lines,
+            content_generator=workflow.stdout_lines,
             content_test=self.workflow_test.stdout,
-            workflow=self.workflow)]
+            workflow=workflow)]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=self.workflow.stderr_lines,
+            content_generator=workflow.stderr_lines,
             content_test=self.workflow_test.stderr,
-            workflow=self.workflow)]
+            workflow=workflow)]
 
         return tests
 
