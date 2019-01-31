@@ -44,7 +44,7 @@ class Workflow(object):
         :param name: An alias for the workflow. This looks nicer than a printed
         command.
         """
-        if len(command) < 1:
+        if command == "":
             raise ValueError("command can not be an empty string")
         self.command = command
         self.name = name

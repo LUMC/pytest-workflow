@@ -80,13 +80,13 @@ def test_validate_schema_colliding_names():
 
 
 def test_no_empty_command():
-    with pytest.raises(jsonschema.ValidationError)  as error:
+    with pytest.raises(jsonschema.ValidationError) as error:
         validate_schema([dict(name="empty", command="")])
     assert error.match("command must not be empty")
 
 
 def test_no_empty_name():
-    with pytest.raises(jsonschema.ValidationError)  as error:
+    with pytest.raises(jsonschema.ValidationError) as error:
         validate_schema([dict(name="", command="echo nothing")])
     assert error.match("name must not be empty")
 
