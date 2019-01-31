@@ -20,7 +20,9 @@
     "properties": {
       "name": {
         "description": "Name of the test",
-        "type": "string"
+        "type": "string",
+        "$comment": "name must not be empty",
+        "minLength": 1
       },
       "tags": {
         "description": "Tags for the workflow test",
@@ -31,7 +33,9 @@
       },
       "command": {
         "description": "The command that is run for the workflow",
-        "type": "string"
+        "type": "string",
+        "$comment": "command must not be empty",
+        "minLength": 1
       },
       "exit_code": {
         "description": "The expected exit code",

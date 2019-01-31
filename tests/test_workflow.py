@@ -75,3 +75,9 @@ def test_long_log():
         "bash -c 'for i in {1..262144}; do echo \"this is a long log\"; done'")
     workflow.run()
     assert len(workflow.stdout) > 65536
+
+
+def test_empty_command():
+    with pytest.raises(ValueError) as error:
+        Workflow("")
+    error.match("command can not be an empty string")
