@@ -21,7 +21,7 @@
       "name": {
         "description": "Name of the test",
         "type": "string",
-        "$comment": "Name must not be empty",
+        "$comment": "name must not be empty",
         "minLength": 1
       },
       "tags": {
@@ -34,7 +34,7 @@
       "command": {
         "description": "The command that is run for the workflow",
         "type": "string",
-        "$comment": "Command must not be empty",
+        "$comment": "command must not be empty",
         "minLength": 1
       },
       "exit_code": {
