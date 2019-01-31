@@ -7,6 +7,11 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 1.0.0-dev
+---------------------------
++ Disallow empty ``command`` and ``name`` keys. An empty ``command`` caused
+  pytest-workflow to hang. Empty names are also disallowed.
+
 Version 0.4.0
 ---------------------------
 + Added more information to the manual on how to debug pipelines and use
