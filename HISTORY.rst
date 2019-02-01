@@ -9,6 +9,8 @@ Changelog
 
 Version 1.0.0-dev
 ---------------------------
++ When tests of stdout/stderr content or file content fail a more informative
+  error message is given to allow for easier debugging.
 + All workflows now get their own folder within the `same` temporary directory.
   This fixes a bug where if ``basetemp`` was not set, each workflow would get
   its own folder in a separate temp directory. For example running workflows
