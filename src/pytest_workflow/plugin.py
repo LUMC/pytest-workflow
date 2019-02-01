@@ -92,6 +92,29 @@ def pytest_configure(config):
     workflow_queue = WorkflowQueue()
     setattr(config, "workflow_queue", workflow_queue)
 
+    # When multiple workflows are started they should all be set in the same
+    # temporary directory
+    # Running in a temporary directory will prevent the project repository
+    # from getting filled up with test workflow output.
+    # The temporary directory is produced using the tempfile stdlib.
+    # If a basetemp is set by the user this is used as the temporary
+    # directory.
+    # Alternatively self.config._tmp_path_factory.getbasetemp() could be used
+    # to create temporary dirs. But the comments in the pytest code
+    # discourage this. Furthermore this creates directories in the following
+    # form: `/tmp/pytest-of-$USER/pytest-<number>`. The number is generated
+    # by pytest itself and increments each run. A maximum of 3 folders can
+    # coexist. When more are detected, pytest will delete the oldest folders.
+    # This can create problems when more than three instances of pytest with
+    # pytest-workflow run under the same user. This is not uncommon in CI.
+    # So this is why the native pytest `tmpdir` fixture is not used.
+
+    basetemp = config.getoption("basetemp")
+    workflow_dir = (
+        Path(basetemp) if basetemp is not None
+        else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
+    setattr(config, "workflow_dir", workflow_dir)
+
 
 def pytest_collection(session):
     """This function is started at the beginning of collection"""
@@ -150,21 +173,6 @@ class WorkflowTestsCollector(pytest.Collector):
         """Creates a temporary directory and add the workflow to the workflow
         queue.
 
-        Running in a temporary directory will prevent the project repository
-        from getting filled up with test workflow output.
-        The temporary directory is produced using the tempfile stdlib.
-        If a basetemp is set by the user this is used as the temporary
-        directory.
-        Alternatively self.config._tmp_path_factory.getbasetemp() could be used
-        to create temporary dirs. But the comments in the pytest code
-        discourage this. Furthermore this creates directories in the following
-        form: `/tmp/pytest-of-$USER/pytest-<number>`. The number is generated
-        by pytest itself and increments each run. A maximum of 3 folders can
-        coexist. When more are detected, pytest will delete the oldest folders.
-        This can create problems when more than three instances of pytest with
-        pytest-workflow run under the same user. This is not uncommon in CI.
-        So this is why the native pytest `tmpdir` fixture is not used.
-
         The temporary directory name is constructed from the test name by
         replacing all whitespaces with '_'. Directory paths with whitespace in
         them are very annoying to inspect.
@@ -177,11 +185,9 @@ class WorkflowTestsCollector(pytest.Collector):
         Print statements are used to provide information to the user.
         This is shorter than using pytest's terminal reporter.
         """
-        basetemp = self.config.getoption("basetemp")
-        basetemp_path = (
-            Path(basetemp) if basetemp is not None
-            else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
-        self.tempdir = basetemp_path / Path(replace_whitespace(self.name, '_'))
+
+        self.tempdir = (self.config.workflow_dir /
+                        Path(replace_whitespace(self.name, '_')))
 
         # Remove the tempdir if it exists. This is needed for shutil.copytree
         # to work properly.
