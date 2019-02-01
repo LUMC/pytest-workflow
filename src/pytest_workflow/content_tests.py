@@ -92,6 +92,7 @@ class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
                  content_generator: Callable[[], Iterable[str]],
                  content_test: ContentTest,
+                 content_name: str,
                  workflow: Workflow):
         """
         Creates a content test collector
@@ -106,6 +107,8 @@ class ContentTestCollector(pytest.Collector):
         the collection phase.
         :param content_test: a ContentTest object.
         :param workflow: the workflow is running.
+        :param content_name: The name of the content that will be displayed if
+        the test fails.
         """
         # pylint: disable=too-many-arguments
         # it is still only 5 not counting self.
@@ -115,6 +118,7 @@ class ContentTestCollector(pytest.Collector):
         self.workflow = workflow
         self.found_strings = None
         self.thread = None
+        self.content_name = content_name
 
     def find_strings(self):
         """Find the strings that are looked for in the given content
@@ -141,7 +145,8 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=True
+                should_contain=True,
+                content_name=self.content_name
             )
             for string in self.content_test.contains]
 
@@ -149,7 +154,8 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=False
+                should_contain=False,
+                content_name=self.content_name
             )
             for string in self.content_test.must_not_contain]
 
@@ -160,7 +166,7 @@ class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
     def __init__(self, parent: ContentTestCollector, string: str,
-                 should_contain: bool):
+                 should_contain: bool, content_name: str):
         """
         Create a ContentTestItem
         :param parent: A ContentTestCollector. We use a ContentTestCollector
@@ -169,12 +175,15 @@ class ContentTestItem(pytest.Item):
         finished.
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
+        :param content_name: the name of the content which allows for easier
+        debugging if the test fails
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
         self.should_contain = should_contain
         self.string = string
+        self.content_name = content_name
 
     def runtest(self):
         """Only after a workflow is finished the contents of files and logs are
@@ -198,7 +207,7 @@ class ContentTestItem(pytest.Item):
         ).format(
             string=self.string,
             found="not found" if self.should_contain else "found",
-            content=self.parent.name,
+            content=self.content_name,
             should="should" if self.should_contain else "should not"
         )
         return message

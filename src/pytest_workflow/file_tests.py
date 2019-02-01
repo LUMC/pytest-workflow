@@ -67,7 +67,8 @@ class FileTestCollector(pytest.Collector):
                                                     filepath),
                 content_test=self.filetest,
                 # FileTest inherits from ContentTest. So this is valid.
-                workflow=self.workflow
+                workflow=self.workflow,
+                content_name=str(filepath)
             )]
 
         if self.filetest.md5sum:
