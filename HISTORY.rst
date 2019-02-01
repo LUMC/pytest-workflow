@@ -9,6 +9,20 @@ Changelog
 
 Version 1.0.0-dev
 ---------------------------
++ All workflows now get their own folder within the `same` temporary directory.
+  This fixes a bug where if ``basetemp`` was not set, each workflow would get
+  its own folder in a separate temp directory. For example running workflows
+  'workflow1' and 'workflow2' would create two temporary folders:
+
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow1' and
+  '/tmp/pytest_workflow\_\ **b8m1wzuf**/workflow2'
+
+  This is now changed to have all workflows in one temporary directory per
+  pytest run:
+
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow1' and
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow2'
+
 + Disallow empty ``command`` and ``name`` keys. An empty ``command`` caused
   pytest-workflow to hang. Empty names are also disallowed.
 
