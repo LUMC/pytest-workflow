@@ -115,7 +115,7 @@ FAILURE_MESSAGE_TESTS = [
           must_not_contain: 
             - "miaow" 
     """,
-     "content file exist bla")
+     "moo.txt' does not exist and cannot be searched.")
 ]  # type: List[Tuple[str,str]]
 
 

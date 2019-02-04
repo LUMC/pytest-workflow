@@ -118,6 +118,7 @@ class ContentTestCollector(pytest.Collector):
         self.workflow = workflow
         self.found_strings = None
         self.thread = None
+        self.file_not_found = False
         self.content_name = content_name
 
     def find_strings(self):
@@ -129,9 +130,12 @@ class ContentTestCollector(pytest.Collector):
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
-        self.found_strings = check_content(
+        try:
+            self.found_strings = check_content(
             strings=strings_to_check,
             text_lines=self.content_generator())
+        except FileNotFoundError:
+            self.file_not_found = True
 
     def collect(self):
         # A thread is started that looks for the strings and collection can go
@@ -195,13 +199,14 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
+        assert not self.parent.file_not_found
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
-        message = (
+        found_message = (
             "'{string}' was {found} in {content} "
             "while it {should} be there."
         ).format(
@@ -210,4 +215,11 @@ class ContentTestItem(pytest.Item):
             content=self.content_name,
             should="should" if self.should_contain else "should not"
         )
-        return message
+        file_error_message = (
+            "'{0}' does not exist and cannot be searched.".format(
+                self.content_name)
+        )
+        if self.parent.file_not_found:
+            return file_error_message
+        else:
+            return found_message
