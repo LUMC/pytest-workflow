@@ -27,7 +27,7 @@ FAILURE_MESSAGE_TESTS = [
     - name: fail_test
       command: grep
     """,
-     "The workflow exited with exit code '2' instead of '0'"),
+     "'fail_test' exited with exit code '2' instead of '0'"),
     ("""\
     - name: create file
       command: echo moo
@@ -104,7 +104,26 @@ FAILURE_MESSAGE_TESTS = [
           - "grep --help"
     """,
      "'grep --help' was found in 'fail_test': stderr while "
-     "it should not be there")
+     "it should not be there"),
+    ("""\
+    - name: file_not_exist
+      command: echo moo
+      files:
+        - path: moo.txt
+          contains:
+            - "moo"
+    """,
+     "moo.txt' does not exist and cannot be searched for containing 'moo'."),
+    ("""\
+    - name: file_not_exist
+      command: echo moo
+      files:
+        - path: moo.txt
+          must_not_contain:
+            - "miaow"
+    """,
+     "moo.txt' does not exist and cannot be searched for "
+     "not containing 'miaow'.")
 ]  # type: List[Tuple[str,str]]
 
 

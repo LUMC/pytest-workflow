@@ -281,7 +281,9 @@ class ExitCodeTest(pytest.Item):
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
-        message = ("The workflow exited with exit code " +
-                   "'{0}' instead of '{1}'.".format(self.workflow.exit_code,
-                                                    self.desired_exit_code))
+        message = ("'{workflow_name}' exited with exit code " +
+                   "'{exit_code}' instead of '{desired_exit_code}'."
+                   ).format(workflow_name=self.workflow.name,
+                            exit_code=self.workflow.exit_code,
+                            desired_exit_code=self.desired_exit_code)
         return message

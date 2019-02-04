@@ -118,6 +118,10 @@ class ContentTestCollector(pytest.Collector):
         self.workflow = workflow
         self.found_strings = None
         self.thread = None
+        # We check the contents of files. Sometimes files are not there. Then
+        # content can not be checked. We save FileNotFoundErrors in this
+        # boolean.
+        self.file_not_found = False
         self.content_name = content_name
 
     def find_strings(self):
@@ -125,13 +129,18 @@ class ContentTestCollector(pytest.Collector):
         The content_generator function shines here. It only starts looking
         for lines of text AFTER the workflow is finished. So that is why a
         function is needed here and not just a variable containing lines of
-        text."""
+        text.
+        When a file we test is not produced, we save the FileNotFoundError so
+        we can give an accurate repr_failure."""
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
-        self.found_strings = check_content(
-            strings=strings_to_check,
-            text_lines=self.content_generator())
+        try:
+            self.found_strings = check_content(
+                strings=strings_to_check,
+                text_lines=self.content_generator())
+        except FileNotFoundError:
+            self.file_not_found = True
 
     def collect(self):
         # A thread is started that looks for the strings and collection can go
@@ -195,19 +204,30 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
+        assert not self.parent.file_not_found
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
-        message = (
-            "'{string}' was {found} in {content} "
-            "while it {should} be there."
-        ).format(
-            string=self.string,
-            found="not found" if self.should_contain else "found",
-            content=self.content_name,
-            should="should" if self.should_contain else "should not"
-        )
-        return message
+        if self.parent.file_not_found:
+            return (
+                "'{content}' does not exist and cannot be searched "
+                "for {containing} '{string}'."
+            ).format(
+                content=self.content_name,
+                containing="containing" if self.should_contain
+                else "not containing",
+                string=self.string)
+
+        else:
+            return (
+                "'{string}' was {found} in {content} "
+                "while it {should} be there."
+            ).format(
+                string=self.string,
+                found="not found" if self.should_contain else "found",
+                content=self.content_name,
+                should="should" if self.should_contain else "should not"
+            )

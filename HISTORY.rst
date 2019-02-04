@@ -9,6 +9,14 @@ Changelog
 
 Version 1.0.0-dev
 ---------------------------
++ Workflow exit code failures now mention the name of the workflow. Previously
+  the generic name "Workflow" was used, which made it harder to figure out
+  which workflows failed.
++ When tests of file content fail because the file does not exist, a different
+  error message is given compared to when the file exist, but the content is
+  not there, which makes debugging easier. Also the accompanying
+  "FileNotFound" error stacktrace is now suppressed, which keeps the test
+  output more pleasant.
 + When tests of stdout/stderr content or file content fail a more informative
   error message is given to allow for easier debugging.
 + All workflows now get their own folder within the `same` temporary directory.
