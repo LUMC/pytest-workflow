@@ -245,13 +245,15 @@ class WorkflowTestsCollector(pytest.Collector):
             name="stdout", parent=self,
             content_generator=workflow.stdout_lines,
             content_test=self.workflow_test.stdout,
-            workflow=workflow)]
+            workflow=workflow,
+            content_name="'{0}': stdout".format(self.workflow_test.name))]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
             content_generator=workflow.stderr_lines,
             content_test=self.workflow_test.stderr,
-            workflow=workflow)]
+            workflow=workflow,
+            content_name="'{0}': stderr".format(self.workflow_test.name))]
 
         return tests
 
