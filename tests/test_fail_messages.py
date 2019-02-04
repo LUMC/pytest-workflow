@@ -112,10 +112,18 @@ FAILURE_MESSAGE_TESTS = [
         - path: moo.txt
           contains:
             - "moo"
-          must_not_contain: 
-            - "miaow" 
     """,
-     "moo.txt' does not exist and cannot be searched.")
+     "moo.txt' does not exist and cannot be searched for containing 'moo'."),
+    ("""\
+    - name: file_not_exist
+      command: echo moo
+      files:
+        - path: moo.txt
+          must_not_contain:
+            - "miaow"
+    """,
+     "moo.txt' does not exist and cannot be searched for "
+     "not containing 'miaow'.")
 ]  # type: List[Tuple[str,str]]
 
 
