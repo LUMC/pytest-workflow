@@ -27,7 +27,7 @@ FAILURE_MESSAGE_TESTS = [
     - name: fail_test
       command: grep
     """,
-     "The workflow exited with exit code '2' instead of '0'"),
+     "'fail_test' exited with exit code '2' instead of '0'"),
     ("""\
     - name: create file
       command: echo moo
