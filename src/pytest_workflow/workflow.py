@@ -164,8 +164,6 @@ class WorkflowQueue(queue.Queue):
         """
         Processes the workflow queue with a number of threads
         :param number_of_threads: The number of threads
-        :param save_logs: Whether to save the logs of the workflows that have
-        run
         """
         threads = []
         for _ in range(number_of_threads):
