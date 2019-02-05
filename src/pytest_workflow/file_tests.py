@@ -15,13 +15,12 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """All tests for workflow files"""
-import functools
 import hashlib
 from pathlib import Path
 
 import pytest
 
-from .content_tests import ContentTestCollector, file_to_string_generator
+from .content_tests import ContentTestCollector
 from .schema import FileTest
 from .workflow import Workflow
 
@@ -63,8 +62,7 @@ class FileTestCollector(pytest.Collector):
             tests += [ContentTestCollector(
                 name="content",
                 parent=self,
-                content_generator=functools.partial(file_to_string_generator,
-                                                    filepath),
+                filepath=filepath,
                 content_test=self.filetest,
                 # FileTest inherits from ContentTest. So this is valid.
                 workflow=self.workflow,

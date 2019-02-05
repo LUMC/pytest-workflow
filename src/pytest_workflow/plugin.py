@@ -15,7 +15,6 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
-import functools
 import shutil
 import tempfile
 import warnings
@@ -27,7 +26,7 @@ import pytest
 import yaml
 
 from . import replace_whitespace
-from .content_tests import ContentTestCollector, file_to_string_generator
+from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
@@ -240,16 +239,14 @@ class WorkflowTestsCollector(pytest.Collector):
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=functools.partial(file_to_string_generator,
-                                                workflow.stdout_file),
+            filepath=workflow.stdout_file,
             content_test=self.workflow_test.stdout,
             workflow=workflow,
             content_name="'{0}': stdout".format(self.workflow_test.name))]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=functools.partial(file_to_string_generator,
-                                                workflow.stderr_file),
+            filepath=workflow.stderr_file,
             content_test=self.workflow_test.stderr,
             workflow=workflow,
             content_name="'{0}': stderr".format(self.workflow_test.name))]

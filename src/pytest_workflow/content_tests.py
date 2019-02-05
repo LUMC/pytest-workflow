@@ -22,7 +22,7 @@ once."""
 
 import threading
 from pathlib import Path
-from typing import Callable, Iterable, List, Set
+from typing import Iterable, List, Set
 
 import pytest
 
@@ -90,7 +90,7 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 content_generator: Callable[[], Iterable[str]],
+                 filepath: Path,
                  content_test: ContentTest,
                  content_name: str,
                  workflow: Workflow):
@@ -113,7 +113,7 @@ class ContentTestCollector(pytest.Collector):
         # pylint: disable=too-many-arguments
         # it is still only 5 not counting self.
         super().__init__(name, parent=parent)
-        self.content_generator = content_generator
+        self.filepath = filepath
         self.content_test = content_test
         self.workflow = workflow
         self.found_strings = None
@@ -138,7 +138,7 @@ class ContentTestCollector(pytest.Collector):
         try:
             self.found_strings = check_content(
                 strings=strings_to_check,
-                text_lines=self.content_generator())
+                text_lines=file_to_string_generator(self.filepath))
         except FileNotFoundError:
             self.file_not_found = True
 
