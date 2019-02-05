@@ -44,10 +44,10 @@ Run ``pytest`` from an environment with pytest-workflow installed.
 Pytest will automatically gather files in the ``tests`` directory starting with
 ``test`` and ending in ``.yaml`` or ``.yml``.
 
-For debugging pipelines running ``pytest -v --keep-workflow-wd`` is
-recommended. This will save the logs and the workflow directory so it is
-possible to check where the pipeline crashed. It will also give a better
-overview of succeeded and failed tests.
+For debugging pipelines using the ``--keep-workflow-wd`` flag  is
+recommended. This will keep the workflow directory and logs after the test run
+so it is possible to check where the pipeline crashed. The ``-v`` flag can come
+in handy as well as it gives a complete overview of succeeded and failed tests.
 
 Below is an example of a YAML file that defines a test:
 
