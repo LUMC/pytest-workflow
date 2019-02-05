@@ -199,15 +199,12 @@ class WorkflowTestsCollector(pytest.Collector):
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         shutil.copytree(str(self.config.rootdir), str(self.tempdir))
+
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=self.tempdir,
                             name=self.workflow_test.name)
 
-        print("queue '{name}' with command '{command}' in '{dir}'".format(
-            name=self.name,
-            command=self.workflow_test.command,
-            dir=str(self.tempdir)))
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
