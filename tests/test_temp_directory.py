@@ -29,13 +29,6 @@ def test_log_messages(testdir):
     assert "'simple echo' stderr saved in: " in result.stdout.str()
 
 
-def test_not_log_messages(testdir):
-    testdir.makefile(".yml", test=SIMPLE_ECHO)
-    result = testdir.runpytest("-v")
-    assert "'simple echo' stdout saved in: " not in result.stdout.str()
-    assert "'simple echo' stderr saved in: " not in result.stdout.str()
-
-
 def test_directory_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")

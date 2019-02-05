@@ -156,7 +156,7 @@ class WorkflowQueue(queue.Queue):
 
     # Queue processing with workers example taken from
     # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
-    def process(self, number_of_threads: int = 1, save_logs: bool = False):
+    def process(self, number_of_threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param number_of_threads: The number of threads
@@ -165,18 +165,16 @@ class WorkflowQueue(queue.Queue):
         """
         threads = []
         for _ in range(number_of_threads):
-            thread = threading.Thread(target=self.worker, args=(save_logs,))
+            thread = threading.Thread(target=self.worker)
             thread.start()
             threads.append(thread)
         self.join()
         for thread in threads:
             thread.join()
 
-    def worker(self, save_logs: bool = False):
+    def worker(self):
         """
         Run workflows until the queue is empty
-        :param save_logs: Whether to save the logs of the workflows that have
-        run
         """
         while True:
             try:
@@ -196,10 +194,7 @@ class WorkflowQueue(queue.Queue):
                 self.task_done()
                 # Some reporting
                 print("'{0}' done.".format(workflow.name))
-                if save_logs:
-                    log_err = workflow.stderr_to_file()
-                    log_out = workflow.stdout_to_file()
-                    print("'{0}' stdout saved in: {1}".format(
-                        workflow.name or workflow.command, str(log_out)))
-                    print("'{0}' stderr saved in: {1}".format(
-                        workflow.name or workflow.command, str(log_err)))
+                print("'{0}' stdout saved in: {1}".format(
+                    workflow.name, str(workflow.stdout_file)))
+                print("'{0}' stderr saved in: {1}".format(
+                    workflow.name, str(workflow.stderr_file)))

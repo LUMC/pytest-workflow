@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import functools
 import shutil
 import tempfile
 import warnings
@@ -26,7 +27,7 @@ import pytest
 import yaml
 
 from . import replace_whitespace
-from .content_tests import ContentTestCollector
+from .content_tests import ContentTestCollector, file_to_string_generator
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
@@ -132,8 +133,7 @@ def pytest_collection(session):
 def pytest_runtestloop(session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
-        number_of_threads=session.config.getoption("workflow_threads"),
-        save_logs=session.config.getoption("keep_workflow_wd")
+        session.config.getoption("workflow_threads")
     )
 
 
@@ -240,14 +240,16 @@ class WorkflowTestsCollector(pytest.Collector):
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=workflow.stdout_lines,
+            content_generator=functools.partial(file_to_string_generator,
+                                                workflow.stdout_file),
             content_test=self.workflow_test.stdout,
             workflow=workflow,
             content_name="'{0}': stdout".format(self.workflow_test.name))]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=workflow.stderr_lines,
+            content_generator=functools.partial(file_to_string_generator,
+                                                workflow.stderr_file),
             content_test=self.workflow_test.stderr,
             workflow=workflow,
             content_name="'{0}': stderr".format(self.workflow_test.name))]
