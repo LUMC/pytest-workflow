@@ -20,6 +20,7 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen. Multithreading functionality was added
 later.
 """
+import contextlib
 import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
@@ -52,9 +53,11 @@ class Workflow(object):
         # for emptiness.
         self.name = name or command.split()[0]
         self.cwd = cwd or Path()
-        self.stdout_file = (tempfile.NamedTemporaryFile() if cwd is None
+        self.stdout_file = (Path(tempfile.NamedTemporaryFile().name)
+                            if cwd is None
                             else self.cwd / Path("log.out"))
-        self.stderr_file = (tempfile.NamedTemporaryFile() if cwd is None
+        self.stderr_file = (Path(tempfile.NamedTemporaryFile().name)
+                            if cwd is None
                             else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
         self.start_lock = threading.Lock()
@@ -70,10 +73,14 @@ class Workflow(object):
         # is started from multiple threads.
         with self.start_lock:
             if self._popen is None:
-                sub_process_args = shlex.split(self.command)
-                self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
-                    sub_process_args, stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE, cwd=str(self.cwd))
+                # We can open multiple files within one with statement.
+                with contextlib.ExitStack() as stack:
+                    stdout_h = stack.enter_context(self.stdout_file.open('wb'))
+                    stderr_h = stack.enter_context(self.stderr_file.open('wb'))
+                    sub_process_args = shlex.split(self.command)
+                    self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
+                        sub_process_args, stdout=stdout_h,
+                        stderr=stderr_h, cwd=str(self.cwd))
             else:
                 raise ValueError("Workflows can only be started once")
 
@@ -81,14 +88,6 @@ class Workflow(object):
         """Runs the workflow and blocks until it is finished"""
         self.start()
         self.wait()
-
-    def stdout_to_file(self) -> Path:
-        self.wait()
-        return bytes_to_file(self.stdout, self.cwd / Path("log.out"))
-
-    def stderr_to_file(self) -> Path:
-        self.wait()
-        return bytes_to_file(self.stderr, self.cwd / Path("log.err"))
 
     def wait(self):
         """Waits for the workflow to complete"""
@@ -118,39 +117,25 @@ class Workflow(object):
             # Wait for process to finish with _popen.communicate(). This blocks
             # until the command completes.
             # _popen.wait() will block with stdout=pipe and stderr=pipe
-            if (self._popen.returncode is None and
-                    self._stderr is None and
-                    self._stdout is None):
-                self._stdout, self._stderr = self._popen.communicate()
+            if self._popen.returncode is None:
+                self._popen.communicate()
 
     @property
     def stdout(self) -> bytes:
         self.wait()
-        return self._stdout  # for testing log
+        with self.stdout_file.open('rb') as stdout:
+            return stdout.read()
 
     @property
     def stderr(self) -> bytes:
         self.wait()
-        return self._stderr  # for testing log
+        with self.stderr_file.open('rb') as stderr:
+            return stderr.read()
 
     @property
     def exit_code(self) -> int:
         self.wait()
         return self._popen.returncode
-
-    def stdout_lines(self) -> List[str]:
-        self.wait()
-        return self._stdout.decode().splitlines()
-
-    def stderr_lines(self) -> List[str]:
-        self.wait()
-        return self._stderr.decode().splitlines()
-
-
-def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
-    with output_file.open('wb') as file_handler:
-        file_handler.write(bytestring)
-    return output_file
 
 
 class WorkflowQueue(queue.Queue):
