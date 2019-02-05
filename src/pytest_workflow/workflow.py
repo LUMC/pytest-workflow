@@ -53,6 +53,10 @@ class Workflow(object):
         # for emptiness.
         self.name = name or command.split()[0]
         self.cwd = cwd or Path()
+        # For long running workflows it is best to save the stdout and stderr
+        # to a file which can be checked with ``tail -f``.
+        # stdout and stderr will be written to a tempfile if no CWD is given
+        # to prevent clutter created when testing.
         self.stdout_file = (Path(tempfile.NamedTemporaryFile().name)
                             if cwd is None
                             else self.cwd / Path("log.out"))
