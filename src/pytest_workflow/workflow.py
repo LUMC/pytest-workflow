@@ -47,6 +47,8 @@ class Workflow(object):
         if command == "":
             raise ValueError("command can not be an empty string")
         self.command = command
+        # Always ensure a name. command.split()[0] can't fail because we tested
+        # for emptiness.
         self.name = name or command.split()[0]
         self.cwd = cwd
         self._popen = None  # type: Optional[subprocess.Popen]
