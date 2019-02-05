@@ -22,7 +22,7 @@ once."""
 
 import threading
 from pathlib import Path
-from typing import Iterable, List, Set
+from typing import Optional, Iterable, List, Set
 
 import pytest
 
@@ -92,26 +92,20 @@ class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
                  filepath: Path,
                  content_test: ContentTest,
-                 content_name: str,
-                 workflow: Workflow):
+                 workflow: Workflow,
+                 content_name: Optional[str] = None):
         """
         Creates a content test collector
         :param name: Name of the thing which contents are tested
         :param parent: a pytest.Collector object
-        :param content_generator: a function that should return the content as
-        lines. This function is a placeholder for the content itself. In other
-        words: instead of passing the contents of a file directly to the
-        ContentTestCollector, you pass a function that when called will return
-        the contents. This allows the pytest collection phase to finish before
-        the file is read. This is useful because the workflows are run after
-        the collection phase.
+        :param filepath: the file that contains the content
         :param content_test: a ContentTest object.
         :param workflow: the workflow is running.
         :param content_name: The name of the content that will be displayed if
-        the test fails.
+        the test fails. Defaults to filepath.
         """
         # pylint: disable=too-many-arguments
-        # it is still only 5 not counting self.
+        # Cannot think of a better way to do this.
         super().__init__(name, parent=parent)
         self.filepath = filepath
         self.content_test = content_test
@@ -122,7 +116,7 @@ class ContentTestCollector(pytest.Collector):
         # content can not be checked. We save FileNotFoundErrors in this
         # boolean.
         self.file_not_found = False
-        self.content_name = content_name
+        self.content_name = content_name or str(filepath)
 
     def find_strings(self):
         """Find the strings that are looked for in the given content
