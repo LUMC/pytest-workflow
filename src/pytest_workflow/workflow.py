@@ -28,7 +28,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import Optional  # noqa: F401  # used for typing
+from typing import Optional
 
 
 class Workflow(object):

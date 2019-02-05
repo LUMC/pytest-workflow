@@ -22,7 +22,7 @@ once."""
 
 import threading
 from pathlib import Path
-from typing import Optional, Iterable, List, Set
+from typing import Iterable, List, Optional, Set
 
 import pytest
 
