@@ -32,6 +32,10 @@ To run multiple workflows simultaneously you can use
 of workflows that can be run simultaneously. This will speed up things if
 you have enough resources to process these workflows simultaneously.
 
+To check the progress of a workflow while it is running you can use ``tail -f``
+on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
+files are reported in the log as soon as a workflow is started.
+
 Running specific workflows
 ----------------------------
 To run a specific workflow use the ``--tag`` flag. Each workflow is tagged with
