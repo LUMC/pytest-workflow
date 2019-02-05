@@ -22,17 +22,10 @@ from pathlib import Path
 from .test_success_messages import SIMPLE_ECHO
 
 
-def test_log_messages(testdir):
-    testdir.makefile(".yml", test=SIMPLE_ECHO)
-    result = testdir.runpytest("-v", "--keep-workflow-wd")
-    assert "'simple echo' stdout saved in: " in result.stdout.str()
-    assert "'simple echo' stderr saved in: " in result.stdout.str()
-
-
 def test_directory_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
-    working_dir = re.search(r"with command 'echo moo' in '(.*)'",
+    working_dir = re.search(r"with command 'echo moo' in '([\w\/_-]*)'",
                             result.stdout.str()).group(1)
     assert Path(working_dir).exists()
     assert Path(working_dir / Path("log.out")).exists()
@@ -42,7 +35,7 @@ def test_directory_kept(testdir):
 def test_directory_not_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
-    working_dir = re.search(r"with command 'echo moo' in '(.*)'",
+    working_dir = re.search(r"with command 'echo moo' in '([\w\/_-]*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
 
@@ -51,7 +44,12 @@ def test_basetemp_correct(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
-    assert str(tempdir) in result.stdout.str()
+    message = ("start 'simple echo' with command 'echo moo' in "
+               "'{tempdir}/simple_echo'. "
+               "stdout: '{tempdir}/simple_echo/log.out'. "
+               "stderr: '{tempdir}/simple_echo/log.err'."
+               ).format(tempdir=str(tempdir))
+    assert message in result.stdout.str()
 
 
 def test_basetemp_can_be_used_twice(testdir):

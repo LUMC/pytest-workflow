@@ -28,7 +28,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import List, Optional  # noqa: F401  # used for typing
+from typing import Optional  # noqa: F401  # used for typing
 
 
 class Workflow(object):
@@ -185,16 +185,16 @@ class WorkflowQueue(queue.Queue):
                 break
             else:
                 print(
-                    "start '{name}' with command '{command}' in '{dir}'"
+                    "start '{name}' with command '{command}' in '{dir}'. "
+                    "stdout: '{stdout_file}'. "
+                    "stderr: '{stderr_file}'."
                     .format(
                         name=workflow.name,
                         command=workflow.command,
-                        dir=workflow.cwd))
+                        dir=workflow.cwd,
+                        stdout_file=workflow.stdout_file,
+                        stderr_file=workflow.stderr_file))
                 workflow.run()
                 self.task_done()
                 # Some reporting
                 print("'{0}' done.".format(workflow.name))
-                print("'{0}' stdout saved in: {1}".format(
-                    workflow.name, str(workflow.stdout_file)))
-                print("'{0}' stderr saved in: {1}".format(
-                    workflow.name, str(workflow.stderr_file)))
