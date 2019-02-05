@@ -81,3 +81,13 @@ def test_empty_command():
     with pytest.raises(ValueError) as error:
         Workflow("")
     error.match("command can not be an empty string")
+
+
+def test_workflow_name():
+    workflow = Workflow("echo moo", name="moo")
+    assert workflow.name == "moo"
+
+
+def test_workflow_name_inferred():
+    workflow = Workflow("echo moo")
+    assert workflow.name == "echo"
