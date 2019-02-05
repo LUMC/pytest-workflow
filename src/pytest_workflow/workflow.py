@@ -23,6 +23,7 @@ later.
 import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
+import tempfile
 import threading
 import time
 from pathlib import Path
@@ -34,13 +35,13 @@ class Workflow(object):
     # Is there a better way of doing things, as pylint suggests?
     def __init__(self,
                  command: str,
-                 cwd: Path = Path(),
+                 cwd: Optional[Path] = None,
                  name: Optional[str] = None):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
         :param cwd: The current working directory in which the command will
-        be executed.
+        be executed. If None given will default to Path()
         :param name: An alias for the workflow. This looks nicer than a printed
         command.
         """
@@ -50,10 +51,12 @@ class Workflow(object):
         # Always ensure a name. command.split()[0] can't fail because we tested
         # for emptiness.
         self.name = name or command.split()[0]
-        self.cwd = cwd
+        self.cwd = cwd or Path()
+        self.stdout_file = (tempfile.NamedTemporaryFile() if cwd is None
+                            else self.cwd / Path("log.out"))
+        self.stderr_file = (tempfile.NamedTemporaryFile() if cwd is None
+                            else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
-        self._stderr = None
-        self._stdout = None
         self.start_lock = threading.Lock()
         self.wait_lock = threading.Lock()
         self.wait_timeout_secs = None
