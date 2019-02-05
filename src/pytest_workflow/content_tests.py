@@ -119,11 +119,8 @@ class ContentTestCollector(pytest.Collector):
         self.content_name = content_name or str(filepath)
 
     def find_strings(self):
-        """Find the strings that are looked for in the given content
-        The content_generator function shines here. It only starts looking
-        for lines of text AFTER the workflow is finished. So that is why a
-        function is needed here and not just a variable containing lines of
-        text.
+        """Find the strings that are looked for in the given file
+
         When a file we test is not produced, we save the FileNotFoundError so
         we can give an accurate repr_failure."""
         self.workflow.wait()
@@ -190,7 +187,7 @@ class ContentTestItem(pytest.Item):
 
     def runtest(self):
         """Only after a workflow is finished the contents of files and logs are
-        read. The ContentTestCollector parent reads each file/log once. This is
+        read. The ContentTestCollector parent reads each file once. This is
         done in its thread. We wait for this thread to complete. Then we check
         all the found strings in the parent.
         This way we do not have to read each file one time per ContentTestItem
