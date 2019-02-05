@@ -47,7 +47,9 @@ class Workflow(object):
         if command == "":
             raise ValueError("command can not be an empty string")
         self.command = command
-        self.name = name
+        # Always ensure a name. command.split()[0] can't fail because we tested
+        # for emptiness.
+        self.name = name or command.split()[0]
         self.cwd = cwd
         self._popen = None  # type: Optional[subprocess.Popen]
         self._stderr = None
@@ -196,13 +198,16 @@ class WorkflowQueue(queue.Queue):
             except queue.Empty:
                 break
             else:
+                print(
+                    "start '{name}' with command '{command}' in '{dir}'"
+                    .format(
+                        name=workflow.name,
+                        command=workflow.command,
+                        dir=workflow.cwd))
                 workflow.run()
                 self.task_done()
                 # Some reporting
-                if workflow.name is not None:
-                    print("'{0}' done.".format(workflow.name))
-                else:
-                    print("command: '{0}' done.".format(workflow.command))
+                print("'{0}' done.".format(workflow.name))
                 if save_logs:
                     log_err = workflow.stderr_to_file()
                     log_out = workflow.stdout_to_file()
