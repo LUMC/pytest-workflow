@@ -13,8 +13,8 @@ Lots of small fixes that improve the usability of pytest-workflow are included
 in version 1.0.0.
 
 + The log reports now when a workflow is starting, instead of when it is added
-  to the queue. This makes it easier to see how the queue is processed and if
-  you forgot to use the ``--workflow-threads`` or ``--wt`` flag.
+  to the queue. This makes it easier to see which workflows are currently
+  running and if you forgot to use the ``--workflow-threads`` or ``--wt`` flag.
 + Workflow exit code failures now mention the name of the workflow. Previously
   the generic name "Workflow" was used, which made it harder to figure out
   which workflows failed.
