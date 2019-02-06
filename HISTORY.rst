@@ -7,7 +7,7 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-Version 1.0.0-dev
+Version 1.0.0
 ---------------------------
 Lots of small fixes that improve the usability of pytest-workflow are included
 in version 1.0.0.
