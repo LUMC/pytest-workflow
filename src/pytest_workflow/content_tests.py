@@ -19,10 +19,11 @@ and logs.
 
 The design philosophy here was that each piece of text should only be read
 once."""
-
+import functools
+import gzip
 import threading
 from pathlib import Path
-from typing import Callable, Iterable, List, Set
+from typing import Iterable, List, Optional, Set
 
 import pytest
 
@@ -78,56 +79,64 @@ def check_content(strings: List[str],
 
 def file_to_string_generator(filepath: Path) -> Iterable[str]:
     """
-    Turns a file into a line generator.
+    Turns a file into a line generator. Files ending with .gz are automatically
+    decompressed.
     :param filepath: the file path
     :return: yields lines of the file
     """
-    # Use 'r' here explicitly as opposed to 'rb'
-    with filepath.open("r") as file_handler:
+    file_open = (functools.partial(gzip.open, str(filepath))
+                 if filepath.suffix == ".gz" else
+                 filepath.open)
+    # Use 'rt' here explicitly as opposed to 'rb'
+    with file_open(mode='rt') as file_handler:
         for line in file_handler:
             yield line
 
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 content_generator: Callable[[], Iterable[str]],
+                 filepath: Path,
                  content_test: ContentTest,
-                 workflow: Workflow):
+                 workflow: Workflow,
+                 content_name: Optional[str] = None):
         """
         Creates a content test collector
         :param name: Name of the thing which contents are tested
         :param parent: a pytest.Collector object
-        :param content_generator: a function that should return the content as
-        lines. This function is a placeholder for the content itself. In other
-        words: instead of passing the contents of a file directly to the
-        ContentTestCollector, you pass a function that when called will return
-        the contents. This allows the pytest collection phase to finish before
-        the file is read. This is useful because the workflows are run after
-        the collection phase.
+        :param filepath: the file that contains the content
         :param content_test: a ContentTest object.
         :param workflow: the workflow is running.
+        :param content_name: The name of the content that will be displayed if
+        the test fails. Defaults to filepath.
         """
         # pylint: disable=too-many-arguments
-        # it is still only 5 not counting self.
+        # Cannot think of a better way to do this.
         super().__init__(name, parent=parent)
-        self.content_generator = content_generator
+        self.filepath = filepath
         self.content_test = content_test
         self.workflow = workflow
         self.found_strings = None
         self.thread = None
+        # We check the contents of files. Sometimes files are not there. Then
+        # content can not be checked. We save FileNotFoundErrors in this
+        # boolean.
+        self.file_not_found = False
+        self.content_name = content_name or str(filepath)
 
     def find_strings(self):
-        """Find the strings that are looked for in the given content
-        The content_generator function shines here. It only starts looking
-        for lines of text AFTER the workflow is finished. So that is why a
-        function is needed here and not just a variable containing lines of
-        text."""
+        """Find the strings that are looked for in the given file
+
+        When a file we test is not produced, we save the FileNotFoundError so
+        we can give an accurate repr_failure."""
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
-        self.found_strings = check_content(
-            strings=strings_to_check,
-            text_lines=self.content_generator())
+        try:
+            self.found_strings = check_content(
+                strings=strings_to_check,
+                text_lines=file_to_string_generator(self.filepath))
+        except FileNotFoundError:
+            self.file_not_found = True
 
     def collect(self):
         # A thread is started that looks for the strings and collection can go
@@ -141,7 +150,8 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=True
+                should_contain=True,
+                content_name=self.content_name
             )
             for string in self.content_test.contains]
 
@@ -149,7 +159,8 @@ class ContentTestCollector(pytest.Collector):
             ContentTestItem(
                 parent=self,
                 string=string,
-                should_contain=False
+                should_contain=False,
+                content_name=self.content_name
             )
             for string in self.content_test.must_not_contain]
 
@@ -160,7 +171,7 @@ class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
     def __init__(self, parent: ContentTestCollector, string: str,
-                 should_contain: bool):
+                 should_contain: bool, content_name: str):
         """
         Create a ContentTestItem
         :param parent: A ContentTestCollector. We use a ContentTestCollector
@@ -169,16 +180,19 @@ class ContentTestItem(pytest.Item):
         finished.
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
+        :param content_name: the name of the content which allows for easier
+        debugging if the test fails
         """
         contain = "contains" if should_contain else "does not contain"
         name = "{0} '{1}'".format(contain, string)
         super().__init__(name, parent=parent)
         self.should_contain = should_contain
         self.string = string
+        self.content_name = content_name
 
     def runtest(self):
         """Only after a workflow is finished the contents of files and logs are
-        read. The ContentTestCollector parent reads each file/log once. This is
+        read. The ContentTestCollector parent reads each file once. This is
         done in its thread. We wait for this thread to complete. Then we check
         all the found strings in the parent.
         This way we do not have to read each file one time per ContentTestItem
@@ -186,19 +200,30 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
+        assert not self.parent.file_not_found
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
 
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
-        message = (
-            "'{string}' was {found} in {content} "
-            "while it {should} be there."
-        ).format(
-            string=self.string,
-            found="not found" if self.should_contain else "found",
-            content=self.parent.name,
-            should="should" if self.should_contain else "should not"
-        )
-        return message
+        if self.parent.file_not_found:
+            return (
+                "'{content}' does not exist and cannot be searched "
+                "for {containing} '{string}'."
+            ).format(
+                content=self.content_name,
+                containing="containing" if self.should_contain
+                else "not containing",
+                string=self.string)
+
+        else:
+            return (
+                "'{string}' was {found} in {content} "
+                "while it {should} be there."
+            ).format(
+                string=self.string,
+                found="not found" if self.should_contain else "found",
+                content=self.content_name,
+                should="should" if self.should_contain else "should not"
+            )

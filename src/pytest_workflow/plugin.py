@@ -92,6 +92,29 @@ def pytest_configure(config):
     workflow_queue = WorkflowQueue()
     setattr(config, "workflow_queue", workflow_queue)
 
+    # When multiple workflows are started they should all be set in the same
+    # temporary directory
+    # Running in a temporary directory will prevent the project repository
+    # from getting filled up with test workflow output.
+    # The temporary directory is produced using the tempfile stdlib.
+    # If a basetemp is set by the user this is used as the temporary
+    # directory.
+    # Alternatively self.config._tmp_path_factory.getbasetemp() could be used
+    # to create temporary dirs. But the comments in the pytest code
+    # discourage this. Furthermore this creates directories in the following
+    # form: `/tmp/pytest-of-$USER/pytest-<number>`. The number is generated
+    # by pytest itself and increments each run. A maximum of 3 folders can
+    # coexist. When more are detected, pytest will delete the oldest folders.
+    # This can create problems when more than three instances of pytest with
+    # pytest-workflow run under the same user. This is not uncommon in CI.
+    # So this is why the native pytest `tmpdir` fixture is not used.
+
+    basetemp = config.getoption("basetemp")
+    workflow_dir = (
+        Path(basetemp) if basetemp is not None
+        else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
+    setattr(config, "workflow_dir", workflow_dir)
+
 
 def pytest_collection(session):
     """This function is started at the beginning of collection"""
@@ -109,8 +132,7 @@ def pytest_collection(session):
 def pytest_runtestloop(session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
-        number_of_threads=session.config.getoption("workflow_threads"),
-        save_logs=session.config.getoption("keep_workflow_wd")
+        session.config.getoption("workflow_threads")
     )
 
 
@@ -150,21 +172,6 @@ class WorkflowTestsCollector(pytest.Collector):
         """Creates a temporary directory and add the workflow to the workflow
         queue.
 
-        Running in a temporary directory will prevent the project repository
-        from getting filled up with test workflow output.
-        The temporary directory is produced using the tempfile stdlib.
-        If a basetemp is set by the user this is used as the temporary
-        directory.
-        Alternatively self.config._tmp_path_factory.getbasetemp() could be used
-        to create temporary dirs. But the comments in the pytest code
-        discourage this. Furthermore this creates directories in the following
-        form: `/tmp/pytest-of-$USER/pytest-<number>`. The number is generated
-        by pytest itself and increments each run. A maximum of 3 folders can
-        coexist. When more are detected, pytest will delete the oldest folders.
-        This can create problems when more than three instances of pytest with
-        pytest-workflow run under the same user. This is not uncommon in CI.
-        So this is why the native pytest `tmpdir` fixture is not used.
-
         The temporary directory name is constructed from the test name by
         replacing all whitespaces with '_'. Directory paths with whitespace in
         them are very annoying to inspect.
@@ -177,11 +184,9 @@ class WorkflowTestsCollector(pytest.Collector):
         Print statements are used to provide information to the user.
         This is shorter than using pytest's terminal reporter.
         """
-        basetemp = self.config.getoption("basetemp")
-        basetemp_path = (
-            Path(basetemp) if basetemp is not None
-            else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
-        self.tempdir = basetemp_path / Path(replace_whitespace(self.name, '_'))
+
+        self.tempdir = (self.config.workflow_dir /
+                        Path(replace_whitespace(self.name, '_')))
 
         # Remove the tempdir if it exists. This is needed for shutil.copytree
         # to work properly.
@@ -193,15 +198,12 @@ class WorkflowTestsCollector(pytest.Collector):
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
         shutil.copytree(str(self.config.rootdir), str(self.tempdir))
+
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=self.tempdir,
                             name=self.workflow_test.name)
 
-        print("queue '{name}' with command '{command}' in '{dir}'".format(
-            name=self.name,
-            command=self.workflow_test.command,
-            dir=str(self.tempdir)))
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
@@ -237,15 +239,17 @@ class WorkflowTestsCollector(pytest.Collector):
 
         tests += [ContentTestCollector(
             name="stdout", parent=self,
-            content_generator=workflow.stdout_lines,
+            filepath=workflow.stdout_file,
             content_test=self.workflow_test.stdout,
-            workflow=workflow)]
+            workflow=workflow,
+            content_name="'{0}': stdout".format(self.workflow_test.name))]
 
         tests += [ContentTestCollector(
             name="stderr", parent=self,
-            content_generator=workflow.stderr_lines,
+            filepath=workflow.stderr_file,
             content_test=self.workflow_test.stderr,
-            workflow=workflow)]
+            workflow=workflow,
+            content_name="'{0}': stderr".format(self.workflow_test.name))]
 
         return tests
 
@@ -273,7 +277,9 @@ class ExitCodeTest(pytest.Item):
     def repr_failure(self, excinfo):
         # pylint: disable=unused-argument
         # excinfo needed for pytest.
-        message = ("The workflow exited with exit code " +
-                   "'{0}' instead of '{1}'.".format(self.workflow.exit_code,
-                                                    self.desired_exit_code))
+        message = ("'{workflow_name}' exited with exit code " +
+                   "'{exit_code}' instead of '{desired_exit_code}'."
+                   ).format(workflow_name=self.workflow.name,
+                            exit_code=self.workflow.exit_code,
+                            desired_exit_code=self.desired_exit_code)
         return message

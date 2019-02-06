@@ -27,7 +27,7 @@ FAILURE_MESSAGE_TESTS = [
     - name: fail_test
       command: grep
     """,
-     "The workflow exited with exit code '2' instead of '0'"),
+     "'fail_test' exited with exit code '2' instead of '0'"),
     ("""\
     - name: create file
       command: echo moo
@@ -60,7 +60,7 @@ FAILURE_MESSAGE_TESTS = [
           contains:
             - miaow
     """,
-     "'miaow' was not found in content while it should be there"),
+     "moo_file_contains_miaow/moo.txt while it should be there"),
     ("""\
     - name: moo file does not contain moo
       command: bash -c 'echo moo > moo.txt'
@@ -69,7 +69,7 @@ FAILURE_MESSAGE_TESTS = [
           must_not_contain:
             - moo
     """,
-     "'moo' was found in content while it should not be there"),
+     "moo_file_does_not_contain_moo/moo.txt while it should not be there"),
     ("""\
     - name: echo miaow
       command: echo moo
@@ -77,7 +77,7 @@ FAILURE_MESSAGE_TESTS = [
         contains:
           - miaow
     """,
-     "'miaow' was not found in stdout while it should be there"),
+     "'miaow' was not found in 'echo miaow': stdout while it should be there"),
     ("""\
     - name: echo does not contain moo
       command: echo moo
@@ -85,7 +85,8 @@ FAILURE_MESSAGE_TESTS = [
         must_not_contain:
           - moo
     """,
-     "moo' was found in stdout while it should not be there"),
+     "moo' was found in 'echo does not contain moo': stdout while "
+     "it should not be there"),
     ("""\
     - name: fail_test
       command: grep
@@ -93,7 +94,8 @@ FAILURE_MESSAGE_TESTS = [
         contains:
           - "No arguments?"
     """,
-     "'No arguments?' was not found in stderr while it should be there"),
+     "'No arguments?' was not found in 'fail_test': stderr "
+     "while it should be there"),
     ("""\
     - name: fail_test
       command: grep
@@ -101,7 +103,27 @@ FAILURE_MESSAGE_TESTS = [
         must_not_contain:
           - "grep --help"
     """,
-     "'grep --help' was found in stderr while it should not be there")
+     "'grep --help' was found in 'fail_test': stderr while "
+     "it should not be there"),
+    ("""\
+    - name: file_not_exist
+      command: echo moo
+      files:
+        - path: moo.txt
+          contains:
+            - "moo"
+    """,
+     "moo.txt' does not exist and cannot be searched for containing 'moo'."),
+    ("""\
+    - name: file_not_exist
+      command: echo moo
+      files:
+        - path: moo.txt
+          must_not_contain:
+            - "miaow"
+    """,
+     "moo.txt' does not exist and cannot be searched for "
+     "not containing 'miaow'.")
 ]  # type: List[Tuple[str,str]]
 
 

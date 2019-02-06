@@ -7,6 +7,49 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+Version 1.0.0
+---------------------------
+Lots of small fixes that improve the usability of pytest-workflow are included
+in version 1.0.0.
+
++ Gzipped files can now also be checked for contents. Files with '.gz' as
+  extension are automatically decompressed.
++ ``stdout`` and ``stderr`` of workflows are now streamed to a file instead of
+  being kept in memory. This means you can check the progress of a workflow by
+  running ``tail -f <stdout or stderr>``. The location of ``stdout`` and
+  ``stderr`` is now reported at the start of each worflow. If the
+  ``--keep-workflow-wd`` is not set the ``stdout`` and ``stderr`` files will be
+  deleted with the rest of the workflow files.
++ The log reports now when a workflow is starting, instead of when it is added
+  to the queue. This makes it easier to see which workflows are currently
+  running and if you forgot to use the ``--workflow-threads`` or ``--wt`` flag.
++ Workflow exit code failures now mention the name of the workflow. Previously
+  the generic name "Workflow" was used, which made it harder to figure out
+  which workflows failed.
++ When tests of file content fail because the file does not exist, a different
+  error message is given compared to when the file exist, but the content is
+  not there, which makes debugging easier. Also the accompanying
+  "FileNotFound" error stacktrace is now suppressed, which keeps the test
+  output more pleasant.
++ When tests of stdout/stderr content or file content fail a more informative
+  error message is given to allow for easier debugging.
++ All workflows now get their own folder within the `same` temporary directory.
+  This fixes a bug where if ``basetemp`` was not set, each workflow would get
+  its own folder in a separate temp directory. For example running workflows
+  'workflow1' and 'workflow2' would create two temporary folders:
+
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow1' and
+  '/tmp/pytest_workflow\_\ **b8m1wzuf**/workflow2'
+
+  This is now changed to have all workflows in one temporary directory per
+  pytest run:
+
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow1' and
+  '/tmp/pytest_workflow\_\ **33mrz5a5**/workflow2'
+
++ Disallow empty ``command`` and ``name`` keys. An empty ``command`` caused
+  pytest-workflow to hang. Empty names are also disallowed.
+
 Version 0.4.0
 ---------------------------
 + Added more information to the manual on how to debug pipelines and use
