@@ -65,10 +65,6 @@ class Workflow(object):
                             else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
         self.start_lock = threading.Lock()
-        self.wait_lock = threading.Lock()
-        self.wait_timeout_secs = None
-        self.wait_time_secs = 0.0
-        self.wait_interval_secs = 0.01
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -93,36 +89,26 @@ class Workflow(object):
         self.start()
         self.wait()
 
-    def wait(self):
+    def wait(self, wait_timeout_secs: Optional[int] = None,
+             wait_interval_secs: float = 0.01):
         """Waits for the workflow to complete"""
-        # Lock the wait step. Only one waiter is allowed here to wait for
-        # the workflow to complete and write the stderr.
-        # A popen.stderr is a buffered reader and can only be read once.
-        # Once self._stderr and self._stdout are written the lock can be
-        # released
-        with self.wait_lock:
-            while self._popen is None:
-                # This piece of code checks if a workflow has started yet. If
-                # it has not, it waits. A counter is implemented here because:
-                # 1. Incrementing a counter is much faster than checking system
-                #    time
-                # 2. The counter is linked to the self object. This means we
-                #    wait only once for the workflow to start. All consecutive
-                #    wait commands will fail instantly. Having all of these
-                #    wait as well would be a waste of time.
-                if (self.wait_timeout_secs is not None
-                        and self.wait_time_secs > self.wait_timeout_secs):
-                    raise ValueError(
-                        "Waiting on a workflow that has not started within the"
-                        " last {0} seconds".format(self.wait_timeout_secs))
-                time.sleep(self.wait_interval_secs)
-                self.wait_time_secs += self.wait_interval_secs
+        wait_time_secs = 0.0
+        while self._popen is None:
+            # This piece of code checks if a workflow has started yet. If
+            # it has not, it waits. A counter is implemented here because
+            # incrementing a counter is much faster than checking system
+            # time
+            if (wait_timeout_secs is not None
+                    and wait_time_secs > wait_timeout_secs):
+                raise ValueError(
+                    "Waiting on a workflow that has not started within the"
+                    " last {0} seconds".format(wait_timeout_secs))
+            time.sleep(wait_interval_secs)
+            wait_time_secs += wait_interval_secs
 
-            # Wait for process to finish with _popen.communicate(). This blocks
-            # until the command completes.
-            # _popen.wait() will block with stdout=pipe and stderr=pipe
-            if self._popen.returncode is None:
-                self._popen.communicate()
+        # Stdout and stderr are written to files. So popen.wait() gives no
+        # errors with long stderr or stdout.
+        self._popen.wait()
 
     @property
     def stdout(self) -> bytes:

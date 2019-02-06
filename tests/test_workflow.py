@@ -46,11 +46,8 @@ def test_stderr():
 
 def test_wait_timeout():
     workflow = Workflow("echo moo")
-    workflow.wait_timeout_secs = 0.1
-    workflow.wait_interval_secs = 0.01
     with pytest.raises(ValueError) as error:
-        workflow.wait()
-    assert math.isclose(workflow.wait_time_secs, 0.11)
+        workflow.wait(wait_timeout_secs=0.1, wait_interval_secs=0.01)
     assert error.match(
         "Waiting on a workflow that has not started within the last 0.1 "
         "seconds"
