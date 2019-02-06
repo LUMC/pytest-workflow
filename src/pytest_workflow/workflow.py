@@ -32,8 +32,7 @@ from typing import Optional
 
 
 class Workflow(object):
-    # pylint: disable=too-many-instance-attributes
-    # Is there a better way of doing things, as pylint suggests?
+
     def __init__(self,
                  command: str,
                  cwd: Optional[Path] = None,
