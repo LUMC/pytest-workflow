@@ -15,7 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """Tests the Workflow class"""
-import math
+import subprocess  # nosec. This is just for the Timeout exception.
 
 import pytest
 
@@ -44,14 +44,22 @@ def test_stderr():
     assert "grep" in workflow.stderr.decode()
 
 
-def test_wait_timeout():
+def test_wait_timeout_workflow_not_started():
     workflow = Workflow("echo moo")
-    with pytest.raises(ValueError) as error:
-        workflow.wait(wait_timeout_secs=0.1, wait_interval_secs=0.01)
+    with pytest.raises(TimeoutError) as error:
+        workflow.wait(timeout_secs=0.1, wait_interval_secs=0.01)
     assert error.match(
         "Waiting on a workflow that has not started within the last 0.1 "
         "seconds"
     )
+
+
+def test_wait_timeout_workflow_started():
+    workflow = Workflow("sleep 10")
+    workflow.start()
+    with pytest.raises(subprocess.TimeoutExpired) as error:
+        workflow.wait(timeout_secs=0.1, wait_interval_secs=0.01)
+    assert error.match("timed out after 0.1 seconds")
 
 
 def test_start_lock():

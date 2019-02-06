@@ -88,26 +88,31 @@ class Workflow(object):
         self.start()
         self.wait()
 
-    def wait(self, wait_timeout_secs: Optional[int] = None,
+    def wait(self, timeout_secs: Optional[float] = None,
              wait_interval_secs: float = 0.01):
         """Waits for the workflow to complete"""
-        wait_time_secs = 0.0
+        wait_time = 0.0
         while self._popen is None:
             # This piece of code checks if a workflow has started yet. If
             # it has not, it waits. A counter is implemented here because
             # incrementing a counter is much faster than checking system
             # time
-            if (wait_timeout_secs is not None
-                    and wait_time_secs > wait_timeout_secs):
-                raise ValueError(
+            if (timeout_secs is not None
+                    and wait_time > timeout_secs):
+                raise TimeoutError(
                     "Waiting on a workflow that has not started within the"
-                    " last {0} seconds".format(wait_timeout_secs))
+                    " last {0} seconds".format(timeout_secs))
             time.sleep(wait_interval_secs)
-            wait_time_secs += wait_interval_secs
+            wait_time += wait_interval_secs
 
         # Stdout and stderr are written to files. So popen.wait() does not
         # block process completion with long stderr or stdout.
-        self._popen.wait()
+        if timeout_secs is not None:
+            # Wait for timeout_secs number of secs minus te time that was
+            # already spent waiting for the workflow to start
+            self._popen.wait(timeout_secs - wait_time)
+        else:
+            self._popen.wait()
 
     @property
     def stdout(self) -> bytes:
