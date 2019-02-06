@@ -63,7 +63,16 @@ FAILING_GREP = textwrap.dedent("""\
   exit_code: 2
 """)
 
-SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP
+ZIPPED_FILE = textwrap.dedent("""\
+- name: zipped file
+  command: bash -c 'echo moo | gzip -c > moo.gz'
+  files:
+    - path: moo.gz
+      contains:
+        - moo
+""")
+
+SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE
 
 SUCCESS_MESSAGES = [
     ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],
@@ -78,7 +87,8 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::simple echo::exit code should be 0 PASSED"],
     ["test_succeeding.yml::failing grep::exit code should be 2 PASSED"],
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
-    ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],  # noqa: E501
+    ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],
+    ["test_succeeding.yml::zipped file::moo.gz::content::contains 'moo' PASSED"],  # noqa: E501
     ["start 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
     ["'moo file' done."]
 ]

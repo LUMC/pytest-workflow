@@ -12,6 +12,8 @@ Version 1.0.0-dev
 Lots of small fixes that improve the usability of pytest-workflow are included
 in version 1.0.0.
 
++ Gzipped files can now also be checked for contents. Files with '.gz' as
+  extension are automatically decompressed.
 + ``stdout`` and ``stderr`` of workflows are now streamed to a file instead of
   being kept in memory. This means you can check the progress of a workflow by
   running ``tail -f <stdout or stderr>``. The location of ``stdout`` and
