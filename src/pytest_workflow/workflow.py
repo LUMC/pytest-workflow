@@ -56,12 +56,16 @@ class Workflow(object):
         # to a file which can be checked with ``tail -f``.
         # stdout and stderr will be written to a tempfile if no CWD is given
         # to prevent clutter created when testing.
-        self.stdout_file = (Path(tempfile.NamedTemporaryFile().name)
-                            if cwd is None
-                            else self.cwd / Path("log.out"))
-        self.stderr_file = (Path(tempfile.NamedTemporaryFile().name)
-                            if cwd is None
-                            else self.cwd / Path("log.err"))
+        self.stdout_file = (
+            Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                             suffix=".out").name)
+            if cwd is None
+            else self.cwd / Path("log.out"))
+        self.stderr_file = (
+            Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                             suffix=".err").name)
+            if cwd is None
+            else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
         self.start_lock = threading.Lock()
 
