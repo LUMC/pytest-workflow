@@ -105,8 +105,8 @@ class Workflow(object):
             time.sleep(wait_interval_secs)
             wait_time_secs += wait_interval_secs
 
-        # Stdout and stderr are written to files. So popen.wait() gives no
-        # errors with long stderr or stdout.
+        # Stdout and stderr are written to files. So popen.wait() does not
+        # block process completion with long stderr or stdout.
         self._popen.wait()
 
     @property
