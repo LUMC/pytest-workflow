@@ -55,7 +55,8 @@ A more advanced example:
     exit_code: 2                       # What the exit code should be (optional, if not given defaults to 0)
     files:
       - path: "fail.log"               # Multiple files can be tested for each workflow
-      - path: "TomCruise.txt"
+      - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
+        contains: "starring"
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
