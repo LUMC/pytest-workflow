@@ -86,7 +86,7 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
     """
     file_open = (functools.partial(gzip.open, str(filepath))
                  if filepath.suffix == ".gz" else
-                 functools.partial(filepath.open))
+                 filepath.open)
     # Use 'rt' here explicitly as opposed to 'rb'
     with file_open(mode='rt') as file_handler:
         for line in file_handler:
