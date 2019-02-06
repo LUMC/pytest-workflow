@@ -19,7 +19,8 @@ and logs.
 
 The design philosophy here was that each piece of text should only be read
 once."""
-
+import functools
+import gzip
 import threading
 from pathlib import Path
 from typing import Iterable, List, Optional, Set
@@ -78,12 +79,16 @@ def check_content(strings: List[str],
 
 def file_to_string_generator(filepath: Path) -> Iterable[str]:
     """
-    Turns a file into a line generator.
+    Turns a file into a line generator. Files ending with .gz are automatically
+    decompressed.
     :param filepath: the file path
     :return: yields lines of the file
     """
-    # Use 'r' here explicitly as opposed to 'rb'
-    with filepath.open("r") as file_handler:
+    file_open = (functools.partial(gzip.open, str(filepath))
+                 if filepath.suffix == ".gz" else
+                 functools.partial(filepath.open))
+    # Use 'rt' here explicitly as opposed to 'rb'
+    with file_open(mode='rt') as file_handler:
         for line in file_handler:
             yield line
 
