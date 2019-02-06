@@ -22,7 +22,7 @@ once."""
 
 import threading
 from pathlib import Path
-from typing import Callable, Iterable, List, Set
+from typing import Iterable, List, Optional, Set
 
 import pytest
 
@@ -90,30 +90,24 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 content_generator: Callable[[], Iterable[str]],
+                 filepath: Path,
                  content_test: ContentTest,
-                 content_name: str,
-                 workflow: Workflow):
+                 workflow: Workflow,
+                 content_name: Optional[str] = None):
         """
         Creates a content test collector
         :param name: Name of the thing which contents are tested
         :param parent: a pytest.Collector object
-        :param content_generator: a function that should return the content as
-        lines. This function is a placeholder for the content itself. In other
-        words: instead of passing the contents of a file directly to the
-        ContentTestCollector, you pass a function that when called will return
-        the contents. This allows the pytest collection phase to finish before
-        the file is read. This is useful because the workflows are run after
-        the collection phase.
+        :param filepath: the file that contains the content
         :param content_test: a ContentTest object.
         :param workflow: the workflow is running.
         :param content_name: The name of the content that will be displayed if
-        the test fails.
+        the test fails. Defaults to filepath.
         """
         # pylint: disable=too-many-arguments
-        # it is still only 5 not counting self.
+        # Cannot think of a better way to do this.
         super().__init__(name, parent=parent)
-        self.content_generator = content_generator
+        self.filepath = filepath
         self.content_test = content_test
         self.workflow = workflow
         self.found_strings = None
@@ -122,14 +116,11 @@ class ContentTestCollector(pytest.Collector):
         # content can not be checked. We save FileNotFoundErrors in this
         # boolean.
         self.file_not_found = False
-        self.content_name = content_name
+        self.content_name = content_name or str(filepath)
 
     def find_strings(self):
-        """Find the strings that are looked for in the given content
-        The content_generator function shines here. It only starts looking
-        for lines of text AFTER the workflow is finished. So that is why a
-        function is needed here and not just a variable containing lines of
-        text.
+        """Find the strings that are looked for in the given file
+
         When a file we test is not produced, we save the FileNotFoundError so
         we can give an accurate repr_failure."""
         self.workflow.wait()
@@ -138,7 +129,7 @@ class ContentTestCollector(pytest.Collector):
         try:
             self.found_strings = check_content(
                 strings=strings_to_check,
-                text_lines=self.content_generator())
+                text_lines=file_to_string_generator(self.filepath))
         except FileNotFoundError:
             self.file_not_found = True
 
@@ -196,7 +187,7 @@ class ContentTestItem(pytest.Item):
 
     def runtest(self):
         """Only after a workflow is finished the contents of files and logs are
-        read. The ContentTestCollector parent reads each file/log once. This is
+        read. The ContentTestCollector parent reads each file once. This is
         done in its thread. We wait for this thread to complete. Then we check
         all the found strings in the parent.
         This way we do not have to read each file one time per ContentTestItem

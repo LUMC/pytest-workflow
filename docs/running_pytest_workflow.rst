@@ -7,13 +7,12 @@ Pytest will automatically gather files in the ``tests`` directory starting with
 ``test`` and ending in ``.yaml`` or ``.yml``.
 
 The workflows are run automatically. Each workflow gets its own temporary
-directory to run. These directories are cleaned up after the tests are
-completed. If you wish to inspect the output of a failing workflow you can use
-the ``--keep-workflow-wd`` flag to disable cleanup. This will also make sure
-the logs of the pipeline are saved in the temporary directory. When
-``--keep-workflow-wd`` is set, the paths to the logs and the temporary
-directory are reported in pytest's output. The `--keep-workflow-wd`` flag is
-highly recommended when debugging pipelines.
+directory to run. The ``stdout`` and ``stderr`` of the workflow command are
+also saved to this directory. The temporary directories are cleaned up after
+the tests are completed. If you wish to inspect the output of a failing
+workflow you can use the ``--keep-workflow-wd`` flag to disable cleanup. This
+will also make sure the logs of the pipeline are not deleted. The
+``--keep-workflow-wd`` flag is highly recommended when debugging pipelines.
 
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
@@ -32,6 +31,10 @@ To run multiple workflows simultaneously you can use
 ``--workflow-threads <int>`` or ``--wt <int>`` flag. This defines the number
 of workflows that can be run simultaneously. This will speed up things if
 you have enough resources to process these workflows simultaneously.
+
+To check the progress of a workflow while it is running you can use ``tail -f``
+on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
+files are reported in the log as soon as a workflow is started.
 
 Running specific workflows
 ----------------------------

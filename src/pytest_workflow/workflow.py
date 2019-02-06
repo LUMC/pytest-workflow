@@ -20,27 +20,28 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen. Multithreading functionality was added
 later.
 """
+import contextlib
 import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
+import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import List, Optional  # noqa: F401  # used for typing
+from typing import Optional
 
 
 class Workflow(object):
-    # pylint: disable=too-many-instance-attributes
-    # Is there a better way of doing things, as pylint suggests?
+
     def __init__(self,
                  command: str,
-                 cwd: Path = Path(),
+                 cwd: Optional[Path] = None,
                  name: Optional[str] = None):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
         :param cwd: The current working directory in which the command will
-        be executed.
+        be executed. If None given will default to Path()
         :param name: An alias for the workflow. This looks nicer than a printed
         command.
         """
@@ -50,15 +51,23 @@ class Workflow(object):
         # Always ensure a name. command.split()[0] can't fail because we tested
         # for emptiness.
         self.name = name or command.split()[0]
-        self.cwd = cwd
+        self.cwd = cwd or Path()
+        # For long running workflows it is best to save the stdout and stderr
+        # to a file which can be checked with ``tail -f``.
+        # stdout and stderr will be written to a tempfile if no CWD is given
+        # to prevent clutter created when testing.
+        self.stdout_file = (
+            Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                             suffix=".out").name)
+            if cwd is None
+            else self.cwd / Path("log.out"))
+        self.stderr_file = (
+            Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                             suffix=".err").name)
+            if cwd is None
+            else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
-        self._stderr = None
-        self._stdout = None
         self.start_lock = threading.Lock()
-        self.wait_lock = threading.Lock()
-        self.wait_timeout_secs = None
-        self.wait_time_secs = 0.0
-        self.wait_interval_secs = 0.01
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -67,10 +76,14 @@ class Workflow(object):
         # is started from multiple threads.
         with self.start_lock:
             if self._popen is None:
-                sub_process_args = shlex.split(self.command)
-                self._popen = subprocess.Popen(  # nosec: Shell is not enabled.
-                    sub_process_args, stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE, cwd=str(self.cwd))
+                # We can open multiple files within one with statement.
+                with contextlib.ExitStack() as stack:
+                    stdout_h = stack.enter_context(self.stdout_file.open('wb'))
+                    stderr_h = stack.enter_context(self.stderr_file.open('wb'))
+                    sub_process_args = shlex.split(self.command)
+                    self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
+                        sub_process_args, stdout=stdout_h,
+                        stderr=stderr_h, cwd=str(self.cwd))
             else:
                 raise ValueError("Workflows can only be started once")
 
@@ -79,75 +92,54 @@ class Workflow(object):
         self.start()
         self.wait()
 
-    def stdout_to_file(self) -> Path:
-        self.wait()
-        return bytes_to_file(self.stdout, self.cwd / Path("log.out"))
+    def wait(self, timeout_secs: Optional[float] = None,
+             wait_interval_secs: float = 0.01):
+        """Waits for the workflow to complete
+        :param timeout_secs: how many seconds should be waited on a workflow
+        the total wait time = wait_to_start_time + run_time. This is set to
+        None by default as it is very hard to predict how long a workflow runs
+        and how long it has to wait on other workflows before starting.
+        :param wait_interval_secs: check interval secs if a workflow is started
+        """
+        wait_time = 0.0
+        while self._popen is None:
+            # This piece of code checks if a workflow has started yet. If
+            # it has not, it waits. A counter is implemented here because
+            # incrementing a counter is much faster than checking system
+            # time
+            if (timeout_secs is not None
+                    and wait_time > timeout_secs):
+                raise TimeoutError(
+                    "Waiting on a workflow that has not started within the"
+                    " last {0} seconds".format(timeout_secs))
+            time.sleep(wait_interval_secs)
+            wait_time += wait_interval_secs
 
-    def stderr_to_file(self) -> Path:
-        self.wait()
-        return bytes_to_file(self.stderr, self.cwd / Path("log.err"))
-
-    def wait(self):
-        """Waits for the workflow to complete"""
-        # Lock the wait step. Only one waiter is allowed here to wait for
-        # the workflow to complete and write the stderr.
-        # A popen.stderr is a buffered reader and can only be read once.
-        # Once self._stderr and self._stdout are written the lock can be
-        # released
-        with self.wait_lock:
-            while self._popen is None:
-                # This piece of code checks if a workflow has started yet. If
-                # it has not, it waits. A counter is implemented here because:
-                # 1. Incrementing a counter is much faster than checking system
-                #    time
-                # 2. The counter is linked to the self object. This means we
-                #    wait only once for the workflow to start. All consecutive
-                #    wait commands will fail instantly. Having all of these
-                #    wait as well would be a waste of time.
-                if (self.wait_timeout_secs is not None
-                        and self.wait_time_secs > self.wait_timeout_secs):
-                    raise ValueError(
-                        "Waiting on a workflow that has not started within the"
-                        " last {0} seconds".format(self.wait_timeout_secs))
-                time.sleep(self.wait_interval_secs)
-                self.wait_time_secs += self.wait_interval_secs
-
-            # Wait for process to finish with _popen.communicate(). This blocks
-            # until the command completes.
-            # _popen.wait() will block with stdout=pipe and stderr=pipe
-            if (self._popen.returncode is None and
-                    self._stderr is None and
-                    self._stdout is None):
-                self._stdout, self._stderr = self._popen.communicate()
+        # Stdout and stderr are written to files. So popen.wait() does not
+        # block process completion with long stderr or stdout.
+        if timeout_secs is not None:
+            # Wait for timeout_secs number of secs minus te time that was
+            # already spent waiting for the workflow to start
+            self._popen.wait(timeout_secs - wait_time)
+        else:
+            self._popen.wait()
 
     @property
     def stdout(self) -> bytes:
         self.wait()
-        return self._stdout  # for testing log
+        with self.stdout_file.open('rb') as stdout:
+            return stdout.read()
 
     @property
     def stderr(self) -> bytes:
         self.wait()
-        return self._stderr  # for testing log
+        with self.stderr_file.open('rb') as stderr:
+            return stderr.read()
 
     @property
     def exit_code(self) -> int:
         self.wait()
         return self._popen.returncode
-
-    def stdout_lines(self) -> List[str]:
-        self.wait()
-        return self._stdout.decode().splitlines()
-
-    def stderr_lines(self) -> List[str]:
-        self.wait()
-        return self._stderr.decode().splitlines()
-
-
-def bytes_to_file(bytestring: bytes, output_file: Path) -> Path:
-    with output_file.open('wb') as file_handler:
-        file_handler.write(bytestring)
-    return output_file
 
 
 class WorkflowQueue(queue.Queue):
@@ -168,27 +160,23 @@ class WorkflowQueue(queue.Queue):
 
     # Queue processing with workers example taken from
     # https://docs.python.org/3.5/library/queue.html?highlight=queue#queue.Queue.join  # noqa
-    def process(self, number_of_threads: int = 1, save_logs: bool = False):
+    def process(self, number_of_threads: int = 1):
         """
         Processes the workflow queue with a number of threads
         :param number_of_threads: The number of threads
-        :param save_logs: Whether to save the logs of the workflows that have
-        run
         """
         threads = []
         for _ in range(number_of_threads):
-            thread = threading.Thread(target=self.worker, args=(save_logs,))
+            thread = threading.Thread(target=self.worker)
             thread.start()
             threads.append(thread)
         self.join()
         for thread in threads:
             thread.join()
 
-    def worker(self, save_logs: bool = False):
+    def worker(self):
         """
         Run workflows until the queue is empty
-        :param save_logs: Whether to save the logs of the workflows that have
-        run
         """
         while True:
             try:
@@ -199,19 +187,16 @@ class WorkflowQueue(queue.Queue):
                 break
             else:
                 print(
-                    "start '{name}' with command '{command}' in '{dir}'"
+                    "start '{name}' with command '{command}' in '{dir}'. "
+                    "stdout: '{stdout_file}'. "
+                    "stderr: '{stderr_file}'."
                     .format(
                         name=workflow.name,
                         command=workflow.command,
-                        dir=workflow.cwd))
+                        dir=workflow.cwd,
+                        stdout_file=workflow.stdout_file,
+                        stderr_file=workflow.stderr_file))
                 workflow.run()
                 self.task_done()
                 # Some reporting
                 print("'{0}' done.".format(workflow.name))
-                if save_logs:
-                    log_err = workflow.stderr_to_file()
-                    log_out = workflow.stdout_to_file()
-                    print("'{0}' stdout saved in: {1}".format(
-                        workflow.name or workflow.command, str(log_out)))
-                    print("'{0}' stderr saved in: {1}".format(
-                        workflow.name or workflow.command, str(log_err)))

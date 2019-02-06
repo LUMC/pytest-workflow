@@ -12,6 +12,12 @@ Version 1.0.0-dev
 Lots of small fixes that improve the usability of pytest-workflow are included
 in version 1.0.0.
 
++ ``stdout`` and ``stderr`` of workflows are now streamed to a file instead of
+  being kept in memory. This means you can check the progress of a workflow by
+  running ``tail -f <stdout or stderr>``. The location of ``stdout`` and
+  ``stderr`` is now reported at the start of each worflow. If the
+  ``--keep-workflow-wd`` is not set the ``stdout`` and ``stderr`` files will be
+  deleted with the rest of the workflow files.
 + The log reports now when a workflow is starting, instead of when it is added
   to the queue. This makes it easier to see which workflows are currently
   running and if you forgot to use the ``--workflow-threads`` or ``--wt`` flag.
