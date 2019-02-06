@@ -94,7 +94,13 @@ class Workflow(object):
 
     def wait(self, timeout_secs: Optional[float] = None,
              wait_interval_secs: float = 0.01):
-        """Waits for the workflow to complete"""
+        """Waits for the workflow to complete
+        :param timeout_secs: how many seconds should be waited on a workflow
+        the total wait time = wait_to_start_time + run_time. This is set to
+        None by default as it is very hard to predict how long a workflow runs
+        and how long it has to wait on other workflows before starting.
+        :param wait_interval_secs: check interval secs if a workflow is started
+        """
         wait_time = 0.0
         while self._popen is None:
             # This piece of code checks if a workflow has started yet. If
