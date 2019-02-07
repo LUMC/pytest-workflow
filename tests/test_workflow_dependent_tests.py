@@ -107,3 +107,34 @@ def test_fixture_unmarked_test(testdir):
     result.assert_outcomes(error=1, passed=4)
     assert ("workflow_dir can only be requested in tests marked with "
             "the workflow mark.") in result.stdout.str()
+
+
+def test_fixture_usable_for_file_tests(testdir):
+    test_workflow = textwrap.dedent("""\
+    - name: number files
+      command: >-
+        bash -c '
+        echo 123 > 123.txt ;
+        echo 456 > 456.txt'
+      files:
+        - path: 123.txt
+        - path: 456.txt
+    """)
+    test_div_by_three = textwrap.dedent("""\
+    import pytest
+    from pathlib import Path
+
+    @pytest.mark.workflow(name="number files")
+    def test_div_by_three(workflow_dir):
+        number_file = workflow_dir / Path("123.txt")
+
+        with number_file.open('rt') as file_h:
+            number_file_content = file_h.read()
+
+        assert int(number_file_content) % 3 == 0
+    """)
+
+    testdir.makefile(".yml", test_workflow=test_workflow)
+    testdir.makefile(".py", test_div=test_div_by_three)
+    result = testdir.runpytest("-v")
+    result.assert_outcomes(passed=4, failed=0, skipped=0, error=0)
