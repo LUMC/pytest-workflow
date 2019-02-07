@@ -23,6 +23,7 @@ from typing import List, Optional  # noqa: F401 needed for typing.
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
+from _pytest.fixtures import SubRequest
 from _pytest.mark import MarkDecorator  # noqa: F401 used for typing
 
 import pytest
@@ -118,10 +119,10 @@ def pytest_configure(config: PytestConfig):
     # So this is why the native pytest `tmpdir` fixture is not used.
 
     basetemp = config.getoption("basetemp")
-    workflow_dir = (
+    workflow_temp_dir = (
         Path(basetemp) if basetemp is not None
         else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
-    setattr(config, "workflow_dir", workflow_dir)
+    setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
 
 def pytest_collection(session: pytest.Session):
@@ -139,9 +140,7 @@ def pytest_collection(session: pytest.Session):
 
 def pytest_collection_modifyitems(config: PytestConfig,
                                   items: List[pytest.Item]):
-    """This function modifies all items after test collection. This allows us
-    to select tests that are marked to depend on a workflow and make the
-    required modifications."""
+    """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
         marker = item.get_closest_marker(name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
@@ -151,6 +150,23 @@ def pytest_collection_modifyitems(config: PytestConfig,
                 skip_marker = pytest.mark.skip(
                     reason="'{0}' has not run.".format(workflow_name))
                 item.add_marker(skip_marker)
+
+
+@pytest.fixture()
+def workflow_dir(request: SubRequest):
+    """Returns the workflow_dir of the workflow named in the mark. This fixture
+    is only provided for tests that are marked with the workflow mark."""
+
+    workflow_temp_dir = request.config.workflow_temp_dir
+    # request.node refers to the node that has the mark. This is a pytest.Node
+    marker = request.node.get_closest_marker(name="workflow")
+
+    if marker is not None:
+        workflow_name = marker.kwargs['name']
+        return workflow_temp_dir / Path(replace_whitespace(workflow_name))
+    else:
+        raise ValueError("workflow_dir can only be requested in tests marked"
+                         " with the workflow mark.")
 
 
 def pytest_runtestloop(session: pytest.Session):
@@ -209,7 +225,7 @@ class WorkflowTestsCollector(pytest.Collector):
         This is shorter than using pytest's terminal reporter.
         """
 
-        self.tempdir = (self.config.workflow_dir /
+        self.tempdir = (self.config.workflow_temp_dir /
                         Path(replace_whitespace(self.name, '_')))
 
         # Remove the tempdir if it exists. This is needed for shutil.copytree
