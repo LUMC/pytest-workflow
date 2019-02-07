@@ -23,10 +23,17 @@ from .test_success_messages import SIMPLE_ECHO
 TEST_HOOK = textwrap.dedent("""\
 import pytest
 
-
 @pytest.mark.workflow(name="simple echo")
 def test_hook_impl():
     assert True
+""")
+
+TEST_FIXTURE = textwrap.dedent("""\
+import pytest
+
+@pytest.mark.workflow(name="simple echo")
+def test_fixture_impl(workflow_dir):
+    assert workflow_dir.name == "simple_echo"
 """)
 
 
@@ -45,3 +52,10 @@ def test_skipped(testdir):
     result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
     result.assert_outcomes(skipped=1)
     assert "'simple echo' has not run." in result.stdout.str()
+
+
+def test_workflow_dir_arg(testdir):
+    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    testdir.makefile(".py", test_fixture=TEST_FIXTURE)
+    result = testdir.runpytest()
+    assert result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
