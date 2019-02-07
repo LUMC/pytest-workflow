@@ -58,4 +58,4 @@ def test_workflow_dir_arg(testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE)
     result = testdir.runpytest()
-    assert result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
+    result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
