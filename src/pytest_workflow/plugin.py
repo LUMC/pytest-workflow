@@ -21,8 +21,9 @@ import warnings
 from pathlib import Path
 from typing import List, Optional  # noqa: F401 needed for typing.
 
-from _pytest import config as pytest_config
-from _pytest.config import argparsing as pytest_argparsing
+from _pytest.config import Config as PytestConfig
+from _pytest.config.argparsing import Parser as PytestParser
+from _pytest.mark import MarkDecorator
 import pytest
 
 import yaml
@@ -34,7 +35,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser: pytest_argparsing.Parser):
+def pytest_addoption(parser: PytestParser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
@@ -84,7 +85,7 @@ def pytest_collect_file(path, parent):
     return None
 
 
-def pytest_configure(config: pytest_config.Config):
+def pytest_configure(config: PytestConfig):
     """This runs before tests start and adds values to the config."""
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
@@ -132,14 +133,17 @@ def pytest_collection(session: pytest.Session):
 
 
 def pytest_collection_modify_items(session: pytest.Session,
-                                   config: pytest_config.Config,
+                                   config: PytestConfig,
                                    items: List[pytest.Item]):
     """This function modifies all items after test collection. This allows us
     to select tests that are marked to depend on a workflow and make the
     required modifications."""
+    for item in items:
+        marker = item.get_closest_marker(name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
+        if marker is not None:
+            item.setup()
 
-
-def pytest_runtestloop(session):
+def pytest_runtestloop(session: pytest.Session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
         session.config.getoption("workflow_threads")
