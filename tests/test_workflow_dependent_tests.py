@@ -52,11 +52,14 @@ import pytest
 @pytest.mark.workflow(name="simple echo")
 def test_fixture_impl(workflow_dir):
     assert workflow_dir.name == "simple_echo"
+    assert workflow_dir.exists()
 """)
 
 
 def test_workflow_dir_arg(testdir):
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    # Call the test, `test_asimple` because tests are run alphabetically.
+    # This will detect if the workflow dir has been removed.
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE)
     result = testdir.runpytest()
     result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
@@ -65,7 +68,7 @@ def test_workflow_dir_arg(testdir):
 def test_worfklow_dir_arg_skipped(testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE)
     result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
     result.assert_outcomes(skipped=1)
@@ -83,7 +86,7 @@ def test_fixture_impl(workflow_dir):
 def test_worfklow_not_exist_dir_arg(testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE_WORKFLOW_NOT_EXIST)
     result = testdir.runpytest("-v", "-r", "s")
     result.assert_outcomes(skipped=1, passed=4)
@@ -101,7 +104,7 @@ def test_fixture_impl(workflow_dir):
 def test_fixture_unmarked_test(testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE_UNMARKED_TEST)
     result = testdir.runpytest("-v", "-r", "s")
     result.assert_outcomes(error=1, passed=4)
@@ -134,7 +137,7 @@ def test_fixture_usable_for_file_tests(testdir):
         assert int(number_file_content) % 3 == 0
     """)
 
-    testdir.makefile(".yml", test_workflow=test_workflow)
+    testdir.makefile(".yml", test_aworkflow=test_workflow)
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
     result.assert_outcomes(passed=4, failed=0, skipped=0, error=0)
