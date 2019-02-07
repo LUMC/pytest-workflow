@@ -174,11 +174,11 @@ def workflow_dir(request: SubRequest):
     """Returns the workflow_dir of the workflow named in the mark. This fixture
     is only provided for tests that are marked with the workflow mark."""
 
-    workflow_temp_dir = request.config.workflow_temp_dir
     # request.node refers to the node that has the mark. This is a pytest.Node
     marker = request.node.get_closest_marker(name="workflow")
 
     if marker is not None:
+        workflow_temp_dir = request.config.workflow_temp_dir
         workflow_name = marker.kwargs['name']
         return workflow_temp_dir / Path(replace_whitespace(workflow_name))
     else:
