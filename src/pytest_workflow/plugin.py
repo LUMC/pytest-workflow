@@ -19,8 +19,10 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Optional  # noqa: F401 needed for typing.
+from typing import List, Optional  # noqa: F401 needed for typing.
 
+from _pytest import config as pytest_config
+from _pytest.config import argparsing as pytest_argparsing
 import pytest
 
 import yaml
@@ -32,7 +34,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: pytest_argparsing.Parser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
@@ -82,7 +84,7 @@ def pytest_collect_file(path, parent):
     return None
 
 
-def pytest_configure(config):
+def pytest_configure(config: pytest_config.Config):
     """This runs before tests start and adds values to the config."""
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
@@ -116,7 +118,7 @@ def pytest_configure(config):
     setattr(config, "workflow_dir", workflow_dir)
 
 
-def pytest_collection(session):
+def pytest_collection(session: pytest.Session):
     """This function is started at the beginning of collection"""
     # pylint: disable=unused-argument
     # needed for pytest
@@ -127,6 +129,14 @@ def pytest_collection(session):
     # Collecting ...
     # queue (etc.)
     print()
+
+
+def pytest_collection_modify_items(session: pytest.Session,
+                                   config: pytest_config.Config,
+                                   items: List[pytest.Item]):
+    """This function modifies all items after test collection. This allows us
+    to select tests that are marked to depend on a workflow and make the
+    required modifications."""
 
 
 def pytest_runtestloop(session):
