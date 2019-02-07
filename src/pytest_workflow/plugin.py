@@ -101,6 +101,10 @@ def pytest_configure(config: PytestConfig):
     executed_workflows = []
     setattr(config, "executed_workflows", executed_workflows)
 
+    # Save workflow for cleanup in this var.
+    workflow_cleanup_dirs = []
+    setattr(config, "workflow_cleanup_dirs", workflow_cleanup_dirs)
+
     # When multiple workflows are started they should all be set in the same
     # temporary directory
     # Running in a temporary directory will prevent the project repository
@@ -176,6 +180,12 @@ def pytest_runtestloop(session: pytest.Session):
     )
 
 
+def pytest_sessionfinish(session: pytest.Session):
+    if not session.config.getoption("keep_workflow_wd"):
+        for tempdir in session.config.workflow_cleanup_dirs:
+            shutil.rmtree(str(tempdir))
+
+
 class YamlFile(pytest.File):
     """
     This class collects YAML files and turns them into test items.
@@ -202,8 +212,6 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
-        # Tempdir is stored for cleanup with teardown().
-        self.tempdir = None  # type: Optional[Path]
 
         # Attach tags to this node for easier workflow selection
         self.tags = [self.workflow_test.name] + self.workflow_test.tags
@@ -225,28 +233,30 @@ class WorkflowTestsCollector(pytest.Collector):
         This is shorter than using pytest's terminal reporter.
         """
 
-        self.tempdir = (self.config.workflow_temp_dir /
-                        Path(replace_whitespace(self.name, '_')))
+        tempdir = (self.config.workflow_temp_dir /
+                   Path(replace_whitespace(self.name, '_')))
 
         # Remove the tempdir if it exists. This is needed for shutil.copytree
         # to work properly.
-        if self.tempdir.exists():
+        if tempdir.exists():
             warnings.warn(
-                "'{0}' already exists. Deleting ...".format(self.tempdir))
-            shutil.rmtree(str(self.tempdir))
+                "'{0}' already exists. Deleting ...".format(tempdir))
+            shutil.rmtree(str(tempdir))
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        shutil.copytree(str(self.config.rootdir), str(self.tempdir))
+        shutil.copytree(str(self.config.rootdir), str(tempdir))
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
-                            cwd=self.tempdir,
+                            cwd=tempdir,
                             name=self.workflow_test.name)
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
+        # Add the tempdir to the removal queue.
+        self.config.workflow_cleanup_dirs.append(tempdir)
         return workflow
 
     def collect(self):
@@ -295,13 +305,6 @@ class WorkflowTestsCollector(pytest.Collector):
             content_name="'{0}': stderr".format(self.workflow_test.name))]
 
         return tests
-
-    def teardown(self):
-        """This function is executed after all tests from this collector have
-        finished. It is used to cleanup the tempdir."""
-        if (not self.config.getoption("keep_workflow_wd")
-                and self.tempdir is not None):
-            shutil.rmtree(str(self.tempdir))
 
 
 class ExitCodeTest(pytest.Item):
