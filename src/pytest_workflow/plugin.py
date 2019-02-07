@@ -23,7 +23,8 @@ from typing import List, Optional  # noqa: F401 needed for typing.
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.mark import MarkDecorator
+from _pytest.mark import MarkDecorator  # noqa: F401 used for typing
+
 import pytest
 
 import yaml
@@ -95,6 +96,10 @@ def pytest_configure(config: PytestConfig):
     workflow_queue = WorkflowQueue()
     setattr(config, "workflow_queue", workflow_queue)
 
+    # Save which workflows are run and which are not.
+    executed_workflows = []
+    setattr(config, "executed_workflows", executed_workflows)
+
     # When multiple workflows are started they should all be set in the same
     # temporary directory
     # Running in a temporary directory will prevent the project repository
@@ -132,16 +137,21 @@ def pytest_collection(session: pytest.Session):
     print()
 
 
-def pytest_collection_modifyitems(session: pytest.Session,
-                                   config: PytestConfig,
-                                   items: List[pytest.Item]):
+def pytest_collection_modifyitems(config: PytestConfig,
+                                  items: List[pytest.Item]):
     """This function modifies all items after test collection. This allows us
     to select tests that are marked to depend on a workflow and make the
     required modifications."""
+
     for item in items:
         marker = item.get_closest_marker(name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
         if marker is not None:
-            item.setup()
+            workflow_name = marker.kwargs['name']
+            if workflow_name not in config.executed_workflows:
+                skip_marker = pytest.mark.skip(
+                    reason="'{0}' has not run.".format(workflow_name))
+                item.add_marker(skip_marker)
+
 
 def pytest_runtestloop(session: pytest.Session):
     """This runs after collection, but before the tests."""
@@ -236,6 +246,9 @@ class WorkflowTestsCollector(pytest.Collector):
         if not (set(self.config.getoption("workflow_tags")
                     ).issubset(set(self.tags))):
             return []
+        else:
+            # If we run the workflow, save this for reference later.
+            self.config.executed_workflows.append(self.workflow_test.name)
 
         # This creates a workflow that is queued for processing after the
         # collection phase.

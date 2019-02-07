@@ -25,14 +25,23 @@ import pytest
 
 
 @pytest.mark.workflow(name="simple echo")
-def test_hook_impl(workflow_dir):
-    print("This runs!")
-    assert workflow_dir
+def test_hook_impl():
+    assert True
 """)
 
 
-def test_hook_worked(testdir):
+def test_not_skipped(testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
     testdir.makefile(".py", test_hook=TEST_HOOK)
     result = testdir.runpytest()
-    assert "This runs!" in result.stdout.str()
+    result.assert_outcomes(passed=5)
+
+
+def test_skipped(testdir):
+    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    testdir.makefile(".py", test_hook=TEST_HOOK)
+    # No workflow will run because the tag does not match
+    # ``-r s`` gives the reason why a test was skipped.
+    result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
+    result.assert_outcomes(skipped=1)
+    assert "'simple echo' has not run." in result.stdout.str()
