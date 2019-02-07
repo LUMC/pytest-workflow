@@ -132,7 +132,7 @@ def pytest_collection(session: pytest.Session):
     print()
 
 
-def pytest_collection_modify_items(session: pytest.Session,
+def pytest_collection_modifyitems(session: pytest.Session,
                                    config: PytestConfig,
                                    items: List[pytest.Item]):
     """This function modifies all items after test collection. This allows us
