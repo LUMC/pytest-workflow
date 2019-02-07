@@ -156,6 +156,19 @@ def pytest_collection_modifyitems(config: PytestConfig,
                 item.add_marker(skip_marker)
 
 
+def pytest_runtestloop(session: pytest.Session):
+    """This runs after collection, but before the tests."""
+    session.config.workflow_queue.process(
+        session.config.getoption("workflow_threads")
+    )
+
+
+def pytest_sessionfinish(session: pytest.Session):
+    if not session.config.getoption("keep_workflow_wd"):
+        for tempdir in session.config.workflow_cleanup_dirs:
+            shutil.rmtree(str(tempdir))
+
+
 @pytest.fixture()
 def workflow_dir(request: SubRequest):
     """Returns the workflow_dir of the workflow named in the mark. This fixture
@@ -171,19 +184,6 @@ def workflow_dir(request: SubRequest):
     else:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
-
-
-def pytest_runtestloop(session: pytest.Session):
-    """This runs after collection, but before the tests."""
-    session.config.workflow_queue.process(
-        session.config.getoption("workflow_threads")
-    )
-
-
-def pytest_sessionfinish(session: pytest.Session):
-    if not session.config.getoption("keep_workflow_wd"):
-        for tempdir in session.config.workflow_cleanup_dirs:
-            shutil.rmtree(str(tempdir))
 
 
 class YamlFile(pytest.File):
