@@ -88,7 +88,7 @@ def test_workflow_dir_arg(test, testdir):
 
 
 @pytest.mark.parametrize("test", [TEST_FIXTURE_KWARGS, TEST_FIXTURE_ARGS])
-def test_worfklow_dir_arg_skipped(test, testdir):
+def test_workflow_dir_arg_skipped(test, testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
@@ -106,7 +106,7 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-def test_worfklow_not_exist_dir_arg(testdir):
+def test_workflow_not_exist_dir_arg(testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
