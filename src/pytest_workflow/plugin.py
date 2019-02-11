@@ -149,20 +149,18 @@ def pytest_collection_modifyitems(config: PytestConfig,
     for item in items:
         marker = item.get_closest_marker(name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
         if marker is not None:
-            try:
-                workflow_name = marker.kwargs['name']
-            except KeyError:
+            workflow_name = marker.kwargs.get('name')
+            if workflow_name is None:
                 # If name key is not defined use the first arg.
-                try:
+                if len(marker.args) >= 1:
                     workflow_name = marker.args[0]
                     # Make sure a marker with name is added anyway for the
                     # fixture lookup.
                     marker.kwargs['name'] = workflow_name
-                except IndexError:
+                else:
                     raise ValueError(
                         "A workflow name should be defined in the "
-                        "workflow marker of {0}".format(item.name)
-                        )
+                        "workflow marker of {0}".format(item.nodeid))
             if workflow_name not in config.executed_workflows:
                 skip_marker = pytest.mark.skip(
                     reason="'{0}' has not run.".format(workflow_name))
