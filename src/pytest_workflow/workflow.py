@@ -139,7 +139,11 @@ class Workflow(object):
     @property
     def exit_code(self) -> int:
         self.wait()
-        return self._popen.returncode
+        if self._popen is not None:
+            return self._popen.returncode
+        else:
+            raise ValueError("No exit code after waiting. Please contact the "
+                             "developers and report this issue.")
 
 
 class WorkflowQueue(queue.Queue):

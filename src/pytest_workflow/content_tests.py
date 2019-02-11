@@ -46,7 +46,7 @@ def check_content(strings: List[str],
 
     # Create two sets. By default all strings are not found.
     strings_to_check = set(strings)
-    found_strings = set()
+    found_strings = set()  # type: Set[str]
 
     for line in text_lines:
         # Break the loop if all strings are found
@@ -88,7 +88,7 @@ def file_to_string_generator(filepath: Path) -> Iterable[str]:
                  if filepath.suffix == ".gz" else
                  filepath.open)
     # Use 'rt' here explicitly as opposed to 'rb'
-    with file_open(mode='rt') as file_handler:
+    with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
         for line in file_handler:
             yield line
 

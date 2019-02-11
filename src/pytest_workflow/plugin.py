@@ -98,11 +98,11 @@ def pytest_configure(config: PytestConfig):
     setattr(config, "workflow_queue", workflow_queue)
 
     # Save which workflows are run and which are not.
-    executed_workflows = []
+    executed_workflows = []  # type: List[str]
     setattr(config, "executed_workflows", executed_workflows)
 
     # Save workflow for cleanup in this var.
-    workflow_cleanup_dirs = []
+    workflow_cleanup_dirs = []  # type: List[str]
     setattr(config, "workflow_cleanup_dirs", workflow_cleanup_dirs)
 
     # When multiple workflows are started they should all be set in the same
