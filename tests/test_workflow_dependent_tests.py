@@ -18,9 +18,11 @@
 
 import textwrap
 
+import pytest
+
 from .test_success_messages import SIMPLE_ECHO
 
-TEST_HOOK = textwrap.dedent("""\
+TEST_HOOK_KWARGS = textwrap.dedent("""\
 import pytest
 
 @pytest.mark.workflow(name="simple echo")
@@ -28,17 +30,26 @@ def test_hook_impl():
     assert True
 """)
 
+TEST_HOOK_ARGS = textwrap.dedent("""\
+import pytest
 
-def test_not_skipped(testdir):
+@pytest.mark.workflow("simple echo")
+def test_hook_impl():
+    assert True
+""")
+
+
+@pytest.mark.parametrize("test", [TEST_HOOK_ARGS, TEST_HOOK_KWARGS])
+def test_not_skipped(test, testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_hook=TEST_HOOK)
+    testdir.makefile(".py", test_hook=test)
     result = testdir.runpytest()
     result.assert_outcomes(passed=5)
 
-
-def test_skipped(testdir):
+@pytest.mark.parametrize("test", [TEST_HOOK_ARGS, TEST_HOOK_KWARGS])
+def test_skipped(test, testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_hook=TEST_HOOK)
+    testdir.makefile(".py", test_hook=test)
     # No workflow will run because the tag does not match
     # ``-r s`` gives the reason why a test was skipped.
     result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
