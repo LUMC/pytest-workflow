@@ -78,9 +78,12 @@ workflow.
 
 .. code-block:: python
 
+    import pathlib
+    import pytest
+
     @pytest.mark.workflow(name='files containing numbers')
     def test_div_by_three(workflow_dir):
-        number_file = workflow_dir / Path("123.txt")
+        number_file = workflow_dir / pathlib.Path("123.txt")
 
         with number_file.open('rt') as file_h:
             number_file_content = file_h.read()
@@ -88,10 +91,14 @@ workflow.
         assert int(number_file_content) % 3 == 0
 
 The ``@pytest.mark.workflow(name='files containing numbers')`` marks the test
-as belonging to a workflow named 'files containing numbers'. This enables the
-use of a ``workflow_dir`` fixture. This is a
+as belonging to a workflow named 'files containing numbers'. The mark can also
+be written without the explicit ``name`` key as ``@pytest.mark.workflow('files
+containing nummbers')``.
+
+``workflow_dir`` is a fixture. It does not work without a
+``pytest.mark.workflow('workflow_name')`` mark.  This is a
 `pathlib.Path <https://docs.python.org/3/library/pathlib.html>`_ object that
-points to the folder where the workflow was executed. This allows writing of
+points to the folder where the named workflow was executed. This allows writing of
 advanced python tests for each file produced by the workflow.
 
 .. container:: note
