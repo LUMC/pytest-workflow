@@ -46,6 +46,7 @@ def test_not_skipped(test, testdir):
     result = testdir.runpytest()
     result.assert_outcomes(passed=5)
 
+
 @pytest.mark.parametrize("test", [TEST_HOOK_ARGS, TEST_HOOK_KWARGS])
 def test_skipped(test, testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
