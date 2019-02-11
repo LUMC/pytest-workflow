@@ -157,7 +157,7 @@ def pytest_collection_modifyitems(config: PytestConfig,
                     workflow_name = marker.args[0]
                     # Make sure a marker with name is added anyway for the
                     # fixture lookup.
-                    item.add_marker(pytest.mark.workflow(name=workflow_name))
+                    marker.kwargs['name'] = workflow_name
                 except IndexError:
                     raise ValueError("A workflow name should be defined in the"
                                      "workflow marker of {0}".format(item.name)

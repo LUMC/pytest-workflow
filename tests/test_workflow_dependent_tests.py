@@ -57,7 +57,7 @@ def test_skipped(test, testdir):
     assert "'simple echo' has not run." in result.stdout.str()
 
 
-TEST_FIXTURE = textwrap.dedent("""\
+TEST_FIXTURE_KWARGS = textwrap.dedent("""\
 import pytest
 
 @pytest.mark.workflow(name="simple echo")
@@ -66,21 +66,32 @@ def test_fixture_impl(workflow_dir):
     assert workflow_dir.exists()
 """)
 
+TEST_FIXTURE_ARGS = textwrap.dedent("""\
+import pytest
 
-def test_workflow_dir_arg(testdir):
+@pytest.mark.workflow("simple echo")
+def test_fixture_impl(workflow_dir):
+    assert workflow_dir.name == "simple_echo"
+    assert workflow_dir.exists()
+""")
+
+
+@pytest.mark.parametrize("test", [TEST_FIXTURE_KWARGS, TEST_FIXTURE_ARGS])
+def test_workflow_dir_arg(test, testdir):
     # Call the test, `test_asimple` because tests are run alphabetically.
     # This will detect if the workflow dir has been removed.
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=TEST_FIXTURE)
+    testdir.makefile(".py", test_fixture=test)
     result = testdir.runpytest()
     result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
 
 
-def test_worfklow_dir_arg_skipped(testdir):
+@pytest.mark.parametrize("test", [TEST_FIXTURE_KWARGS, TEST_FIXTURE_ARGS])
+def test_worfklow_dir_arg_skipped(test, testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=TEST_FIXTURE)
+    testdir.makefile(".py", test_fixture=test)
     result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
     result.assert_outcomes(skipped=1)
 
