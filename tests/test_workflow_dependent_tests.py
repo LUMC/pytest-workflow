@@ -123,6 +123,26 @@ def test_fixture_unmarked_test(testdir):
             "the workflow mark.") in result.stdout.str()
 
 
+TEST_MARK_WRONG_KEY = textwrap.dedent("""\
+import pytest
+
+@pytest.mark.workflow(naem="simple echo")
+def test_fixture_impl(workflow_dir):
+    assert workflow_dir.name == "simple_echo"
+    assert workflow_dir.exists()
+""")
+
+
+def test_mark_wrong_key(testdir):
+    """Run this test to check if this does not run into fixture request
+    errors"""
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    testdir.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
+    result = testdir.runpytest("-v", "-r", "s")
+    assert ("A workflow name should be defined in the"
+            "workflow marker of ") in result.stdout.str()
+
+
 def test_fixture_usable_for_file_tests(testdir):
     test_workflow = textwrap.dedent("""\
     - name: number files
