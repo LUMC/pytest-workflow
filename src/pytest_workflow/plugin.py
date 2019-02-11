@@ -159,9 +159,10 @@ def pytest_collection_modifyitems(config: PytestConfig,
                     # fixture lookup.
                     marker.kwargs['name'] = workflow_name
                 except IndexError:
-                    raise ValueError("A workflow name should be defined in the"
-                                     "workflow marker of {0}".format(item.name)
-                                     )
+                    raise ValueError(
+                        "A workflow name should be defined in the "
+                        "workflow marker of {0}".format(item.name)
+                        )
             if workflow_name not in config.executed_workflows:
                 skip_marker = pytest.mark.skip(
                     reason="'{0}' has not run.".format(workflow_name))

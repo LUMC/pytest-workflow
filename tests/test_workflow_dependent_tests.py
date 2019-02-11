@@ -150,8 +150,9 @@ def test_mark_wrong_key(testdir):
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
     result = testdir.runpytest("-v", "-r", "s")
-    assert ("A workflow name should be defined in the"
+    assert ("A workflow name should be defined in the "
             "workflow marker of ") in result.stdout.str()
+    result.assert_outcomes(run=4, error=1)
 
 
 def test_fixture_usable_for_file_tests(testdir):
