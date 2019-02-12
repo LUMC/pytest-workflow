@@ -145,14 +145,16 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-def test_mark_wrong_key(testdir):
+def test_mark_wrong_key_with_fixture(testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
     result = testdir.runpytest("-v", "-r", "s")
     assert ("A workflow name should be defined in the "
-            "workflow marker of ") in result.stdout.str()
+            "workflow marker of test_fixture.py::test_fixture_impl"
+            ) in result.stdout.str()
+    result.assert_outcomes(passed=4, error=1)
 
 
 def test_fixture_usable_for_file_tests(testdir):

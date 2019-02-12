@@ -147,7 +147,8 @@ def pytest_collection_modifyitems(config: PytestConfig,
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker = item.get_closest_marker(name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
+        marker = item.get_closest_marker(
+            name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
         if marker is not None:
             workflow_name = marker.kwargs.get('name')
             if workflow_name is None:
@@ -158,9 +159,20 @@ def pytest_collection_modifyitems(config: PytestConfig,
                     # fixture lookup.
                     marker.kwargs['name'] = workflow_name
                 else:
-                    raise ValueError(
+                    # If we raise an error here a number of things will happen:
+                    # + Pytest will crash. Giving a lot of INTERNAL ERROR lines
+                    # + No tests will run
+                    # + No workflows will be started
+                    # + All the threads that are waiting for a workflow to
+                    #   finish will wait indefinitely. Causing an infinite
+                    #   hang. Pytest will never finish.
+                    # Therefore we do not crash here, but raise a warning.
+                    item.warn(pytest.PytestWarning(
                         "A workflow name should be defined in the "
-                        "workflow marker of {0}".format(item.nodeid))
+                        "workflow marker of {0}".format(item.nodeid)))
+                    # Go on with the next item.
+                    continue
+
             if workflow_name not in config.executed_workflows:
                 skip_marker = pytest.mark.skip(
                     reason="'{0}' has not run.".format(workflow_name))
@@ -190,7 +202,12 @@ def workflow_dir(request: SubRequest):
 
     if marker is not None:
         workflow_temp_dir = request.config.workflow_temp_dir
-        workflow_name = marker.kwargs['name']
+        try:
+            workflow_name = marker.kwargs['name']
+        except KeyError:
+            raise ValueError(
+                "A workflow name should be defined in the "
+                "workflow marker of {0}".format(request.node.nodeid))
         return workflow_temp_dir / Path(replace_whitespace(workflow_name))
     else:
         raise ValueError("workflow_dir can only be requested in tests marked"
