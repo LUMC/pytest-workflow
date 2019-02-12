@@ -54,3 +54,4 @@ matrix:
         - conda config --add channels conda-forge
         - conda create -n my_env cromwell
         - source activate my_env
+        - pip install --upgrade pip
