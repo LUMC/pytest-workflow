@@ -155,7 +155,7 @@ def pytest_collection_modifyitems(config: PytestConfig,
                 # If name key is not defined use the first arg.
                 if len(marker.args) >= 1:
                     workflow_name = marker.args[0]
-                    # Make sure a marker with name is added anyway for the
+                    # Make sure a name attribute is added anyway for the
                     # fixture lookup.
                     marker.kwargs['name'] = workflow_name
                 else:
@@ -283,7 +283,11 @@ class WorkflowTestsCollector(pytest.Collector):
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
-        # Add the tempdir to the removal queue.
+        # Add the tempdir to the removal queue. We do not use a teardown method
+        # because this will remove the tempdir right after all the tests from
+        # this node have finished. If custom tests are defined this should not
+        # happen. The removal queue is processed just before pytest finishes
+        # and all tests have run.
         self.config.workflow_cleanup_dirs.append(tempdir)
         return workflow
 
