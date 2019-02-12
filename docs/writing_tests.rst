@@ -93,7 +93,8 @@ workflow.
 The ``@pytest.mark.workflow(name='files containing numbers')`` marks the test
 as belonging to a workflow named 'files containing numbers'. The mark can also
 be written without the explicit ``name`` key as ``@pytest.mark.workflow('files
-containing nummbers')``.
+containing nummbers')``. This test will only run if the workflow 'files
+containing numbers' has run.
 
 ``workflow_dir`` is a fixture. It does not work without a
 ``pytest.mark.workflow('workflow_name')`` mark.  This is a
