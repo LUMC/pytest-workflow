@@ -52,5 +52,5 @@ matrix:
         - conda config --add channels defaults
         - conda config --add channels bioconda
         - conda config --add channels conda-forge
-        - conda create -n my_env cromwell
+        - conda create -n my_env cromwell tox  # Install tox for good integration within the conda env.
         - source activate my_env

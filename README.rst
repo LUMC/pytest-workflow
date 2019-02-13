@@ -69,7 +69,8 @@ Below is an example of a YAML file that defines a test:
 This will run ``touch test.file`` and check afterwards if a file with path:
 ``test.file`` is present. It will also check if the ``command`` has exited
 with exit code ``0``, which is the only default test that is run. Testing
-workflows that exit with another exit code is also possible.
+workflows that exit with another exit code is also possible. Several other
+predefined tests as well as custom tests are possible.
 
 Documentation for more advanced use cases can be found on our
 `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
