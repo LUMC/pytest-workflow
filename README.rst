@@ -4,6 +4,14 @@ pytest-workflow
 
 .. Badges have empty alts. So nothing shows up if they do not work.
 .. This fixes readthedocs issues with badges.
+.. image:: https://img.shields.io/pypi/v/pytest-workflow.svg
+  :target: https://pypi.org/project/pytest-workflow/
+  :alt:
+
+.. image:: https://img.shields.io/pypi/pyversions/pytest-workflow.svg
+  :target: https://pypi.org/project/pytest-workflow/
+  :alt:
+
 .. image:: https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59
   :target: https://www.codacy.com/app/LUMC/pytest-workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LUMC/pytest-workflow&amp;utm_campaign=Badge_Grade
   :alt:
@@ -14,10 +22,6 @@ pytest-workflow
 
 .. image:: https://codecov.io/gh/LUMC/pytest-workflow/branch/develop/graph/badge.svg
   :target: https://codecov.io/gh/LUMC/pytest-workflow
-  :alt:
-
-.. image:: https://img.shields.io/pypi/pyversions/pytest-workflow.svg
-  :target: https://pypi.org/project/pytest-workflow/
   :alt:
 
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
@@ -65,7 +69,8 @@ Below is an example of a YAML file that defines a test:
 This will run ``touch test.file`` and check afterwards if a file with path:
 ``test.file`` is present. It will also check if the ``command`` has exited
 with exit code ``0``, which is the only default test that is run. Testing
-workflows that exit with another exit code is also possible.
+workflows that exit with another exit code is also possible. Several other
+predefined tests as well as custom tests are possible.
 
 Documentation for more advanced use cases can be found on our
 `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.

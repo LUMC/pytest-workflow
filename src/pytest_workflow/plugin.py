@@ -19,7 +19,12 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Optional  # noqa: F401 needed for typing.
+from typing import List, Optional  # noqa: F401 needed for typing.
+
+from _pytest.config import Config as PytestConfig
+from _pytest.config.argparsing import Parser as PytestParser
+from _pytest.fixtures import SubRequest
+from _pytest.mark import MarkDecorator  # noqa: F401 used for typing
 
 import pytest
 
@@ -32,7 +37,7 @@ from .schema import WorkflowTest, workflow_tests_from_schema
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser):
+def pytest_addoption(parser: PytestParser):
     parser.addoption(
         "--keep-workflow-wd",
         action="store_true",
@@ -82,7 +87,7 @@ def pytest_collect_file(path, parent):
     return None
 
 
-def pytest_configure(config):
+def pytest_configure(config: PytestConfig):
     """This runs before tests start and adds values to the config."""
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
@@ -91,6 +96,14 @@ def pytest_configure(config):
     # this going.
     workflow_queue = WorkflowQueue()
     setattr(config, "workflow_queue", workflow_queue)
+
+    # Save which workflows are run and which are not.
+    executed_workflows = []  # type: List[str]
+    setattr(config, "executed_workflows", executed_workflows)
+
+    # Save workflow for cleanup in this var.
+    workflow_cleanup_dirs = []  # type: List[str]
+    setattr(config, "workflow_cleanup_dirs", workflow_cleanup_dirs)
 
     # When multiple workflows are started they should all be set in the same
     # temporary directory
@@ -110,13 +123,13 @@ def pytest_configure(config):
     # So this is why the native pytest `tmpdir` fixture is not used.
 
     basetemp = config.getoption("basetemp")
-    workflow_dir = (
+    workflow_temp_dir = (
         Path(basetemp) if basetemp is not None
         else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
-    setattr(config, "workflow_dir", workflow_dir)
+    setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
 
-def pytest_collection(session):
+def pytest_collection(session: pytest.Session):
     """This function is started at the beginning of collection"""
     # pylint: disable=unused-argument
     # needed for pytest
@@ -129,11 +142,79 @@ def pytest_collection(session):
     print()
 
 
-def pytest_runtestloop(session):
+def pytest_collection_modifyitems(config: PytestConfig,
+                                  items: List[pytest.Item]):
+    """Here we skip all tests related to workflows that are not executed"""
+
+    for item in items:
+        marker = item.get_closest_marker(
+            name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
+
+        if marker is None:
+            continue
+
+        if 'name' in marker.kwargs:
+            workflow_name = marker.kwargs['name']
+        # If name key is not defined use the first arg.
+        elif 'name' not in marker.kwargs and len(marker.args) >= 1:
+            workflow_name = marker.args[0]
+            # Make sure a name attribute is added anyway for the
+            # fixture lookup.
+            marker.kwargs['name'] = workflow_name
+        else:
+            # If we raise an error here a number of things will happen:
+            # + Pytest will crash. Giving a lot of INTERNAL ERROR lines
+            # + No tests will run
+            # + No workflows will be started
+            # + All the threads that are waiting for a workflow to
+            #   finish will wait indefinitely. Causing an infinite
+            #   hang. Pytest will never finish.
+            # Therefore we do not crash here, but raise a warning.
+            item.warn(pytest.PytestWarning(
+                "A workflow name should be defined in the "
+                "workflow marker of {0}".format(item.nodeid)))
+            # Go on with the next item.
+            continue
+
+        if workflow_name not in config.executed_workflows:
+            skip_marker = pytest.mark.skip(
+                reason="'{0}' has not run.".format(workflow_name))
+            item.add_marker(skip_marker)
+
+
+def pytest_runtestloop(session: pytest.Session):
     """This runs after collection, but before the tests."""
     session.config.workflow_queue.process(
         session.config.getoption("workflow_threads")
     )
+
+
+def pytest_sessionfinish(session: pytest.Session):
+    if not session.config.getoption("keep_workflow_wd"):
+        for tempdir in session.config.workflow_cleanup_dirs:
+            shutil.rmtree(str(tempdir))
+
+
+@pytest.fixture()
+def workflow_dir(request: SubRequest):
+    """Returns the workflow_dir of the workflow named in the mark. This fixture
+    is only provided for tests that are marked with the workflow mark."""
+
+    # request.node refers to the node that has the mark. This is a pytest.Node
+    marker = request.node.get_closest_marker(name="workflow")
+
+    if marker is not None:
+        workflow_temp_dir = request.config.workflow_temp_dir
+        try:
+            workflow_name = marker.kwargs['name']
+        except KeyError:
+            raise TypeError(
+                "A workflow name should be defined in the "
+                "workflow marker of {0}".format(request.node.nodeid))
+        return workflow_temp_dir / Path(replace_whitespace(workflow_name))
+    else:
+        raise ValueError("workflow_dir can only be requested in tests marked"
+                         " with the workflow mark.")
 
 
 class YamlFile(pytest.File):
@@ -162,8 +243,6 @@ class WorkflowTestsCollector(pytest.Collector):
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
-        # Tempdir is stored for cleanup with teardown().
-        self.tempdir = None  # type: Optional[Path]
 
         # Attach tags to this node for easier workflow selection
         self.tags = [self.workflow_test.name] + self.workflow_test.tags
@@ -185,28 +264,34 @@ class WorkflowTestsCollector(pytest.Collector):
         This is shorter than using pytest's terminal reporter.
         """
 
-        self.tempdir = (self.config.workflow_dir /
-                        Path(replace_whitespace(self.name, '_')))
+        tempdir = (self.config.workflow_temp_dir /
+                   Path(replace_whitespace(self.name, '_')))
 
         # Remove the tempdir if it exists. This is needed for shutil.copytree
         # to work properly.
-        if self.tempdir.exists():
+        if tempdir.exists():
             warnings.warn(
-                "'{0}' already exists. Deleting ...".format(self.tempdir))
-            shutil.rmtree(str(self.tempdir))
+                "'{0}' already exists. Deleting ...".format(tempdir))
+            shutil.rmtree(str(tempdir))
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        shutil.copytree(str(self.config.rootdir), str(self.tempdir))
+        shutil.copytree(str(self.config.rootdir), str(tempdir))
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
-                            cwd=self.tempdir,
+                            cwd=tempdir,
                             name=self.workflow_test.name)
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
 
+        # Add the tempdir to the removal queue. We do not use a teardown method
+        # because this will remove the tempdir right after all the tests from
+        # this node have finished. If custom tests are defined this should not
+        # happen. The removal queue is processed just before pytest finishes
+        # and all tests have run.
+        self.config.workflow_cleanup_dirs.append(tempdir)
         return workflow
 
     def collect(self):
@@ -222,6 +307,9 @@ class WorkflowTestsCollector(pytest.Collector):
         if not (set(self.config.getoption("workflow_tags")
                     ).issubset(set(self.tags))):
             return []
+        else:
+            # If we run the workflow, save this for reference later.
+            self.config.executed_workflows.append(self.workflow_test.name)
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
@@ -252,13 +340,6 @@ class WorkflowTestsCollector(pytest.Collector):
             content_name="'{0}': stderr".format(self.workflow_test.name))]
 
         return tests
-
-    def teardown(self):
-        """This function is executed after all tests from this collector have
-        finished. It is used to cleanup the tempdir."""
-        if (not self.config.getoption("keep_workflow_wd")
-                and self.tempdir is not None):
-            shutil.rmtree(str(self.tempdir))
 
 
 class ExitCodeTest(pytest.Item):

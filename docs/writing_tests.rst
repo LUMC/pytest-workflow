@@ -2,6 +2,9 @@
 Writing tests with pytest-workflow
 ==================================
 
+Getting started
+---------------
+
 In order to write tests that are discoverable by the plugin you need to
 complete the following steps.
 
@@ -23,7 +26,8 @@ This will run ``touch test.file`` and check afterwards if a file with path:
 with exit code ``0``, which is the only default test that is run. Testing
 workflows that exit with another exit code is also possible.
 
-A more advanced example:
+Test options
+------------
 
 .. code-block:: yaml
 
@@ -65,3 +69,40 @@ A more advanced example:
 
 
 The above YAML file contains all the possible options for a workflow test.
+
+Writing custom tests
+--------------------
+
+Pytest-workflow provides a way to run custom tests on files produced by a
+workflow.
+
+.. code-block:: python
+
+    import pathlib
+    import pytest
+
+    @pytest.mark.workflow(name='files containing numbers')
+    def test_div_by_three(workflow_dir):
+        number_file = workflow_dir / pathlib.Path("123.txt")
+
+        with number_file.open('rt') as file_h:
+            number_file_content = file_h.read()
+
+        assert int(number_file_content) % 3 == 0
+
+The ``@pytest.mark.workflow(name='files containing numbers')`` marks the test
+as belonging to a workflow named 'files containing numbers'. The mark can also
+be written without the explicit ``name`` key as ``@pytest.mark.workflow('files
+containing nummbers')``. This test will only run if the workflow 'files
+containing numbers' has run.
+
+``workflow_dir`` is a fixture. It does not work without a
+``pytest.mark.workflow('workflow_name')`` mark.  This is a
+`pathlib.Path <https://docs.python.org/3/library/pathlib.html>`_ object that
+points to the folder where the named workflow was executed. This allows writing of
+advanced python tests for each file produced by the workflow.
+
+.. container:: note
+
+    NOTE: stdout and stderr are available as files in the root of the
+    ``workflow_dir`` as ``log.out`` and ``log.err`` respectively.

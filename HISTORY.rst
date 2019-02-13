@@ -7,6 +7,10 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.1.0
+---------------------------
++ Enabled custom tests on workflow files.
+
 Version 1.0.0
 ---------------------------
 Lots of small fixes that improve the usability of pytest-workflow are included
