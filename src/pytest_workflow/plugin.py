@@ -208,7 +208,7 @@ def workflow_dir(request: SubRequest):
         try:
             workflow_name = marker.kwargs['name']
         except KeyError:
-            raise ValueError(
+            raise TypeError(
                 "A workflow name should be defined in the "
                 "workflow marker of {0}".format(request.node.nodeid))
         return workflow_temp_dir / Path(replace_whitespace(workflow_name))
