@@ -7,6 +7,11 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.2.0
+---------------------------
++ Added ``--kwd`` as alias for ``--keep-workflow-wd``. Notify the user of
+  deletion of temporary directories and logs.
+
 version 1.1.0
 ---------------------------
 + Enabled custom tests on workflow files.

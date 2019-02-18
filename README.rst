@@ -52,7 +52,7 @@ To check the progress of a workflow while it is running you can use ``tail -f``
 on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
 files are reported in the log as soon as a workflow is started.
 
-For debugging pipelines using the ``--keep-workflow-wd`` flag  is
+For debugging pipelines using the ``--kwd`` or ``--keep-workflow-wd`` flag  is
 recommended. This will keep the workflow directory and logs after the test run
 so it is possible to check where the pipeline crashed. The ``-v`` flag can come
 in handy as well as it gives a complete overview of succeeded and failed tests.

@@ -38,6 +38,9 @@ def test_directory_not_kept(testdir):
     working_dir = re.search(r"with command 'echo moo' in '([\w\/_-]*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
+    assert ("Removing temporary directories and logs. Use '--kwd' or "
+            "'--keep-workflow-wd' to disable this behaviour."
+            ) in result.stdout.str()
 
 
 def test_basetemp_correct(testdir):

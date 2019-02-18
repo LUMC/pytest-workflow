@@ -39,7 +39,7 @@ from .workflow import Workflow, WorkflowQueue
 
 def pytest_addoption(parser: PytestParser):
     parser.addoption(
-        "--keep-workflow-wd",
+        "--kwd", "--keep-workflow-wd",
         action="store_true",
         help="Keep temporary directories where workflows are run for "
              "debugging purposes. This also triggers saving of stdout and "
@@ -191,6 +191,9 @@ def pytest_runtestloop(session: pytest.Session):
 
 def pytest_sessionfinish(session: pytest.Session):
     if not session.config.getoption("keep_workflow_wd"):
+        # The newline is needed otherwise everything looks ugly.
+        print("\nRemoving temporary directories and logs. Use '--kwd' or "
+              "'--keep-workflow-wd' to disable this behaviour.")
         for tempdir in session.config.workflow_cleanup_dirs:
             shutil.rmtree(str(tempdir))
 
