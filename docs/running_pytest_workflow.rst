@@ -10,8 +10,8 @@ The workflows are run automatically. Each workflow gets its own temporary
 directory to run. The ``stdout`` and ``stderr`` of the workflow command are
 also saved to this directory. The temporary directories are cleaned up after
 the tests are completed. If you wish to inspect the output of a failing
-workflow you can use the ``--keep-workflow-wd`` flag to disable cleanup. This
-will also make sure the logs of the pipeline are not deleted. The
+workflow you can use the ``--kwd`` or ``--keep-workflow-wd`` flag to disable
+cleanup. This will also make sure the logs of the pipeline are not deleted. The
 ``--keep-workflow-wd`` flag is highly recommended when debugging pipelines.
 
 If you wish to change the temporary directory in which the workflows are run
