@@ -49,6 +49,11 @@ and 3.7. Python 2 is not supported.
 - Create a ``tests`` directory in the root of your repository.
 - Create your test yaml files in the ``tests`` directory.
 
+Pytest-workflow is also available as a `conda package on bioconda
+<https://bioconda.github.io/recipes/pytest-workflow/README.html>`_. Follow
+`these instructions <https://bioconda.github.io/index.html#set-up-channels>`_
+to set up channels properly in order to use bioconda.
+
 Quickstart
 ==========
 

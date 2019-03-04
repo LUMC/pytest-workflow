@@ -26,3 +26,11 @@ On Ubuntu or Debian:
     environment will not work with ``pytest-workflow`` because this will start
     the python2 version of ``pytest``. This is because python2 is the default
     python on any distribution released before January 1st 2020.
+
+Pytest-workflow is also available as a `conda package on bioconda
+<https://bioconda.github.io/recipes/pytest-workflow/README.html>`_.
+To install with conda:
+
+- `Set up conda to use the bioconda channel
+  <https://bioconda.github.io/index.html#set-up-channels>`_
+- ``conda install pytest-workflow``
