@@ -52,7 +52,8 @@ and 3.7. Python 2 is not supported.
 Pytest-workflow is also available as a `conda package on bioconda
 <https://bioconda.github.io/recipes/pytest-workflow/README.html>`_. Follow
 `these instructions <https://bioconda.github.io/index.html#set-up-channels>`_
-to set up channels properly in order to use bioconda.
+to set up channels properly in order to use bioconda. After that ``conda
+install pytest-workflow`` can be used to install pytest-workflow.
 
 Quickstart
 ==========
