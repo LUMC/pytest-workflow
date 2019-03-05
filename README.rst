@@ -8,8 +8,16 @@ pytest-workflow
   :target: https://pypi.org/project/pytest-workflow/
   :alt:
 
+.. image:: https://img.shields.io/conda/v/bioconda/pytest-workflow.svg
+  :target: https://https://bioconda.github.io/recipes/pytest-workflow/README.html
+  :alt:
+
 .. image:: https://img.shields.io/pypi/pyversions/pytest-workflow.svg
   :target: https://pypi.org/project/pytest-workflow/
+  :alt:
+
+.. image:: https://img.shields.io/pypi/l/pytest-workflow.svg
+  :target: https://github.com/LUMC/pytest-workflow/blob/master/LICENSE
   :alt:
 
 .. image:: https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59
@@ -40,6 +48,12 @@ and 3.7. Python 2 is not supported.
 - Install using pip ``pip install pytest-workflow``
 - Create a ``tests`` directory in the root of your repository.
 - Create your test yaml files in the ``tests`` directory.
+
+Pytest-workflow is also available as a `conda package on bioconda
+<https://bioconda.github.io/recipes/pytest-workflow/README.html>`_. Follow
+`these instructions <https://bioconda.github.io/index.html#set-up-channels>`_
+to set up channels properly in order to use bioconda. After that ``conda
+install pytest-workflow`` can be used to install pytest-workflow.
 
 Quickstart
 ==========
