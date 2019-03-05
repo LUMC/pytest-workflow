@@ -21,7 +21,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="1.1.0",
+    version="1.1.1",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",
@@ -43,6 +43,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",

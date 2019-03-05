@@ -7,6 +7,13 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.1.1
+---------------------------
++ Added ``--kwd`` as alias for ``--keep-workflow-wd``. Notify the user of
+  deletion of temporary directories and logs.
++ Released pytest-workflow as a `conda package on bioconda
+  <https://bioconda.github.io/recipes/pytest-workflow/README.html>`_.
+
 version 1.1.0
 ---------------------------
 + Enabled custom tests on workflow files.
