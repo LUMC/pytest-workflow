@@ -162,10 +162,8 @@ def pytest_collection_modifyitems(config: PytestConfig,
             # fixture lookup.
             marker.kwargs['name'] = workflow_name
         else:
-           raise TypeError(
-                "A workflow name should be defined in the "
-                "workflow marker of {0}".format(item.nodeid)
-           )
+            raise TypeError("A workflow name should be defined in the "
+                            "workflow marker of {0}".format(item.nodeid))
 
         if workflow_name not in config.executed_workflows:
             skip_marker = pytest.mark.skip(

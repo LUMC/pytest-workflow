@@ -20,7 +20,6 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen. Multithreading functionality was added
 later.
 """
-import contextlib
 import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
@@ -28,10 +27,12 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 
 class Workflow(object):
+    # If there is a better way to do this we can disable the pylint warning.
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self,
                  command: str,
@@ -68,7 +69,7 @@ class Workflow(object):
             else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
         self._started = False
-        self.errors = []
+        self.errors = []  # type: List[Exception]
         self.start_lock = threading.Lock()
 
     def start(self):
@@ -85,7 +86,7 @@ class Workflow(object):
                     self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
-                except Exception as error:
+                except Exception as error:  # pylint: disable=broad-except
                     # Append the error so it can be raised in the main thread.
                     self.errors.append(error)
                 finally:
