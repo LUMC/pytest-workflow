@@ -21,9 +21,11 @@ import textwrap
 
 def test_shlex_error(testdir):
     test = textwrap.dedent("""\
-    - name: a-test
+    - name: wrong command
       command: a command with a dangling double-quote"
     """)
     testdir.makefile(".yml", test=test)
     result = testdir.runpytest("-v")
-    assert "shlex" in result.stdout
+    assert "shlex" in result.stdout.str()
+    assert "ValueError: No closing quotation" in result.stdout.str()
+    assert "'wrong command' python error during start" in result.stdout.str()
