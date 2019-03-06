@@ -194,7 +194,7 @@ class WorkflowQueue(queue.Queue):
         self.join()
         # If errors are detected raise the first error. Raising all errors
         # is not possible.
-        if len(self._process_errors) > 0:  # pylint: disable=len-as-condition  # this is more explicit  # noqa: E501
+        if len(self._process_errors) > 0:
             raise self._process_errors[0]
         for thread in threads:
             thread.join()
