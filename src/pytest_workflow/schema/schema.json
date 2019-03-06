@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft-07/schema",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "$comment0": "Copyright (C) 2018 Leiden University Medical Center",
   "$comment1": "This file is part of pytest-workflow",
   "$comment2": "pytest-workflow is free software: you can redistribute it and/or modify",
