@@ -102,7 +102,9 @@ class Workflow(object):
         :param wait_interval_secs: check interval secs if a workflow is started
         """
         wait_time = 0.0
-        while self._popen is None:
+        # Wait until the workflow is started.
+        # Unless the main thread has stopped
+        while self._popen is None and threading.main_thread().is_alive():
             # This piece of code checks if a workflow has started yet. If
             # it has not, it waits. A counter is implemented here because
             # incrementing a counter is much faster than checking system
