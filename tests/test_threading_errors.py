@@ -18,8 +18,6 @@
 
 import textwrap
 
-import pytest
-
 
 def test_shlex_error(testdir):
     test = textwrap.dedent("""\
@@ -27,3 +25,5 @@ def test_shlex_error(testdir):
       command: a command with a dangling double-quote"
     """)
     testdir.makefile(".yml", test=test)
+    result = testdir.runpytest("-v")
+    assert "shlex" in result.stdout
