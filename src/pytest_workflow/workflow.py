@@ -67,6 +67,8 @@ class Workflow(object):
             if cwd is None
             else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
+        self._started = False
+        self.errors = []
         self.start_lock = threading.Lock()
 
     def start(self):
@@ -75,15 +77,21 @@ class Workflow(object):
         # The lock ensures that the workflow is started only once, even if it
         # is started from multiple threads.
         with self.start_lock:
-            if self._popen is None:
-                # We can open multiple files within one with statement.
-                with contextlib.ExitStack() as stack:
-                    stdout_h = stack.enter_context(self.stdout_file.open('wb'))
-                    stderr_h = stack.enter_context(self.stderr_file.open('wb'))
+            if not self._started:
+                try:
+                    stdout_h = self.stdout_file.open('wb')
+                    stderr_h = self.stderr_file.open('wb')
                     sub_process_args = shlex.split(self.command)
                     self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
+                except Exception as error:
+                    # Append the error so it can be raised in the main thread.
+                    self.errors.append(error)
+                finally:
+                    self._started = True
+                    stdout_h.close()
+                    stderr_h.close()
             else:
                 raise ValueError("Workflows can only be started once")
 
@@ -104,7 +112,7 @@ class Workflow(object):
         wait_time = 0.0
         # Wait until the workflow is started.
         # Unless the main thread has stopped
-        while self._popen is None and threading.main_thread().is_alive():
+        while not self._started and threading.main_thread().is_alive():
             # This piece of code checks if a workflow has started yet. If
             # it has not, it waits. A counter is implemented here because
             # incrementing a counter is much faster than checking system
@@ -119,12 +127,16 @@ class Workflow(object):
 
         # Stdout and stderr are written to files. So popen.wait() does not
         # block process completion with long stderr or stdout.
-        if timeout_secs is not None:
+        if timeout_secs is not None and self._popen is not None:
             # Wait for timeout_secs number of secs minus te time that was
             # already spent waiting for the workflow to start
             self._popen.wait(timeout_secs - wait_time)
-        else:
+        elif self._popen is not None:
             self._popen.wait()
+        else:
+            # If self._popen is none, something went wrong during starting the
+            # workflow
+            pass
 
     @property
     def stdout(self) -> bytes:
@@ -155,6 +167,8 @@ class WorkflowQueue(queue.Queue):
     def __init__(self):
         # No argument for maxsize. This queue is infinite.
         super().__init__()
+        # Collect errors during thread processing.
+        self._process_errors = []
 
     def put(self, item, block=True, timeout=None):
         """Like Queue.put() but tests if item is a Workflow"""
@@ -177,6 +191,8 @@ class WorkflowQueue(queue.Queue):
             thread.start()
             threads.append(thread)
         self.join()
+        for error in self._process_errors:
+            raise error
         for thread in threads:
             thread.join()
 
@@ -203,6 +219,10 @@ class WorkflowQueue(queue.Queue):
                         stdout_file=workflow.stdout_file,
                         stderr_file=workflow.stderr_file))
                 workflow.run()
+                # Collect the workflow errors.
+                self._process_errors.extend(workflow.errors)
                 self.task_done()
                 # Some reporting
-                print("'{0}' done.".format(workflow.name))
+                result = ("python error during starting"
+                          if workflow.errors else "done")
+                print("'{0}' {1}.".format(workflow.name, result))
