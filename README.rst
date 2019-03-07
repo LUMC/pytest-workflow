@@ -9,7 +9,7 @@ pytest-workflow
   :alt:
 
 .. image:: https://img.shields.io/conda/v/bioconda/pytest-workflow.svg
-  :target: https://https://bioconda.github.io/recipes/pytest-workflow/README.html
+  :target: https://bioconda.github.io/recipes/pytest-workflow/README.html
   :alt:
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest-workflow.svg
