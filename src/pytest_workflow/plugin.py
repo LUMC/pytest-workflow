@@ -162,19 +162,8 @@ def pytest_collection_modifyitems(config: PytestConfig,
             # fixture lookup.
             marker.kwargs['name'] = workflow_name
         else:
-            # If we raise an error here a number of things will happen:
-            # + Pytest will crash. Giving a lot of INTERNAL ERROR lines
-            # + No tests will run
-            # + No workflows will be started
-            # + All the threads that are waiting for a workflow to
-            #   finish will wait indefinitely. Causing an infinite
-            #   hang. Pytest will never finish.
-            # Therefore we do not crash here, but raise a warning.
-            item.warn(pytest.PytestWarning(
-                "A workflow name should be defined in the "
-                "workflow marker of {0}".format(item.nodeid)))
-            # Go on with the next item.
-            continue
+            raise TypeError("A workflow name should be defined in the "
+                            "workflow marker of {0}".format(item.nodeid))
 
         if workflow_name not in config.executed_workflows:
             skip_marker = pytest.mark.skip(

@@ -21,7 +21,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="1.1.1",
+    version="1.1.2",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",

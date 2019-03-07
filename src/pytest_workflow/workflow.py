@@ -20,7 +20,6 @@ on stdout, stderr and exit code.
 This file was created by A.H.B. Bollen. Multithreading functionality was added
 later.
 """
-import contextlib
 import queue
 import shlex
 import subprocess  # nosec: security implications have been considered
@@ -28,10 +27,12 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 
 class Workflow(object):
+    # If there is a better way to do this we can disable the pylint warning.
+    # pylint: disable=too-many-instance-attributes
 
     def __init__(self,
                  command: str,
@@ -67,6 +68,8 @@ class Workflow(object):
             if cwd is None
             else self.cwd / Path("log.err"))
         self._popen = None  # type: Optional[subprocess.Popen]
+        self._started = False
+        self.errors = []  # type: List[Exception]
         self.start_lock = threading.Lock()
 
     def start(self):
@@ -75,15 +78,21 @@ class Workflow(object):
         # The lock ensures that the workflow is started only once, even if it
         # is started from multiple threads.
         with self.start_lock:
-            if self._popen is None:
-                # We can open multiple files within one with statement.
-                with contextlib.ExitStack() as stack:
-                    stdout_h = stack.enter_context(self.stdout_file.open('wb'))
-                    stderr_h = stack.enter_context(self.stderr_file.open('wb'))
+            if not self._started:
+                try:
+                    stdout_h = self.stdout_file.open('wb')
+                    stderr_h = self.stderr_file.open('wb')
                     sub_process_args = shlex.split(self.command)
                     self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
+                except Exception as error:  # pylint: disable=broad-except
+                    # Append the error so it can be raised in the main thread.
+                    self.errors.append(error)
+                finally:
+                    self._started = True
+                    stdout_h.close()
+                    stderr_h.close()
             else:
                 raise ValueError("Workflows can only be started once")
 
@@ -102,7 +111,9 @@ class Workflow(object):
         :param wait_interval_secs: check interval secs if a workflow is started
         """
         wait_time = 0.0
-        while self._popen is None:
+        # Wait until the workflow is started.
+        # Unless the main thread has stopped
+        while not self._started and threading.main_thread().is_alive():
             # This piece of code checks if a workflow has started yet. If
             # it has not, it waits. A counter is implemented here because
             # incrementing a counter is much faster than checking system
@@ -117,12 +128,16 @@ class Workflow(object):
 
         # Stdout and stderr are written to files. So popen.wait() does not
         # block process completion with long stderr or stdout.
-        if timeout_secs is not None:
+        if timeout_secs is not None and self._popen is not None:
             # Wait for timeout_secs number of secs minus te time that was
             # already spent waiting for the workflow to start
             self._popen.wait(timeout_secs - wait_time)
-        else:
+        elif self._popen is not None:
             self._popen.wait()
+        else:
+            # If self._popen is none, something went wrong during starting the
+            # workflow
+            pass
 
     @property
     def stdout(self) -> bytes:
@@ -153,6 +168,8 @@ class WorkflowQueue(queue.Queue):
     def __init__(self):
         # No argument for maxsize. This queue is infinite.
         super().__init__()
+        # Collect errors during thread processing.
+        self._process_errors = []
 
     def put(self, item, block=True, timeout=None):
         """Like Queue.put() but tests if item is a Workflow"""
@@ -175,6 +192,10 @@ class WorkflowQueue(queue.Queue):
             thread.start()
             threads.append(thread)
         self.join()
+        # If errors are detected raise the first error. Raising all errors
+        # is not possible.
+        if len(self._process_errors) > 0:
+            raise self._process_errors[0]
         for thread in threads:
             thread.join()
 
@@ -201,6 +222,10 @@ class WorkflowQueue(queue.Queue):
                         stdout_file=workflow.stdout_file,
                         stderr_file=workflow.stderr_file))
                 workflow.run()
+                # Collect the workflow errors.
+                self._process_errors.extend(workflow.errors)
                 self.task_done()
                 # Some reporting
-                print("'{0}' done.".format(workflow.name))
+                result = ("python error during starting"
+                          if workflow.errors else "done")
+                print("'{0}' {1}.".format(workflow.name, result))
