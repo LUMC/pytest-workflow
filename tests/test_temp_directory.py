@@ -25,7 +25,7 @@ from .test_success_messages import SIMPLE_ECHO
 def test_directory_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
-    working_dir = re.search(r"with command 'echo moo' in '([\w\/_-]*)'",
+    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
                             result.stdout.str()).group(1)
     assert Path(working_dir).exists()
     assert Path(working_dir / Path("log.out")).exists()
@@ -35,7 +35,7 @@ def test_directory_kept(testdir):
 def test_directory_not_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
-    working_dir = re.search(r"with command 'echo moo' in '([\w\/_-]*)'",
+    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("Removing temporary directories and logs. Use '--kwd' or "
@@ -87,31 +87,34 @@ def test_basetemp_will_be_created(testdir):
 
 SUCCESS_TEST = """\
 - name: success
-  command: exit 0
+  command: bash -c 'exit 0'
 """
 
 FAIL_TEST = """\
 - name: fail
-  command: fail
+  command: bash -c 'exit 1'
 """
 
 
 def test_directory_kept_on_fail(testdir):
-    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    testdir.makefile(".yml", test=FAIL_TEST)
     result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
-    working_dir = re.search(r"with command 'fail' in '([\w\/_-]*)'",
-                            result.stdout.str()).group(1)
+    working_dir = re.search(
+        r"with command 'bash -c 'exit 1'' in '([\w/_-]*)'",
+        result.stdout.str()).group(1)
     assert Path(working_dir).exists()
     assert Path(working_dir / Path("log.out")).exists()
     assert Path(working_dir / Path("log.err")).exists()
     assert ("One or more tests failed. Keeping temporary directories and "
             "logs." in result.stdout.str())
 
+
 def test_directory_not_kept_on_succes(testdir):
-    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    testdir.makefile(".yml", test=SUCCESS_TEST)
     result = testdir.runpytest("-v", "--kwdof")
-    working_dir = re.search(r"with command 'success' in '([\w\/_-]*)'",
-                            result.stdout.str()).group(1)
+    working_dir = re.search(
+        r"with command 'bash -c 'exit 0'' in '([\w/_-]*)'",
+        result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("All tests succeeded. Removing temporary directories and logs." in
             result.stdout.str())

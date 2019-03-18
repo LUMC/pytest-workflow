@@ -46,7 +46,7 @@ def pytest_addoption(parser: PytestParser):
              "stderr in the workflow directory",
         dest="keep_workflow_wd")
     parser.addoption(
-        "--kwdof", "--keep-worfklow-wd-on-fail",
+        "--kwdof", "--keep-workflow-wd-on-fail",
         action="store_true",
         help="Similar to --keep-workflow-wd, but only keeps the temporary "
              "directories if there are test failures. On success all "
