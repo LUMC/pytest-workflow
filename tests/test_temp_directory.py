@@ -83,3 +83,35 @@ def test_basetemp_will_be_created(testdir):
                                str(tempdir))
     assert tempdir.exists()
     assert result.ret == 0
+
+
+SUCCESS_TEST = """\
+- name: success
+  command: exit 0
+"""
+
+FAIL_TEST = """\
+- name: fail
+  command: fail
+"""
+
+
+def test_directory_kept_on_fail(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
+    working_dir = re.search(r"with command 'fail' in '([\w\/_-]*)'",
+                            result.stdout.str()).group(1)
+    assert Path(working_dir).exists()
+    assert Path(working_dir / Path("log.out")).exists()
+    assert Path(working_dir / Path("log.err")).exists()
+    assert ("One or more tests failed. Keeping temporary directories and "
+            "logs." in result.stdout.str())
+
+def test_directory_not_kept_on_succes(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    result = testdir.runpytest("-v", "--kwdof")
+    working_dir = re.search(r"with command 'success' in '([\w\/_-]*)'",
+                            result.stdout.str()).group(1)
+    assert not Path(working_dir).exists()
+    assert ("All tests succeeded. Removing temporary directories and logs." in
+            result.stdout.str())
