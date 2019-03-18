@@ -8,11 +8,13 @@ Pytest will automatically gather files in the ``tests`` directory starting with
 
 The workflows are run automatically. Each workflow gets its own temporary
 directory to run. The ``stdout`` and ``stderr`` of the workflow command are
-also saved to this directory. The temporary directories are cleaned up after
-the tests are completed. If you wish to inspect the output of a failing
-workflow you can use the ``--kwd`` or ``--keep-workflow-wd`` flag to disable
-cleanup. This will also make sure the logs of the pipeline are not deleted. The
-``--keep-workflow-wd`` flag is highly recommended when debugging pipelines.
+also saved to this directory to ``log.out`` and ``log.err`` respectively.
+The temporary directories are cleaned up after the tests are completed.
+If you wish to inspect the output of a failing
+workflow you can use the ``--keep-workflow-wd`` or ``--kwd`` flag to disable
+cleanup. This will also make sure the logs of the pipeline are not deleted.
+If you only want to keep directories when one or more tests fail you can use
+the ``--keep-workflow-wd-on-fail`` or ``--kwdof`` flag.
 
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
