@@ -186,18 +186,28 @@ def pytest_runtestloop(session: pytest.Session):
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
-    keep_workflow_dirs = (
-            session.config.getoption("keep_workflow_wd") or (
-            session.config.getoption("keep_workflow_wd_on_fail")
-            and exitstatus != 0)
-    )
-
-    if not keep_workflow_dirs:
-        print("Removing temporary directories and logs. Use '--kwd' or "
-              "'--keep-workflow-wd' to disable this behaviour.")
+    def cleanup():
         for tempdir in session.config.workflow_cleanup_dirs:
             shutil.rmtree(str(tempdir))
 
+    # No cleanup needed if we keep workflow directories.
+    if session.config.getoption("keep_workflow_wd"):
+        # no cleanup()
+        pass
+    elif session.config.getoption("keep_workflow_wd_on_fail"):
+        if exitstatus == 0:
+            print("All tests succeeded. Removing temporary directories and "
+                  "logs.")
+            cleanup()
+        else:
+            print("One or more tests failed. Keeping temporary directories "
+                  "and logs.")
+            # no cleanup()
+    else:  # When no flags are set. Remove temporary directories and logs.
+        print("Removing temporary directories and logs. Use '--kwd' or "
+              "'--keep-workflow-wd' to disable this behaviour.")
+        cleanup()
+    return
 
 @pytest.fixture()
 def workflow_dir(request: SubRequest):
