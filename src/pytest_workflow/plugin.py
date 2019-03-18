@@ -207,7 +207,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
         cleanup()
-    return
+
 
 @pytest.fixture()
 def workflow_dir(request: SubRequest):
