@@ -15,6 +15,8 @@ workflow you can use the ``--keep-workflow-wd`` or ``--kwd`` flag to disable
 cleanup. This will also make sure the logs of the pipeline are not deleted.
 If you only want to keep directories when one or more tests fail you can use
 the ``--keep-workflow-wd-on-fail`` or ``--kwdof`` flag.
+``--keep-workflow-wd-on-fail`` will keep all temporary directories, even from
+workflows that have succeeded.
 
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
