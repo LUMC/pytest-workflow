@@ -46,6 +46,13 @@ def pytest_addoption(parser: PytestParser):
              "stderr in the workflow directory",
         dest="keep_workflow_wd")
     parser.addoption(
+        "--kwdof", "--keep-workflow-wd-on-fail",
+        action="store_true",
+        help="Similar to --keep-workflow-wd, but only keeps the temporary "
+             "directories if there are test failures. On success all "
+             "directories are deleted.",
+        dest="keep_workflow_wd_on_fail")
+    parser.addoption(
         "--wt", "--workflow-threads",
         dest="workflow_threads",
         default=1,
@@ -178,13 +185,28 @@ def pytest_runtestloop(session: pytest.Session):
     )
 
 
-def pytest_sessionfinish(session: pytest.Session):
-    if not session.config.getoption("keep_workflow_wd"):
-        # The newline is needed otherwise everything looks ugly.
-        print("\nRemoving temporary directories and logs. Use '--kwd' or "
-              "'--keep-workflow-wd' to disable this behaviour.")
+def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
+    def cleanup():
         for tempdir in session.config.workflow_cleanup_dirs:
             shutil.rmtree(str(tempdir))
+
+    # No cleanup needed if we keep workflow directories.
+    if session.config.getoption("keep_workflow_wd"):
+        # no cleanup()
+        pass
+    elif session.config.getoption("keep_workflow_wd_on_fail"):
+        if exitstatus == 0:
+            print("All tests succeeded. Removing temporary directories and "
+                  "logs.")
+            cleanup()
+        else:
+            print("One or more tests failed. Keeping temporary directories "
+                  "and logs.")
+            # no cleanup()
+    else:  # When no flags are set. Remove temporary directories and logs.
+        print("Removing temporary directories and logs. Use '--kwd' or "
+              "'--keep-workflow-wd' to disable this behaviour.")
+        cleanup()
 
 
 @pytest.fixture()
