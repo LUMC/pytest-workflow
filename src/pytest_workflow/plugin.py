@@ -30,7 +30,7 @@ import pytest
 
 import yaml
 
-from . import replace_whitespace
+from . import replace_whitespace, rm_dirs
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
@@ -195,10 +195,6 @@ def pytest_runtestloop(session: pytest.Session):
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
-    def cleanup():
-        for tempdir in session.config.workflow_cleanup_dirs:
-            shutil.rmtree(str(tempdir))
-
     # No cleanup needed if we keep workflow directories
     # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
     # was not used.)
@@ -210,14 +206,14 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         if exitstatus == 0:
             print("All tests succeeded. Removing temporary directories and "
                   "logs.")
-            cleanup()
+            rm_dirs(session.config.workflow_cleanup_dirs)
         else:
             print("One or more tests failed. Keeping temporary directories "
                   "and logs.")
     else:  # When no flags are set. Remove temporary directories and logs.
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
-        cleanup()
+        rm_dirs(session.config.workflow_cleanup_dirs)
 
 
 @pytest.fixture()
