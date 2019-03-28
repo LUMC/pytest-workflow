@@ -85,6 +85,17 @@ def test_basetemp_will_be_created(testdir):
     assert result.ret == 0
 
 
+def test_basetemp_can_not_be_in_rootdir(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    testdir_path = Path(str(testdir.tmpdir))
+    tempdir = testdir_path / Path("tmp")
+    result = testdir.runpytest("-v", "--basetemp", str(tempdir))
+    message = "'{tempdir}' is a subdirectory of '{rootdir}'".format(
+        tempdir=str(tempdir),
+        rootdir=str(testdir_path))
+    assert message in result.stderr.str()
+
+
 SUCCESS_TEST = """\
 - name: success
   command: bash -c 'exit 0'
