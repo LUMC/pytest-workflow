@@ -199,11 +199,14 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         for tempdir in session.config.workflow_cleanup_dirs:
             shutil.rmtree(str(tempdir))
 
-    # No cleanup needed if we keep workflow directories.
-    if session.config.getoption("keep_workflow_wd"):
-        # no cleanup()
+    # No cleanup needed if we keep workflow directories
+    # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
+    # was not used.)
+    if (session.config.getoption("keep_workflow_wd") or
+            len(session.config.workflow_cleanup_dirs) == 0):
         pass
     elif session.config.getoption("keep_workflow_wd_on_fail"):
+        # Ony cleanup if there are cleanup_dirs.
         if exitstatus == 0:
             print("All tests succeeded. Removing temporary directories and "
                   "logs.")
@@ -211,7 +214,6 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         else:
             print("One or more tests failed. Keeping temporary directories "
                   "and logs.")
-            # no cleanup()
     else:  # When no flags are set. Remove temporary directories and logs.
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
