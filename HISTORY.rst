@@ -11,6 +11,10 @@ version 1.2.0-dev
 ---------------------------
 + Added a ``--keep-workflow-wd-on-fail`` or ``--kwdof`` flag. Setting this flag
   will make sure temporary directories are only deleted when all tests succeed.
++ Giving a ``--basetemp`` directory that is within pytest's current working
+  directory will now raise an exception to prevent infinit recursive directory
+  copying.
++ The cleanup message is only displayed when pytest-workflow is used.
 
 version 1.1.2
 ---------------------------

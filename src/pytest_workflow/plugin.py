@@ -30,7 +30,7 @@ import pytest
 
 import yaml
 
-from . import replace_whitespace
+from . import replace_whitespace, rm_dirs
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
@@ -133,6 +133,15 @@ def pytest_configure(config: PytestConfig):
     workflow_temp_dir = (
         Path(basetemp) if basetemp is not None
         else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
+
+    rootdir = Path(str(config.rootdir))
+    # Raise an error if the workflow temporary directory of the rootdir
+    # (pytest's CWD). This will lead to infinite looping and copying.
+    if str(workflow_temp_dir.absolute()).startswith(str(rootdir.absolute())):
+        raise ValueError("'{0}' is a subdirectory of '{1}'. Please select a "
+                         "--basetemp that is not in pytest's current working "
+                         "directory.".format(workflow_temp_dir, rootdir))
+
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
 
@@ -186,27 +195,25 @@ def pytest_runtestloop(session: pytest.Session):
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
-    def cleanup():
-        for tempdir in session.config.workflow_cleanup_dirs:
-            shutil.rmtree(str(tempdir))
-
-    # No cleanup needed if we keep workflow directories.
-    if session.config.getoption("keep_workflow_wd"):
-        # no cleanup()
+    # No cleanup needed if we keep workflow directories
+    # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
+    # was not used.)
+    if (session.config.getoption("keep_workflow_wd") or
+            len(session.config.workflow_cleanup_dirs) == 0):
         pass
     elif session.config.getoption("keep_workflow_wd_on_fail"):
+        # Ony cleanup if there are cleanup_dirs.
         if exitstatus == 0:
             print("All tests succeeded. Removing temporary directories and "
                   "logs.")
-            cleanup()
+            rm_dirs(session.config.workflow_cleanup_dirs)
         else:
             print("One or more tests failed. Keeping temporary directories "
                   "and logs.")
-            # no cleanup()
     else:  # When no flags are set. Remove temporary directories and logs.
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
-        cleanup()
+        rm_dirs(session.config.workflow_cleanup_dirs)
 
 
 @pytest.fixture()
