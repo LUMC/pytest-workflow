@@ -7,7 +7,7 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.2.0-dev
+version 1.2.0
 ---------------------------
 + Giving a ``--basetemp`` directory that is within pytest's current working
   directory will now raise an exception to prevent infinite recursive directory
