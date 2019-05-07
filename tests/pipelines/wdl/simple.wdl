@@ -23,12 +23,15 @@ version 1.0
 task read_random {
     input {
         Int lines_to_read
+        String outfile_name
     }
     command {
-        head -n ~{lines_to_read} /dev/urandom > output
+        set -e
+        mkdir -p $(dirname ~{outfile_name})
+        head -n ~{lines_to_read} /dev/urandom > ~{outfile_name}
     }
     output {
-        File out = "output"
+        File out = outfile_name
     }
     runtime {
         docker: "ubuntu:18.04"
@@ -38,9 +41,12 @@ task read_random {
 task base64 {
     input {
         File in_file
+        String outfile_name
     }
     command {
-        cat ~{in_file} | base64 > output.txt
+        set -e -o pipefail
+        mkdir -p $(dirname ~{outfile_name})
+        cat ~{in_file} | base64 > ~{outfile_name}
     }
     output {
       File out = "output.txt"
@@ -53,9 +59,12 @@ task base64 {
 task gzip {
     input {
         File in_file
+        String outfile_name
     }
     command {
-        cat in_file | gzip -c > output.gz
+        set -e -o pipefail
+        mkdir -p $(dirname ~{outfile_name})
+        cat in_file | gzip -c > ~{outfile_name}
     }
     output {
         File out = "output.gz"
@@ -66,13 +75,15 @@ task gzip {
 
 }
 
-task concatenate_gzip_files {
+task concatenate_files {
     input {
         Array[File]+ files
-
-    }
+        String outfile_name
+     }
     command {
-        cat ~{sep=' ' files} > output.gz
+        set -e
+        mkdir -p $(dirname ~{outfile_name})
+        cat ~{sep=' ' files} > ~{outfile_name}
     }
     output {
         File out = "output.gz"
@@ -92,22 +103,29 @@ workflow random_zip {
     scatter (iteration in iterations) {
         call read_random {
             input:
-                lines_to_read=lines_to_read
+                lines_to_read=lines_to_read,
+                outfile_name="rand/" + iteration + ".txt"
         }
         call base64 {
             input:
-                in_file = read_random.out
+                in_file = read_random.out,
+                outfile_name="base64/" + iteration + ".txt"
         }
         call gzip {
             input:
-                in_file = base64.out
+                in_file = base64.out,
+                outfile_name="randgz/" + iteration + "txt"
         }
     }
-    call concatenate_gzip_files {
+    call concatenate_files {
         input:
-            files = gzip.out
+            files = gzip.out,
+            outfile_name="alldata.gz"
     }
     output {
-        File zipped_file = concatenate_gzip_files.out
+        Array[File] rand_files = read_random.out
+        Array[File] base64_files = base64.out
+        Array[File] gzip_files = gzip.out
+        File zipped_file = concatenate_files.out
     }
 }

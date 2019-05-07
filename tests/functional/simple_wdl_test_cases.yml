@@ -1,12 +1,37 @@
 - name: simple wdl
-  command: >-
-    bash -c '
-    TEST_JSON=simple.json ;
-    sed -i "2i\"string_to_zip.out_path\":\"$PWD/moo.txt.gz\"," $TEST_JSON ;
-    cromwell run -i $TEST_JSON simple.wdl'
+  command: cromwell run -i simple.json -o simple.options.json simple.wdl
   files:
-    - path: moo.txt.gz
-      md5sum: 173fd8023240a8016033b33f42db14a2
+    - path: test-output/rand/0.txt
+    - path: test-output/rand/1.txt
+    - path: test-output/rand/2.txt
+    - path: test-output/rand/3.txt
+    - path: test-output/rand/4.txt
+    - path: test-output/rand/5.txt
+    - path: test-output/rand/6.txt
+    - path: test-output/rand/7.txt
+    - path: test-output/rand/8.txt
+    - path: test-output/rand/9.txt
+    - path: test-output/b64/0.txt
+    - path: test-output/b64/1.txt
+    - path: test-output/b64/2.txt
+    - path: test-output/b64/3.txt
+    - path: test-output/b64/4.txt
+    - path: test-output/b64/5.txt
+    - path: test-output/b64/6.txt
+    - path: test-output/b64/7.txt
+    - path: test-output/b64/8.txt
+    - path: test-output/b64/9.txt
+    - path: test-output/randgz/0.txt.gz
+    - path: test-output/randgz/1.txt.gz
+    - path: test-output/randgz/2.txt.gz
+    - path: test-output/randgz/3.txt.gz
+    - path: test-output/randgz/4.txt.gz
+    - path: test-output/randgz/5.txt.gz
+    - path: test-output/randgz/6.txt.gz
+    - path: test-output/randgz/7.txt.gz
+    - path: test-output/randgz/8.txt.gz
+    - path: test-output/randgz/9.txt.gz
+    - path: test-output/all_data.gz
   stdout:
     contains:
       - "WorkflowSucceededState"
