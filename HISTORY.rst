@@ -7,6 +7,11 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.3.0-dev
+---------------------------
++ Updated documentation on how to test Cromwell + WDL pipelines.
+
+
 version 1.2.0
 ---------------------------
 + Giving a ``--basetemp`` directory that is within pytest's current working

@@ -41,12 +41,21 @@ def simple_wdl_json():
         return json_handle.read()
 
 
+@pytest.fixture
+def simple_wdl_options_json():
+    json_path = (Path(__file__).parent.parent / Path("pipelines") /
+                 Path("wdl") / Path("simple.options.json"))
+    with json_path.open("r") as json_handle:
+        return json_handle.read()
+
+
 @pytest.mark.functional
 def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
-                  simple_wdl_json):
+                  simple_wdl_json, simple_wdl_options_json):
     testdir.makefile(ext=".json", simple=simple_wdl_json)
     testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
     testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
+    testdir.makefile(ext=".options.json", simple=simple_wdl_options_json)
     result = testdir.runpytest("-v")
     exit_code = result.ret
     assert exit_code == 0
