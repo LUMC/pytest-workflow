@@ -1,4 +1,7 @@
 {
   "final_workflow_outputs_dir": "test-output",
-  "use_relative_output_paths": true
+  "use_relative_output_paths": true,
+  "default_runtime_attributes": {
+    "docker_user": "$EUID"
+  }
 }
