@@ -26,29 +26,43 @@ WDL with Cromwell example
 Below an example yaml file is explained which can be used to test a WDL
 pipeline run through Cromwell.
 
-One problem with Cromwell is the way it handles relative paths and how it
-handles the input file:
+By default Cromwell outputs its files in the execution folder in a
+deeply-nested folder structure. Cromwell can output to a separate
+workflow-outputs folder and since Cromwell version 40 it can also output the
+files in a structure that is not nested. For more information check the
+`Cromwell documentation on global workflow options
+<https://cromwell.readthedocs.io/en/stable/wf_options/Overview/#global-workflow-options>`_.
 
-+ Relative paths are written only within the ``cromwell-executions`` folder.
-  If you want to write outside this folder you need absolute paths. This is
-  fine but for testing your pipeline ``pytest-workflow`` creates a temporary
-  folder from which the pipeline is run. You don't know beforehand which path
-  this is, but you could use the environment variable ``$PWD``.
-+ However the second problem is that inputs can only be supplied to Cromwell in
-  a json file, not on the command line. So you cannot dynamically choose an
-  output folder. You have to rewrite the input file.
+In order to run Cromwell for CI tests an options file should be present in the
+repository with the following contents:
 
-To fix this problem you can write ``command`` to be a bash script that injects
-``$PWD`` into the inputs.json.
+.. code-block:: json
+
+    {
+    "final_workflow_outputs_dir": "test-output",
+    "use_relative_output_paths": true,
+    "default_runtime_attributes": {
+      "docker_user": "$EUID"
+      }
+    }
+
+``final_workflow_outputs_dir`` will make sure all the files produced in the
+workflow will be copied to the ``final_workflow_outputs_dir``.
+``use_relative_output_paths`` will get rid of all the Cromwell specific folders
+such as ``call-myTask`` etc. The ``default_runtime_attributes`` are only
+necessary when using docker containers. It will make sure all the files are
+created by the same user that runs the test (docker containers run as root by
+default). This will ensure that files can be deleted by pytest-workflow
+afterwards.
+
+The following yaml file tests a Cromwell pipeline. In this case Cromwell is
+installed via conda. The conda installation adds a wrapper to Cromwell so it
+can be used as a command, instead of having to use the jar.
 
 .. code-block:: yaml
 
   - name: My pipeline
-    command: >-
-      bash -c '
-      TEST_JSON=tests/inputs/my_pipeline_test1.json ;
-      sed -i "2i\"my_pipeline.output_dir\":\"$PWD/test-output\"," $TEST_JSON ;
-      cromwell run -i $TEST_JSON simple.wdl'
+    command: cromwell run -i inputs.json -o options.json moo.wdl'
     files:
       - path: test-output/moo.txt.gz
         md5sum: 173fd8023240a8016033b33f42db14a2
@@ -56,7 +70,3 @@ To fix this problem you can write ``command`` to be a bash script that injects
       contains:
         - "WorkflowSucceededState"
 
-``sed -i "2i\"my_pipeline.output_dir\":\"$PWD/test-output\"," $TEST_JSON``
-inserts ``"my_pipeline.output_dir":"</pytest/temporary/dir>/test-output",`` on
-the second line of ``$TEST_JSON``. This solves the problem. File paths can now
-be traced from ``test-output`` as demonstrated in the example.
