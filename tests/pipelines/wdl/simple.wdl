@@ -49,7 +49,7 @@ task base64 {
         cat ~{in_file} | base64 > ~{outfile_name}
     }
     output {
-      File out = "output.txt"
+      File out = outfile_name
     }
     runtime {
        docker: "ubuntu:18.04"
@@ -64,10 +64,10 @@ task gzip {
     command {
         set -e -o pipefail
         mkdir -p $(dirname ~{outfile_name})
-        cat in_file | gzip -c > ~{outfile_name}
+        cat ~{in_file} | gzip -c > ~{outfile_name}
     }
     output {
-        File out = "output.gz"
+        File out = outfile_name
     }
     runtime {
         docker: "ubuntu:18.04"
@@ -86,7 +86,7 @@ task concatenate_files {
         cat ~{sep=' ' files} > ~{outfile_name}
     }
     output {
-        File out = "output.gz"
+        File out = outfile_name
     }
     runtime {
         docker: "ubuntu:18.04"
@@ -104,7 +104,7 @@ workflow random_zip {
         call read_random {
             input:
                 lines_to_read=lines_to_read,
-                outfile_name="rand/" + iteration + ".txt"
+                outfile_name="rand/" + iteration + ".bin"
         }
         call base64 {
             input:

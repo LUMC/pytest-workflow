@@ -1,4 +1,4 @@
 {
-  "final-workflow-outputs-dir": "test-output",
+  "final_workflow_outputs_dir": "test-output",
   "use_relative_output_paths": true
 }

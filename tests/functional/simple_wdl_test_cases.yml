@@ -1,16 +1,16 @@
 - name: simple wdl
   command: cromwell run -i simple.json -o simple.options.json simple.wdl
   files:
-    - path: test-output/rand/0.txt
-    - path: test-output/rand/1.txt
-    - path: test-output/rand/2.txt
-    - path: test-output/rand/3.txt
-    - path: test-output/rand/4.txt
-    - path: test-output/rand/5.txt
-    - path: test-output/rand/6.txt
-    - path: test-output/rand/7.txt
-    - path: test-output/rand/8.txt
-    - path: test-output/rand/9.txt
+    - path: test-output/rand/0.bin
+    - path: test-output/rand/1.bin
+    - path: test-output/rand/2.bin
+    - path: test-output/rand/3.bin
+    - path: test-output/rand/4.bin
+    - path: test-output/rand/5.bin
+    - path: test-output/rand/6.bin
+    - path: test-output/rand/7.bin
+    - path: test-output/rand/8.bin
+    - path: test-output/rand/9.bin
     - path: test-output/b64/0.txt
     - path: test-output/b64/1.txt
     - path: test-output/b64/2.txt
