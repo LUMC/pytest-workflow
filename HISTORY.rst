@@ -9,6 +9,9 @@ Changelog
 
 version 1.3.0-dev
 ---------------------------
++ Updated documentation to reflect to move to conda-forge as requested on
+  `this github issue
+  <https://github.com/bioconda/bioconda-recipes/issues/13964>`_.
 + Updated documentation on how to test Cromwell + WDL pipelines.
 
 
