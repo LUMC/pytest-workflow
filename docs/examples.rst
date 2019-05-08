@@ -62,7 +62,7 @@ can be used as a command, instead of having to use the jar.
 .. code-block:: yaml
 
   - name: My pipeline
-    command: cromwell run -i inputs.json -o options.json moo.wdl'
+    command: cromwell run -i inputs.json -o options.json moo.wdl
     files:
       - path: test-output/moo.txt.gz
         md5sum: 173fd8023240a8016033b33f42db14a2
