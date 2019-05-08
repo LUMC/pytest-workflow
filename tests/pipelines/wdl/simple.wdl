@@ -109,18 +109,18 @@ workflow random_zip {
         call base64 {
             input:
                 in_file = read_random.out,
-                outfile_name="base64/" + iteration + ".txt"
+                outfile_name="b64/" + iteration + ".txt"
         }
         call gzip {
             input:
                 in_file = base64.out,
-                outfile_name="randgz/" + iteration + "txt"
+                outfile_name="randgz/" + iteration + ".txt.gz"
         }
     }
     call concatenate_files {
         input:
             files = gzip.out,
-            outfile_name="alldata.gz"
+            outfile_name="all_data.gz"
     }
     output {
         Array[File] rand_files = read_random.out

@@ -1,5 +1,7 @@
 - name: simple wdl
-  command: cromwell run -i simple.json -o simple.options.json simple.wdl
+  command: >-
+     cromwell -Dbackend.providers.Local.config.runtime-attributes="String? docker String? docker_user=\"$EUID\""
+     run -i simple.json -o simple.options.json simple.wdl
   files:
     - path: test-output/rand/0.bin
     - path: test-output/rand/1.bin
