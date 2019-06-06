@@ -9,6 +9,9 @@ Changelog
 
 version 1.3.0-dev
 ---------------------------
++ Since pytest 4.5.0 unknown markers give a warning. ``@pytest.mark.workflow``
+  markers are now added to the configuration. Information on usage shows up
+  with ``pytest --mark``.
 + Updated documentation to reflect the move to conda-forge as requested on
   `this github issue
   <https://github.com/bioconda/bioconda-recipes/issues/13964>`_.
