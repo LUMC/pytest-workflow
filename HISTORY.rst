@@ -7,7 +7,7 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.3.0-dev
+version 1.2.1
 ---------------------------
 + Since pytest 4.5.0 unknown markers give a warning. ``@pytest.mark.workflow``
   markers are now added to the configuration. Information on usage shows up
