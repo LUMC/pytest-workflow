@@ -97,6 +97,14 @@ def test_workflow_dir_arg_skipped(test, testdir):
     result.assert_outcomes(skipped=1)
 
 
+@pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
+def test_mark_not_unknown(test, testdir):
+    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    testdir.makefile(".py", test_fixture=test)
+    result = testdir.runpytest("-v")
+    assert "PytestUnknownMarkWarning" not in result.stdout.str()
+
+
 TEST_FIXTURE_WORKFLOW_NOT_EXIST = textwrap.dedent("""\
 import pytest
 
