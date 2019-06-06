@@ -7,6 +7,17 @@ Changelog
 .. NOTE: This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.2.1
+---------------------------
++ Since pytest 4.5.0 unknown markers give a warning. ``@pytest.mark.workflow``
+  markers are now added to the configuration. Information on usage shows up
+  with ``pytest --mark``.
++ Updated documentation to reflect the move to conda-forge as requested on
+  `this github issue
+  <https://github.com/bioconda/bioconda-recipes/issues/13964>`_.
++ Updated documentation on how to test Cromwell + WDL pipelines.
+
+
 version 1.2.0
 ---------------------------
 + Giving a ``--basetemp`` directory that is within pytest's current working

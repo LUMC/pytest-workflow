@@ -96,6 +96,16 @@ def pytest_collect_file(path, parent):
 
 def pytest_configure(config: PytestConfig):
     """This runs before tests start and adds values to the config."""
+
+    #  Add marker to the config to prevent issues caused by:
+    #  https://github.com/pytest-dev/pytest/issues/4826
+    # Errors are now emitted when unknown marks are included
+    config.addinivalue_line(
+        "markers",
+        "workflow(name): mark test to run only with the given "
+        "workflow name. Also provides access to the workflow_dir "
+        "fixture."
+    )
     # We need to add a workflow queue to some central variable. Instead of
     # using a global variable we add a value to the config.
     # Using setattr is not the nicest way of doing things, but having something

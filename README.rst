@@ -8,8 +8,8 @@ pytest-workflow
   :target: https://pypi.org/project/pytest-workflow/
   :alt:
 
-.. image:: https://img.shields.io/conda/v/bioconda/pytest-workflow.svg
-  :target: https://bioconda.github.io/recipes/pytest-workflow/README.html
+.. image:: https://img.shields.io/conda/v/conda-forge/pytest-workflow.svg
+  :target: https://anaconda.org/conda-forge/pytest-workflow
   :alt:
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest-workflow.svg
@@ -18,10 +18,6 @@ pytest-workflow
 
 .. image:: https://img.shields.io/pypi/l/pytest-workflow.svg
   :target: https://github.com/LUMC/pytest-workflow/blob/master/LICENSE
-  :alt:
-
-.. image:: https://api.codacy.com/project/badge/Grade/f8bc14b0a507429eac7c06194fafcd59
-  :target: https://www.codacy.com/app/LUMC/pytest-workflow?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=LUMC/pytest-workflow&amp;utm_campaign=Badge_Grade
   :alt:
 
 .. image:: https://travis-ci.org/LUMC/pytest-workflow.svg?branch=develop
@@ -49,11 +45,14 @@ and 3.7. Python 2 is not supported.
 - Create a ``tests`` directory in the root of your repository.
 - Create your test yaml files in the ``tests`` directory.
 
-Pytest-workflow is also available as a `conda package on bioconda
-<https://bioconda.github.io/recipes/pytest-workflow/README.html>`_. Follow
-`these instructions <https://bioconda.github.io/index.html#set-up-channels>`_
-to set up channels properly in order to use bioconda. After that ``conda
-install pytest-workflow`` can be used to install pytest-workflow.
+Pytest-workflow is also available as a `conda package on conda-forge
+<https://anaconda.org/conda-forge/pytest-workflow>`_. Follow
+`these instructions 
+<http://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge>`_ 
+to set up channels properly in order to use conda-forge. Alternatively,
+you can `set up the channels correctly for use with bioconda 
+<https://bioconda.github.io/index.html#set-up-channels>`_. After that ``conda
+install pytest-workflow`` can be used to install pytest-workflow. 
 
 Quickstart
 ==========
