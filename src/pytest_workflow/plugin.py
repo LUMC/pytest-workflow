@@ -19,7 +19,7 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import List, Optional  # noqa: F401 needed for typing.
+from typing import Dict, List, Optional  # noqa: F401 needed for typing.
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
@@ -115,7 +115,7 @@ def pytest_configure(config: PytestConfig):
     setattr(config, "workflow_queue", workflow_queue)
 
     # Save which workflows are run and which are not.
-    executed_workflows = []  # type: List[str]
+    executed_workflows = {}  # type: Dict[str, str]
     setattr(config, "executed_workflows", executed_workflows)
 
     # Save workflow for cleanup in this var.
@@ -191,7 +191,7 @@ def pytest_collection_modifyitems(config: PytestConfig,
             raise TypeError("A workflow name should be defined in the "
                             "workflow marker of {0}".format(item.nodeid))
 
-        if workflow_name not in config.executed_workflows:
+        if workflow_name not in config.executed_workflows.keys():
             skip_marker = pytest.mark.skip(
                 reason="'{0}' has not run.".format(workflow_name))
             item.add_marker(skip_marker)
@@ -338,9 +338,20 @@ class WorkflowTestsCollector(pytest.Collector):
         if not (set(self.config.getoption("workflow_tags")
                     ).issubset(set(self.tags))):
             return []
+        elif self.workflow_test.name in self.config.executed_workflows.keys():
+            raise ValueError(
+                "Workflow name '{this}' used more than once. Conflicting "
+                "tests: {this_test}, {existing_test}. ".format(
+                    this=self.workflow_test.name,
+                    this_test=self.nodeid,
+                    existing_test=self.config.executed_workflows[
+                        self.workflow_test.name]
+                )
+            )
         else:
             # If we run the workflow, save this for reference later.
-            self.config.executed_workflows.append(self.workflow_test.name)
+            self.config.executed_workflows[
+                self.workflow_test.name] = self.nodeid
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
