@@ -108,5 +108,5 @@ advanced python tests for each file produced by the workflow.
 
 .. note::
 
-    NOTE: stdout and stderr are available as files in the root of the
+    stdout and stderr are available as files in the root of the
     ``workflow_dir`` as ``log.out`` and ``log.err`` respectively.
