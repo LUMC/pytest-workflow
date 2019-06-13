@@ -22,7 +22,7 @@ On Ubuntu or Debian
     ``python3 -m pip install --user pytest-workflow``
 - ``pytest`` can now be run with ``python3 -m pytest``.
 
-.. container:: note
+.. note::
 
     NOTE: Running plain ``pytest`` on Ubuntu or Debian outside of a virtual
     environment will not work with ``pytest-workflow`` because this will start
