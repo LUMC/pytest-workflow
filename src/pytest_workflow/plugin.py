@@ -204,6 +204,22 @@ def pytest_runtestloop(session: pytest.Session):
     )
 
 
+def pytest_collectstart(collector: pytest.Collector):
+    if isinstance(collector, WorkflowTestsCollector):
+        name = collector.workflow_test.name
+        executed_workflows = collector.config.executed_workflows
+
+        if name in executed_workflows.keys():
+            raise ValueError(
+                "Workflow name '{this}' used more than once. Conflicting "
+                "tests: {this_test}, {existing_test}. ".format(
+                    this=name,
+                    this_test=collector.nodeid,
+                    existing_test=executed_workflows[name]
+                )
+            )
+
+
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
     # No cleanup needed if we keep workflow directories
     # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
@@ -338,20 +354,10 @@ class WorkflowTestsCollector(pytest.Collector):
         if not (set(self.config.getoption("workflow_tags")
                     ).issubset(set(self.tags))):
             return []
-        elif self.workflow_test.name in self.config.executed_workflows.keys():
-            raise ValueError(
-                "Workflow name '{this}' used more than once. Conflicting "
-                "tests: {this_test}, {existing_test}. ".format(
-                    this=self.workflow_test.name,
-                    this_test=self.nodeid,
-                    existing_test=self.config.executed_workflows[
-                        self.workflow_test.name]
-                )
-            )
         else:
             # If we run the workflow, save this for reference later.
-            self.config.executed_workflows[
-                self.workflow_test.name] = self.nodeid
+            self.config.executed_workflows[self.workflow_test.name] = (
+                self.nodeid)
 
         # This creates a workflow that is queued for processing after the
         # collection phase.
