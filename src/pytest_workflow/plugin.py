@@ -205,9 +205,13 @@ def pytest_runtestloop(session: pytest.Session):
 
 
 def pytest_collectstart(collector: pytest.Collector):
+    """This runs before the collector runs its collect attribute"""
+
     if isinstance(collector, WorkflowTestsCollector):
-        name = collector.workflow_test.name
-        executed_workflows = collector.config.executed_workflows
+        name = collector.workflow_test.name  # type: str
+
+        # Executed workflows contains workflow name as key and nodeid as value.
+        executed_workflows = collector.config.executed_workflows  # type: Dict[str,str]  # noqa: E501
 
         if name in executed_workflows.keys():
             raise ValueError(
@@ -356,6 +360,8 @@ class WorkflowTestsCollector(pytest.Collector):
             return []
         else:
             # If we run the workflow, save this for reference later.
+            # Save the nodeid because it also contains the originating file.
+            # This is useful for error messages later.
             self.config.executed_workflows[self.workflow_test.name] = (
                 self.nodeid)
 
