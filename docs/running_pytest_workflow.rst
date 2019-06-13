@@ -21,9 +21,9 @@ workflows that have succeeded.
 If you wish to change the temporary directory in which the workflows are run
 use ``--basetemp <dir>`` to change pytest's base temp directory.
 
-.. container:: warning
+.. warning::
 
-  WARNING: When a directory is passed to ``--basetemp`` some of the directory
+  When a directory is passed to ``--basetemp`` some of the directory
   contents will be deleted. For example: if your workflow is named
   ``"my workflow"`` then any file or directory named ``my_workflow`` will be
   deleted. This makes sure you start with a clean slate if you run pytest

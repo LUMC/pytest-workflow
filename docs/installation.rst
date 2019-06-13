@@ -22,9 +22,9 @@ On Ubuntu or Debian
     ``python3 -m pip install --user pytest-workflow``
 - ``pytest`` can now be run with ``python3 -m pytest``.
 
-.. container:: note
+.. note::
 
-    NOTE: Running plain ``pytest`` on Ubuntu or Debian outside of a virtual
+    Running plain ``pytest`` on Ubuntu or Debian outside of a virtual
     environment will not work with ``pytest-workflow`` because this will start
     the python2 version of ``pytest``. This is because python2 is the default
     python on any distribution released before January 1st 2020.
