@@ -15,8 +15,8 @@ version 1.3.0-dev
 + Add tags 'wdl', 'cromwell' and 'snakemake' to the package to increase
   discoverability.
 + Remove pylint from the lint procedure as it was very strict and got stricter
-  with every update, causing tests that previously succeed to fail on a regular
-  basis.
+  with every update, causing tests that previously succeeded to fail on a
+  regular basis.
 + Make sure pytest-workflow crashes when multiple workflows have the same name,
   even when they are in different files.
 + Added setup.cfg to include license in source distributions on PyPI for
