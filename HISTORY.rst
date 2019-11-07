@@ -7,7 +7,7 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.3.0-dev
+version 1.2.2
 ---------------------------
 + Do not test on python3.5 snakemake as it crashes. Added test for python3.7
   snakemake.
