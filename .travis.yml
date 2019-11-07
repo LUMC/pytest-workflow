@@ -37,9 +37,9 @@ matrix:
         - codecov -v  # -v to make sure coverage upload works.
 
     # FUNCTIONAL TESTS
-    - python: 3.5
-      env: TOX_ENV=snakemake
     - python: 3.6
+      env: TOX_ENV=snakemake
+    - python: 3.7
       env: TOX_ENV=snakemake
     - env: TOX_ENV=cromwell
       before_install:
