@@ -4,8 +4,24 @@ Changelog
 
 .. Newest changes should be on top.
 
-.. NOTE: This document is user facing. Please word the changes in such a way
+.. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
+
+version 1.2.2
+---------------------------
++ Test against python3.8
++ Do not test on python3.5 snakemake as it crashes. Added test for python3.7
+  snakemake.
++ Fix a typo in the documentation.
++ Add tags 'wdl', 'cromwell' and 'snakemake' to the package to increase
+  discoverability.
++ Remove pylint from the lint procedure as it was very strict and got stricter
+  with every update, causing tests that previously succeeded to fail on a
+  regular basis.
++ Make sure pytest-workflow crashes when multiple workflows have the same name,
+  even when they are in different files.
++ Added setup.cfg to include license in source distributions on PyPI for
+  future versions
 
 version 1.2.1
 ---------------------------

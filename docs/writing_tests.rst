@@ -60,7 +60,8 @@ Test options
     files:
       - path: "fail.log"               # Multiple files can be tested for each workflow
       - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
-        contains: "starring"
+        contains: 
+          - "starring"
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
@@ -69,6 +70,10 @@ Test options
 
 
 The above YAML file contains all the possible options for a workflow test.
+
+.. note::
+    Workflow names must be unique. Pytest workflow will crash when multiple
+    workflows have the same name, even if they are in different files.
 
 Writing custom tests
 --------------------
@@ -102,7 +107,7 @@ containing numbers' has run.
 points to the folder where the named workflow was executed. This allows writing of
 advanced python tests for each file produced by the workflow.
 
-.. container:: note
+.. note::
 
-    NOTE: stdout and stderr are available as files in the root of the
+    stdout and stderr are available as files in the root of the
     ``workflow_dir`` as ``log.out`` and ``log.err`` respectively.

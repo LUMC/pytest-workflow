@@ -21,7 +21,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="1.2.1",
+    version="1.2.2",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",
@@ -29,7 +29,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",
     license="AGPL-3.0-or-later",
-    keywords="pytest workflow pipeline yaml yml",
+    keywords="pytest workflow pipeline yaml yml wdl cromwell snakemake",
     zip_safe=False,
     packages=find_packages('src'),
     package_dir={'': 'src'},
@@ -43,6 +43,7 @@ setup(
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
