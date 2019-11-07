@@ -9,6 +9,7 @@ Changelog
 
 version 1.2.2
 ---------------------------
++ Test against python3.8
 + Do not test on python3.5 snakemake as it crashes. Added test for python3.7
   snakemake.
 + Fix a typo in the documentation.
