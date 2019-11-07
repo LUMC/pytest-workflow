@@ -9,6 +9,8 @@ Changelog
 
 version 1.3.0-dev
 ---------------------------
++ Do not test on python3.5 snakemake as it crashes. Added test for python3.7
+  snakemake.
 + Fix a typo in the documentation.
 + Add tags 'wdl', 'cromwell' and 'snakemake' to the package to increase
   discoverability.
