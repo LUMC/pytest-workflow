@@ -9,9 +9,17 @@ Changelog
 
 version 1.3.0-dev
 ---------------------------
++ Do not test on python3.5 snakemake as it crashes. Added test for python3.7
+  snakemake.
++ Fix a typo in the documentation.
++ Add tags 'wdl', 'cromwell' and 'snakemake' to the package to increase
+  discoverability.
++ Remove pylint from the lint procedure as it was very strict and got stricter
+  with every update, causing tests that previously succeeded to fail on a
+  regular basis.
 + Make sure pytest-workflow crashes when multiple workflows have the same name,
   even when they are in different files.
-+ Added MANIFEST.in to include license in source distributions on PyPI for
++ Added setup.cfg to include license in source distributions on PyPI for
   future versions
 
 version 1.2.1
