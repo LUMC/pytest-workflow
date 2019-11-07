@@ -29,7 +29,7 @@ setup(
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/x-rst",
     license="AGPL-3.0-or-later",
-    keywords="pytest workflow pipeline yaml yml",
+    keywords="pytest workflow pipeline yaml yml wdl cromwell snakemake",
     zip_safe=False,
     packages=find_packages('src'),
     package_dir={'': 'src'},
