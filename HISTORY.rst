@@ -19,7 +19,7 @@ version 1.3.0-dev
   basis.
 + Make sure pytest-workflow crashes when multiple workflows have the same name,
   even when they are in different files.
-+ Added MANIFEST.in to include license in source distributions on PyPI for
++ Added setup.cfg to include license in source distributions on PyPI for
   future versions
 
 version 1.2.1
