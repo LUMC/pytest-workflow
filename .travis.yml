@@ -9,8 +9,8 @@ matrix:
   include:
     # TEST DOCS AND LINTING
     # Use default python3 version here.
-    - env: TOX_ENV=py3-docs
-    - env: TOX_ENV=py3-lint
+    - env: TOX_ENV=docs
+    - env: TOX_ENV=lint
 
     # UNIT TESTS
     # On most recent versions of python.
@@ -38,10 +38,10 @@ matrix:
 
     # FUNCTIONAL TESTS
     - python: 3.5
-      env: TOX_ENV=py3-snakemake
+      env: TOX_ENV=snakemake
     - python: 3.6
-      env: TOX_ENV=py3-snakemake
-    - env: TOX_ENV=py3-cromwell
+      env: TOX_ENV=snakemake
+    - env: TOX_ENV=cromwell
       before_install:
         # Install conda
         - export MINICONDA=${HOME}/miniconda
