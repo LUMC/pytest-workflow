@@ -10,7 +10,7 @@ In a virtual environment
 
 - Create a new python3 virtual environment.
 - Make sure your virtual environment is activated.
-- Install using pip ``pip install pytest-workflow``
+- Install using pip ``pip install pytest-workflow``.
 
 On Ubuntu or Debian
 -------------------
@@ -18,7 +18,7 @@ On Ubuntu or Debian
 - This requires the ``python3`` and ``python3-pip`` packages to be installed.
 - Installing
 
-  - system-wide: ``sudo python3 -m pip install pytest-workflow``
+  - system-wide: ``sudo python3 -m pip install pytest-workflow``.
   - for your user only (no sudo needed):
     ``python3 -m pip install --user pytest-workflow``
 - ``pytest`` can now be run with ``python3 -m pytest``.
@@ -43,4 +43,4 @@ To install with conda:
   - If you want to use pytest-workflow together with bioconda you can follow
     `the instructions here
     <https://bioconda.github.io/index.html#set-up-channels>`_.
-- ``conda install pytest-workflow``
+- ``conda install pytest-workflow``.
