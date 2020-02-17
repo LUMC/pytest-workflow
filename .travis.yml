@@ -23,7 +23,6 @@ matrix:
     - python: 3.5
       env: TOX_ENV=py35
       install:
-        - pip install codacy-coverage
         - pip install codecov
         - pip install tox
       after_success:
