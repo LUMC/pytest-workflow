@@ -9,9 +9,9 @@ Changelog
 
 version 1.3.0-dev
 ---------------------------
-
++ Added missing ``help`` section for ``--tag``.
 + Documentation: added usage chapter for pytest-workflow specific options.
-+ Added missing `help` for `--tag`.
++ Documentation: updated Cromwell example.
 + Removed redundant references to pylint in code comments and CI.
 + Remove Codacy from the CI.
 
