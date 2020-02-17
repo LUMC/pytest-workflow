@@ -115,12 +115,10 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
 
 @pytest.mark.parametrize(["message"], SUCCESS_MESSAGES)
 def test_message_in_result(message: str, succeeding_tests_output):
-    # pylint: disable=redefined-outer-name
     assert message in succeeding_tests_output
 
 
 def test_message_success_no_errors_or_fails(succeeding_tests_output):
-    # pylint: disable=redefined-outer-name
     assert "ERROR" not in succeeding_tests_output
     assert "FAIL" not in succeeding_tests_output
 

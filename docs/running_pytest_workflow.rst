@@ -1,6 +1,10 @@
 =======================
 Running pytest-workflow
 =======================
+
+Usage
+-----
+
 Run ``pytest`` from an environment with pytest-workflow installed or
 ``python3 -m pytest`` if using a system-wide or user-wide installation.
 Pytest will automatically gather files in the ``tests`` directory starting with
@@ -9,6 +13,22 @@ Pytest will automatically gather files in the ``tests`` directory starting with
 The workflows are run automatically. Each workflow gets its own temporary
 directory to run. The ``stdout`` and ``stderr`` of the workflow command are
 also saved to this directory to ``log.out`` and ``log.err`` respectively.
+
+To check the progress of a workflow while it is running you can use ``tail -f``
+on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
+files are reported in the log as soon as a workflow is started.
+
+Specific pytest options for pytest workflow
+------------------------------------------------
+
+.. argparse::
+    :module: pytest_workflow.plugin
+    :func: __pytest_workflow_cli
+    :prog: pytest
+
+Temporary directory cleanup
+---------------------------
+
 The temporary directories are cleaned up after the tests are completed.
 If you wish to inspect the output of a failing
 workflow you can use the ``--keep-workflow-wd`` or ``--kwd`` flag to disable
@@ -31,14 +51,13 @@ use ``--basetemp <dir>`` to change pytest's base temp directory.
   DO NOT use ``--basetemp`` on directories where none of the
   contents should be deleted.
 
+Running multiple workflows simultaneously
+-----------------------------------------
+
 To run multiple workflows simultaneously you can use
 ``--workflow-threads <int>`` or ``--wt <int>`` flag. This defines the number
 of workflows that can be run simultaneously. This will speed up things if
 you have enough resources to process these workflows simultaneously.
-
-To check the progress of a workflow while it is running you can use ``tail -f``
-on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
-files are reported in the log as soon as a workflow is started.
 
 Running specific workflows
 ----------------------------
