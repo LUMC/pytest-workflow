@@ -109,8 +109,6 @@ class ContentTestCollector(pytest.Collector):
         :param content_name: The name of the content that will be displayed if
         the test fails. Defaults to filepath.
         """
-        # pylint: disable=too-many-arguments
-        # Cannot think of a better way to do this.
         super().__init__(name, parent=parent)
         self.filepath = filepath
         self.content_test = content_test
@@ -205,8 +203,6 @@ class ContentTestItem(pytest.Item):
                 self.should_contain)
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument
-        # excinfo needed for pytest.
         if self.parent.file_not_found:
             return (
                 "'{content}' does not exist and cannot be searched "

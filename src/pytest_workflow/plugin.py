@@ -173,8 +173,6 @@ def pytest_configure(config: PytestConfig):
 
 def pytest_collection(session: pytest.Session):
     """This function is started at the beginning of collection"""
-    # pylint: disable=unused-argument
-    # needed for pytest
     # We print an empty line here to make the report look slightly better.
     # Without it pytest will output "Collecting ... " and the workflow commands
     # will be immediately after this: "Collecting ... queue (etc.) "
@@ -426,8 +424,6 @@ class ExitCodeTest(pytest.Item):
         assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument
-        # excinfo needed for pytest.
         message = ("'{workflow_name}' exited with exit code " +
                    "'{exit_code}' instead of '{desired_exit_code}'."
                    ).format(workflow_name=self.workflow.name,
