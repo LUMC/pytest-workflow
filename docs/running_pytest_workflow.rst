@@ -14,6 +14,12 @@ The workflows are run automatically. Each workflow gets its own temporary
 directory to run. The ``stdout`` and ``stderr`` of the workflow command are
 also saved to this directory to ``log.out`` and ``log.err`` respectively.
 
+To check the progress of a workflow while it is running you can use ``tail -f``
+on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
+files are reported in the log as soon as a workflow is started.
+
+Specific pytest options for pytest workflow
+------------------------------------------------
 
 .. argparse::
     :module: pytest_workflow.plugin
@@ -52,10 +58,6 @@ To run multiple workflows simultaneously you can use
 ``--workflow-threads <int>`` or ``--wt <int>`` flag. This defines the number
 of workflows that can be run simultaneously. This will speed up things if
 you have enough resources to process these workflows simultaneously.
-
-To check the progress of a workflow while it is running you can use ``tail -f``
-on the ``stdout`` or ``stderr`` file of the workflow. The locations of these
-files are reported in the log as soon as a workflow is started.
 
 Running specific workflows
 ----------------------------
