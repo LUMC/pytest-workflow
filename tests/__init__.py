@@ -1,1 +1,1 @@
-# This file is here to prevent problems on travis with pylint.
+# This allows for relative imports in tests.

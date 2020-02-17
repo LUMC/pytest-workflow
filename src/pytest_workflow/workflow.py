@@ -31,8 +31,6 @@ from typing import List, Optional
 
 
 class Workflow(object):
-    # If there is a better way to do this we can disable the pylint warning.
-    # pylint: disable=too-many-instance-attributes
 
     def __init__(self,
                  command: str,
@@ -86,7 +84,7 @@ class Workflow(object):
                     self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
-                except Exception as error:  # pylint: disable=broad-except
+                except Exception as error:
                     # Append the error so it can be raised in the main thread.
                     self.errors.append(error)
                 finally:

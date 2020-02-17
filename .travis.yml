@@ -23,19 +23,9 @@ matrix:
     - python: 3.5
       env: TOX_ENV=py35
       install:
-        - pip install codacy-coverage
         - pip install codecov
         - pip install tox
       after_success:
-        # Correct coverage xml for coverage services.
-        - >
-          bash -c 'set -eux;
-          pkg_path=$(find .tox/py*/lib/python*/site-packages/pytest_workflow -maxdepth 0 -type d);
-          sed -i "s:${pkg_path}:src/pytest_workflow:g" coverage.xml'
-        - >
-          bash -c ' if [[ -v CODACY_PROJECT_TOKEN ]]; then
-          python-codacy-coverage -r coverage.xml;
-          fi'
         - codecov -v  # -v to make sure coverage upload works.
 
     # FUNCTIONAL TESTS

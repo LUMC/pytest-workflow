@@ -7,6 +7,14 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.3.0-dev
+---------------------------
+
++ Documentation: added usage chapter for pytest-workflow specific options.
++ Added missing `help` for `--tag`.
++ Removed redundant references to pylint in code comments and CI.
++ Remove Codacy from the CI.
+
 version 1.2.2
 ---------------------------
 + Test against python3.8

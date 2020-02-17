@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import argparse
 import shutil
 import tempfile
 import warnings
@@ -81,8 +82,23 @@ def pytest_addoption(parser: PytestParser):
         action="append",
         type=str,
         # Otherwise default is None and this does not work with list operations
-        default=[]
+        default=[],
+        help="Run workflows with this name or tag."
     )
+
+
+def __pytest_workflow_cli():  # pragma: no cover
+    """Helper function for showing all pytest-workflow specific options in the
+    documentation with sphinx argparse. The ArgParser class bypasses any
+    pytest specific implementation of the PytestParser to use a common
+    argparse.ArgumentParser instead."""
+    class ArgParser(argparse.ArgumentParser):
+        def addoption(self, *args, **kwargs):
+            self.add_argument(*args, **kwargs)
+
+    parser = ArgParser()
+    pytest_addoption(parser)
+    return parser
 
 
 def pytest_collect_file(path, parent):
@@ -157,8 +173,6 @@ def pytest_configure(config: PytestConfig):
 
 def pytest_collection(session: pytest.Session):
     """This function is started at the beginning of collection"""
-    # pylint: disable=unused-argument
-    # needed for pytest
     # We print an empty line here to make the report look slightly better.
     # Without it pytest will output "Collecting ... " and the workflow commands
     # will be immediately after this: "Collecting ... queue (etc.) "
@@ -410,8 +424,6 @@ class ExitCodeTest(pytest.Item):
         assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo):
-        # pylint: disable=unused-argument
-        # excinfo needed for pytest.
         message = ("'{workflow_name}' exited with exit code " +
                    "'{exit_code}' instead of '{desired_exit_code}'."
                    ).format(workflow_name=self.workflow.name,
