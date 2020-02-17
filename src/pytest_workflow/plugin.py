@@ -15,6 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """core functionality of pytest-workflow plugin"""
+import argparse
 import shutil
 import tempfile
 import warnings
@@ -81,8 +82,23 @@ def pytest_addoption(parser: PytestParser):
         action="append",
         type=str,
         # Otherwise default is None and this does not work with list operations
-        default=[]
+        default=[],
+        help="Run workflows with this name or tag."
     )
+
+
+def __pytest_workflow_cli():  # pragma: no cover
+    """Helper function for showing all pytest-workflow specific options in the
+    documentation with sphinx argparse. The ArgParser class bypasses any
+    pytest specific implementation of the PytestParser to use a common
+    argparse.ArgumentParser instead."""
+    class ArgParser(argparse.ArgumentParser):
+        def addoption(self, *args, **kwargs):
+            self.add_argument(*args, **kwargs)
+
+    parser = ArgParser()
+    pytest_addoption(parser)
+    return parser
 
 
 def pytest_collect_file(path, parent):
