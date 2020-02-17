@@ -88,18 +88,15 @@ workflow.
 
     @pytest.mark.workflow(name='files containing numbers')
     def test_div_by_three(workflow_dir):
-        number_file = workflow_dir / pathlib.Path("123.txt")
-
-        with number_file.open('rt') as file_h:
-            number_file_content = file_h.read()
-
+        number_file = pathlib.Path(workflow_dir, "123.txt")
+        number_file_content = number_file.read_text()
         assert int(number_file_content) % 3 == 0
 
 The ``@pytest.mark.workflow(name='files containing numbers')`` marks the test
-as belonging to a workflow named 'files containing numbers'. The mark can also
-be written without the explicit ``name`` key as ``@pytest.mark.workflow('files
-containing nummbers')``. This test will only run if the workflow 'files
-containing numbers' has run.
+as belonging to a workflow named ``files containing numbers``. The mark can
+also be written without the explicit ``name`` key as
+``@pytest.mark.workflow('files containing nummbers')``. This test will only run
+if the workflow 'files containing numbers' has run.
 
 ``workflow_dir`` is a fixture. It does not work without a
 ``pytest.mark.workflow('workflow_name')`` mark.  This is a
