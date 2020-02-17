@@ -7,9 +7,9 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.3.0-dev
+version 1.2.3
 ---------------------------
-+ Added missing ``help`` section for ``--tag``.
++ Added missing ``help`` section for ``--tag`` on the CLI.
 + Documentation: added usage chapter for pytest-workflow specific options.
 + Documentation: updated Cromwell example.
 + Removed redundant references to pylint in code comments and CI.
