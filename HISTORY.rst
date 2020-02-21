@@ -9,7 +9,8 @@ Changelog
 
 version 1.2.4
 ---------------------------
-+ Fix error in cromwell example which did not allow it to run properly.
++ Fix error in cromwell example which did not allow it to remove folders
+  correctly.
 
 version 1.2.3
 ---------------------------
