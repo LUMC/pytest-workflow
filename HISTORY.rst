@@ -7,6 +7,10 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.2.4
+---------------------------
++ Fix error in cromwell example which did not allow it to run properly.
+
 version 1.2.3
 ---------------------------
 + Added missing ``help`` section for ``--tag`` on the CLI.
