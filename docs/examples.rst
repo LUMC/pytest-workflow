@@ -40,13 +40,20 @@ repository with the following contents:
 
     {
     "final_workflow_outputs_dir": "test-output",
-    "use_relative_output_paths": true
+    "use_relative_output_paths": true,
+    "default_runtime_attributes": {
+      "docker_user": "$EUID"
+      }
     }
 
 ``final_workflow_outputs_dir`` will make sure all the files produced in the
 workflow will be copied to the ``final_workflow_outputs_dir``.
 ``use_relative_output_paths`` will get rid of all the Cromwell specific folders
-such as ``call-myTask`` etc.
+such as ``call-myTask`` etc. The ``default_runtime_attributes`` are only
+necessary when using docker containers. It will make sure all the files are
+created by the same user that runs the test (docker containers run as root by
+default). This will ensure that files can be deleted by pytest-workflow
+afterwards.
 
 The following yaml file tests a Cromwell pipeline. In this case Cromwell is
 installed via conda. The conda installation adds a wrapper to Cromwell so it
