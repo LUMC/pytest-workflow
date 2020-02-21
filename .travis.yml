@@ -33,6 +33,8 @@ matrix:
       env: TOX_ENV=snakemake
     - python: 3.7
       env: TOX_ENV=snakemake
+    - python: 3.7
+      env: TOX_ENV=miniwdl
     - env: TOX_ENV=cromwell
       before_install:
         # Install conda
