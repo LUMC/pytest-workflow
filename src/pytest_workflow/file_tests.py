@@ -53,13 +53,14 @@ class FileTestCollector(pytest.Collector):
         # certain conditions are met.
         tests = []
 
-        tests += [FileExists(parent=self,
-                             filepath=filepath,
-                             should_exist=self.filetest.should_exist,
-                             workflow=self.workflow)]
+        tests += [FileExists.from_parent(
+            parent=self,
+            filepath=filepath,
+            should_exist=self.filetest.should_exist,
+            workflow=self.workflow)]
 
         if self.filetest.contains or self.filetest.must_not_contain:
-            tests += [ContentTestCollector(
+            tests += [ContentTestCollector.from_parent(
                 name="content",
                 parent=self,
                 filepath=filepath,
@@ -68,7 +69,7 @@ class FileTestCollector(pytest.Collector):
                 workflow=self.workflow)]
 
         if self.filetest.md5sum:
-            tests += [FileMd5(
+            tests += [FileMd5.from_parent(
                 parent=self,
                 filepath=filepath,
                 md5sum=self.filetest.md5sum,
