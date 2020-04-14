@@ -31,10 +31,10 @@ import pytest
 
 import yaml
 
-from . import replace_whitespace, rm_dirs
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
+from .util import is_in_dir, replace_whitespace, rm_dirs
 from .workflow import Workflow, WorkflowQueue
 
 
@@ -163,7 +163,7 @@ def pytest_configure(config: PytestConfig):
     rootdir = Path(str(config.rootdir))
     # Raise an error if the workflow temporary directory of the rootdir
     # (pytest's CWD). This will lead to infinite looping and copying.
-    if str(workflow_temp_dir.absolute()).startswith(str(rootdir.absolute())):
+    if is_in_dir(workflow_temp_dir, rootdir):
         raise ValueError("'{0}' is a subdirectory of '{1}'. Please select a "
                          "--basetemp that is not in pytest's current working "
                          "directory.".format(workflow_temp_dir, rootdir))
