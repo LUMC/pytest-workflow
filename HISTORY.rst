@@ -7,8 +7,10 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.2.4-dev
+version 1.3-dev
 ---------------------------
++ Move to python 3.6 as minimum python requirement, in order to fix the
+  subdirectory bug using pathlib.
 + Add correct subdirectory evaluation to fix issue where ``/parent-dir/child``
   was evaluated as a subdirectory of ``/parent`` due to starting with the same
   string. (`Issue #95 <https://github.com/LUMC/pytest-workflow/issues/95>`_)

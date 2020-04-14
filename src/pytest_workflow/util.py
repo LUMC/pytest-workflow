@@ -21,15 +21,17 @@ def rm_dirs(directories: List[Path]):
         shutil.rmtree(str(directory))
 
 
-def is_in_dir(child: Path, parent: Path) -> bool:
+def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
     """
-    Checks if child path is in parent path. Works also for non-existent paths.
+    Checks if child path is in parent path. Works for non-existent paths if
+    strict is set to false.
     :param child: The path of interest
     :param parent: The parent directory
+    :param strict: Check if paths exist when resolving.
     :return: True or False
     """
-    resolved_child = child.resolve()
-    resolved_parent = parent.resolve()
+    resolved_child = child.resolve(strict=strict)
+    resolved_parent = parent.resolve(strict=strict)
     if str(resolved_child).startswith(str(resolved_parent)):
         # /my/path/parent-dir/child starts with /my/path/parent but is not in
         # that dir. We can check this by checking the filepathparts
