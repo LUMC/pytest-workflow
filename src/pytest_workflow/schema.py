@@ -102,6 +102,8 @@ def validate_schema(instance):
 # These classes are created so that the test yaml does not have to be passed
 # around between test objects. But instead these objects which have self-
 # documenting members
+# TODO: Rewrite these into @Dataclass classes when python 3.7 becomes the
+# TODO: minimum required version.
 
 class ContentTest(object):
     """
