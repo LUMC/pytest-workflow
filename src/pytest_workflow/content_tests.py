@@ -46,34 +46,20 @@ def check_content(strings: List[str],
 
     # Create two sets. By default all strings are not found.
     strings_to_check = set(strings)
-    found_strings = set()  # type: Set[str]
+    found_strings: Set[str] = set()
 
     for line in text_lines:
         # Break the loop if all strings are found
-        # First do length check for speed as this runs every loop.
-        if len(found_strings) == len(strings_to_check):
-            # Then true check
-            if found_strings == strings_to_check:
-                break
-            else:
-                raise ValueError(
-                    "The number of strings found is equal to the "
-                    "number of strings to be checked. But the"
-                    " sets are not equal. Please contact the "
-                    "developers to fix this issue.")
+        # Python implements fast set equality checking by checking length first
+        if found_strings == strings_to_check:
+            break
 
         for string in strings_to_check:
             if string not in found_strings and string in line:
                 found_strings.add(string)
-
-    if not found_strings.issubset(strings_to_check):
-        raise ValueError(
-            "Strings where found that were not searched for. Please contact"
-            " the developers to fix this issue. \n" +
-            "Searched for strings: {0}\n".format(strings_to_check) +
-            "Found strings: {0}\n".format(found_strings)
-        )
-
+        # Remove found strings for faster searching. This should be done
+        # outside of the loop above.
+        strings_to_check -= found_strings
     return found_strings
 
 
