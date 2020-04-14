@@ -55,8 +55,8 @@ def validate_schema(instance):
     test_names = [replace_whitespace(test['name'], ' ') for test in instance]
     if len(test_names) != len(set(test_names)):
         raise jsonschema.ValidationError(
-            "Some names were not unique when whitespace was removed. "
-            "Defined names: {0}".format(test_names))
+            f"Some names were not unique when whitespace was removed. "
+            f"Defined names: {test_names}")
 
     def test_contains_concordance(dictionary: dict, name: str):
         """
@@ -72,10 +72,9 @@ def validate_schema(instance):
             common_members = set(contains).intersection(set(must_not_contain))
             if common_members != set():
                 raise jsonschema.ValidationError(
-                    "contains and must_not_contain are not allowed to have the"
-                    " same members for the same object."
-                    " Object: {0}. Common members: {1}".format(name,
-                                                               common_members)
+                    f"contains and must_not_contain are not allowed to have "
+                    f"the same members for the same object. "
+                    f"Object: {name}. Common members: {common_members}"
                 )
 
     for test in instance:
@@ -93,9 +92,8 @@ def validate_schema(instance):
                 for check in ["md5sum", "contains", "must_not_contain"]:
                     if check in keys:
                         raise jsonschema.ValidationError(
-                            "Content checking not allowed " +
-                            "on non existing file: {0}. Key = {1}".format(
-                                test_file["path"], check))
+                            f"Content checking not allowed on non existing "
+                            f"file: {test_file['path']}. Key = {check}")
 
 
 # Schema classes below
@@ -104,6 +102,7 @@ def validate_schema(instance):
 # documenting members
 # TODO: Rewrite these into @Dataclass classes when python 3.7 becomes the
 # TODO: minimum required version.
+
 
 class ContentTest(object):
     """
