@@ -112,14 +112,8 @@ class ContentTest(object):
     """
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None):
-        if contains:
-            self.contains = contains
-        else:
-            self.contains = []
-        if must_not_contain:
-            self.must_not_contain = must_not_contain
-        else:
-            self.must_not_contain = []
+        self.contains: List[str] = contains or []
+        self.must_not_contain: List[str] = must_not_contain or []
 
     @classmethod
     def from_dict(cls, dictionary: dict):
@@ -131,7 +125,6 @@ class ContentTest(object):
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
-
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
@@ -191,8 +184,8 @@ class WorkflowTest(object):
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
-        self.files = files if files is not None else []
-        self.tags = tags if tags is not None else []
+        self.files = files or []
+        self.tags = tags or []
 
     @classmethod
     def from_schema(cls, schema: dict):
