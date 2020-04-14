@@ -65,9 +65,9 @@ class Workflow(object):
                                              suffix=".err").name)
             if cwd is None
             else self.cwd / Path("log.err"))
-        self._popen = None  # type: Optional[subprocess.Popen]
+        self._popen: Optional[subprocess.Popen] = None
         self._started = False
-        self.errors = []  # type: List[Exception]
+        self.errors: List[Exception] = []
         self.start_lock = threading.Lock()
 
     def start(self):
@@ -205,7 +205,7 @@ class WorkflowQueue(queue.Queue):
             try:
                 # We know the type is Workflow, because this was enforced in
                 # the put method.
-                workflow = self.get_nowait()  # type: Workflow
+                workflow: Workflow = self.get_nowait()
             except queue.Empty:
                 break
             else:

@@ -131,11 +131,11 @@ def pytest_configure(config: PytestConfig):
     setattr(config, "workflow_queue", workflow_queue)
 
     # Save which workflows are run and which are not.
-    executed_workflows = {}  # type: Dict[str, str]
+    executed_workflows: Dict[str, str] = {}
     setattr(config, "executed_workflows", executed_workflows)
 
     # Save workflow for cleanup in this var.
-    workflow_cleanup_dirs = []  # type: List[str]
+    workflow_cleanup_dirs: List[str] = []
     setattr(config, "workflow_cleanup_dirs", workflow_cleanup_dirs)
 
     # When multiple workflows are started they should all be set in the same
@@ -187,8 +187,8 @@ def pytest_collection_modifyitems(config: PytestConfig,
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker = item.get_closest_marker(
-            name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
+        marker: Optional[MarkDecorator] = item.get_closest_marker(
+            name="workflow")
 
         if marker is None:
             continue
@@ -222,10 +222,11 @@ def pytest_collectstart(collector: pytest.Collector):
     """This runs before the collector runs its collect attribute"""
 
     if isinstance(collector, WorkflowTestsCollector):
-        name = collector.workflow_test.name  # type: str
+        name: str = collector.workflow_test.name
 
         # Executed workflows contains workflow name as key and nodeid as value.
-        executed_workflows = collector.config.executed_workflows  # type: Dict[str,str]  # noqa: E501
+        executed_workflows: Dict[str, str] = (
+            collector.config.executed_workflows)
 
         if name in executed_workflows.keys():
             raise ValueError(
