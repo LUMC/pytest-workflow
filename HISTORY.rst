@@ -9,8 +9,15 @@ Changelog
 
 version 1.3-dev
 ---------------------------
-+ Move to python 3.6 as minimum python requirement, in order to fix the
-  subdirectory bug using pathlib.
+Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.
+This was necessary for fixing the deprecation warning issue and the issue with
+the subdirectory evaluation.
+
+Changes
++++++++++++++++++++++++++++
++ Solve issue where pytest would display a lot of deprecation warnings when
+  running pytest-workflow. (`Issue #98
+  <https://github.com/LUMC/pytest-workflow/issues/98>`_)
 + Fix issues with later versions of Cromwell and Snakemake in CI testing.
 + Add correct subdirectory evaluation to fix issue where ``/parent-dir/child``
   was evaluated as a subdirectory of ``/parent`` due to starting with the same
