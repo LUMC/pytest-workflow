@@ -119,8 +119,8 @@ class Workflow(object):
             if (timeout_secs is not None
                     and wait_time > timeout_secs):
                 raise TimeoutError(
-                    "Waiting on a workflow that has not started within the"
-                    " last {0} seconds".format(timeout_secs))
+                    f"Waiting on a workflow that has not started within the "
+                    f"last {timeout_secs} seconds")
             time.sleep(wait_interval_secs)
             wait_time += wait_interval_secs
 
@@ -210,15 +210,10 @@ class WorkflowQueue(queue.Queue):
                 break
             else:
                 print(
-                    "start '{name}' with command '{command}' in '{dir}'. "
-                    "stdout: '{stdout_file}'. "
-                    "stderr: '{stderr_file}'."
-                    .format(
-                        name=workflow.name,
-                        command=workflow.command,
-                        dir=workflow.cwd,
-                        stdout_file=workflow.stdout_file,
-                        stderr_file=workflow.stderr_file))
+                    f"start '{workflow.name}' with command "
+                    f"'{workflow.command}' in '{workflow.cwd}'. "
+                    f"stdout: '{workflow.stdout_file}'. "
+                    f"stderr: '{workflow.stderr_file}'.")
                 workflow.run()
                 # Collect the workflow errors.
                 self._process_errors.extend(workflow.errors)
@@ -226,4 +221,4 @@ class WorkflowQueue(queue.Queue):
                 # Some reporting
                 result = ("python error during starting"
                           if workflow.errors else "done")
-                print("'{0}' {1}.".format(workflow.name, result))
+                print(f"'{workflow.name}' {result}.")
