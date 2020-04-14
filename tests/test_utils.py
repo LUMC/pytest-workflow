@@ -42,6 +42,7 @@ IN_DIR_TESTS = [
     ("simple", "simple/parent", False)
 ]
 
+
 @pytest.mark.parametrize(["child", "parent", "in_dir"], IN_DIR_TESTS)
 def test_is_in_dir(child: str, parent: str, in_dir: bool):
     assert is_in_dir(Path(child), Path(parent)) is in_dir

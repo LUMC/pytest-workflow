@@ -41,4 +41,3 @@ def is_in_dir(child: Path, parent: Path) -> bool:
             # No break: If we did not find any mismatches child is in parent.
             return True
     return False
-
