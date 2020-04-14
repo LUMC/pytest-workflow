@@ -292,6 +292,9 @@ class YamlFile(pytest.File):
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
 
+        # from_parent calls the __init__ constructor indirectly. It is
+        # important to name the arguments in from_parent so the __init__
+        # constructor is called correctly.
         return [WorkflowTestsCollector.from_parent(parent=self,
                                                    workflow_test=test)
                 for test in workflow_tests_from_schema(schema)]
@@ -300,6 +303,9 @@ class YamlFile(pytest.File):
 class WorkflowTestsCollector(pytest.Collector):
     """This class starts all the tests collectors per workflow"""
 
+    # The __init___ constructor is called indirectly by the `from_parent`
+    # method which is builtin in any pytest Node. In order to set custom
+    # attributes it is therefore still required to set up an __init__ method.
     def __init__(self, workflow_test: WorkflowTest, parent: pytest.Collector):
         self.workflow_test = workflow_test
         super().__init__(workflow_test.name, parent=parent)
