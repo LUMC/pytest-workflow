@@ -17,7 +17,10 @@
 from .test_success_messages import SIMPLE_ECHO
 
 
-def test_no_deprecation_warnings(testdir):
+# Add a test to make sure no deprecation, or other warnings occur due to
+# changes in upstream libraries.
+def test_no_warnings(testdir):
     testdir.makefile(".yml", test_a=SIMPLE_ECHO)
     result = testdir.runpytest()
-    assert "PytestDeprecationWarning" not in result.stdout.str()
+    outcomes = result.parseoutcomes()
+    assert outcomes.get('warnings', 0) == 0
