@@ -164,9 +164,9 @@ def pytest_configure(config: PytestConfig):
     # Raise an error if the workflow temporary directory of the rootdir
     # (pytest's CWD). This will lead to infinite looping and copying.
     if is_in_dir(workflow_temp_dir, rootdir):
-        raise ValueError("'{0}' is a subdirectory of '{1}'. Please select a "
-                         "--basetemp that is not in pytest's current working "
-                         "directory.".format(workflow_temp_dir, rootdir))
+        raise ValueError(f"'{workflow_temp_dir}' is a subdirectory of "
+                         f"'{rootdir}'. Please select a --basetemp that is "
+                         f"not in pytest's current working directory.")
 
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
@@ -202,12 +202,12 @@ def pytest_collection_modifyitems(config: PytestConfig,
             # fixture lookup.
             marker.kwargs['name'] = workflow_name
         else:
-            raise TypeError("A workflow name should be defined in the "
-                            "workflow marker of {0}".format(item.nodeid))
+            raise TypeError(f"A workflow name should be defined in the "
+                            f"workflow marker of {item.nodeid}")
 
         if workflow_name not in config.executed_workflows.keys():
             skip_marker = pytest.mark.skip(
-                reason="'{0}' has not run.".format(workflow_name))
+                reason=f"'{workflow_name}' has not run.")
             item.add_marker(skip_marker)
 
 
@@ -229,12 +229,8 @@ def pytest_collectstart(collector: pytest.Collector):
 
         if name in executed_workflows.keys():
             raise ValueError(
-                "Workflow name '{this}' used more than once. Conflicting "
-                "tests: {this_test}, {existing_test}. ".format(
-                    this=name,
-                    this_test=collector.nodeid,
-                    existing_test=executed_workflows[name]
-                )
+                f"Workflow name '{name}' used more than once. Conflicting "
+                f"tests: {collector.nodeid}, {executed_workflows[name]}. "
             )
 
 
@@ -274,8 +270,8 @@ def workflow_dir(request: SubRequest):
             workflow_name = marker.kwargs['name']
         except KeyError:
             raise TypeError(
-                "A workflow name should be defined in the "
-                "workflow marker of {0}".format(request.node.nodeid))
+                f"A workflow name should be defined in the "
+                f"workflow marker of {request.node.nodeid}")
         return workflow_temp_dir / Path(replace_whitespace(workflow_name))
     else:
         raise ValueError("workflow_dir can only be requested in tests marked"
@@ -337,7 +333,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # to work properly.
         if tempdir.exists():
             warnings.warn(
-                "'{0}' already exists. Deleting ...".format(tempdir))
+                f"'{tempdir}' already exists. Deleting ...")
             shutil.rmtree(str(tempdir))
 
         # Copy the project directory to the temporary directory using pytest's
@@ -428,9 +424,7 @@ class ExitCodeTest(pytest.Item):
         assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo):
-        message = ("'{workflow_name}' exited with exit code " +
-                   "'{exit_code}' instead of '{desired_exit_code}'."
-                   ).format(workflow_name=self.workflow.name,
-                            exit_code=self.workflow.exit_code,
-                            desired_exit_code=self.desired_exit_code)
+        message = (f"'{self.workflow.name}' exited with exit code " +
+                   f"'{self.workflow.exit_code}' instead of "
+                   f"'{self.desired_exit_code}'.")
         return message
