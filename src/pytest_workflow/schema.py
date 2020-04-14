@@ -22,7 +22,7 @@ from typing import List, Optional
 
 import jsonschema
 
-from . import replace_whitespace
+from .util import replace_whitespace
 
 SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
 DEFAULT_EXIT_CODE = 0
