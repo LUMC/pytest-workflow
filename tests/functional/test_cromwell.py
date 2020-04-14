@@ -56,7 +56,7 @@ def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
     testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
     testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
     testdir.makefile(ext=".options.json", simple=simple_wdl_options_json)
-    result = testdir.runpytest("-v")
+    result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
     exit_code = result.ret
     assert exit_code == 0
     assert "simple wdl" in result.stdout.str()
