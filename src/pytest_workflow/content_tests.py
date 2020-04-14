@@ -157,7 +157,7 @@ class ContentTestItem(pytest.Item):
         debugging if the test fails
         """
         contain = "contains" if should_contain else "does not contain"
-        name = "{0} '{1}'".format(contain, string)
+        name = f"{contain} '{string}'"
         super().__init__(name, parent=parent)
         self.should_contain = should_contain
         self.string = string
@@ -179,22 +179,16 @@ class ContentTestItem(pytest.Item):
 
     def repr_failure(self, excinfo):
         if self.parent.file_not_found:
+            containing = "containing" if self.should_contain \
+                             else "not containing",
             return (
-                "'{content}' does not exist and cannot be searched "
-                "for {containing} '{string}'."
-            ).format(
-                content=self.content_name,
-                containing="containing" if self.should_contain
-                else "not containing",
-                string=self.string)
-
+                f"'{self.content_name}' does not exist and cannot be searched "
+                f"for {containing} '{self.string}'."
+            )
         else:
+            found = "not found" if self.should_contain else "found",
+            should = "should" if self.should_contain else "should not"
             return (
-                "'{string}' was {found} in {content} "
-                "while it {should} be there."
-            ).format(
-                string=self.string,
-                found="not found" if self.should_contain else "found",
-                content=self.content_name,
-                should="should" if self.should_contain else "should not"
+                f"'{self.string}' was {found} in {self.content_name} "
+                f"while it {should} be there."
             )
