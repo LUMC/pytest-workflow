@@ -177,7 +177,7 @@ class ContentTestItem(pytest.Item):
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
 
-    def repr_failure(self, excinfo):
+    def repr_failure(self, excinfo, style=None):
         if self.parent.file_not_found:
             containing = ("containing" if self.should_contain else
                           "not containing")

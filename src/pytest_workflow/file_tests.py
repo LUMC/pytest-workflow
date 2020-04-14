@@ -101,7 +101,7 @@ class FileExists(pytest.Item):
         self.workflow.wait()
         assert self.file.exists() == self.should_exist
 
-    def repr_failure(self, excinfo):
+    def repr_failure(self, excinfo, style=None):
         exist = "not exist" if self.should_exist else "exist"
         should = "should" if self.should_exist else "should not"
         # self.file gives the actual path that was tested (including /tmp

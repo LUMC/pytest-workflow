@@ -171,7 +171,7 @@ def pytest_configure(config: PytestConfig):
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
 
-def pytest_collection(session: pytest.Session):
+def pytest_collection():
     """This function is started at the beginning of collection"""
     # We print an empty line here to make the report look slightly better.
     # Without it pytest will output "Collecting ... " and the workflow commands
@@ -423,7 +423,7 @@ class ExitCodeTest(pytest.Item):
         # workflow.exit_code waits for workflow to finish.
         assert self.workflow.exit_code == self.desired_exit_code
 
-    def repr_failure(self, excinfo):
+    def repr_failure(self, excinfo, style=None):
         message = (f"'{self.workflow.name}' exited with exit code " +
                    f"'{self.workflow.exit_code}' instead of "
                    f"'{self.desired_exit_code}'.")
