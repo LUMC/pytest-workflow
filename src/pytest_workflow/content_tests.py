@@ -179,14 +179,14 @@ class ContentTestItem(pytest.Item):
 
     def repr_failure(self, excinfo):
         if self.parent.file_not_found:
-            containing = "containing" if self.should_contain \
-                             else "not containing",
+            containing = ("containing" if self.should_contain else
+                          "not containing")
             return (
                 f"'{self.content_name}' does not exist and cannot be searched "
                 f"for {containing} '{self.string}'."
             )
         else:
-            found = "not found" if self.should_contain else "found",
+            found = "not found" if self.should_contain else "found"
             should = "should" if self.should_contain else "should not"
             return (
                 f"'{self.string}' was {found} in {self.content_name} "
