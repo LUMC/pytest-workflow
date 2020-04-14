@@ -63,22 +63,6 @@ def check_content(strings: List[str],
     return found_strings
 
 
-def file_to_string_generator(filepath: Path) -> Iterable[str]:
-    """
-    Turns a file into a line generator. Files ending with .gz are automatically
-    decompressed.
-    :param filepath: the file path
-    :return: yields lines of the file
-    """
-    file_open = (functools.partial(gzip.open, str(filepath))
-                 if filepath.suffix == ".gz" else
-                 filepath.open)
-    # Use 'rt' here explicitly as opposed to 'rb'
-    with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
-        for line in file_handler:
-            yield line
-
-
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
                  filepath: Path,
@@ -115,10 +99,15 @@ class ContentTestCollector(pytest.Collector):
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
+        file_open = (functools.partial(gzip.open, str(self.filepath))
+                     if self.filepath.suffix == ".gz" else
+                     self.filepath.open)
         try:
-            self.found_strings = check_content(
-                strings=strings_to_check,
-                text_lines=file_to_string_generator(self.filepath))
+            # Use 'rt' here explicitly as opposed to 'rb'
+            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
+                self.found_strings = check_content(
+                    strings=strings_to_check,
+                    text_lines=file_handler)
         except FileNotFoundError:
             self.file_not_found = True
 
