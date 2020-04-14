@@ -398,14 +398,14 @@ class WorkflowTestsCollector(pytest.Collector):
             filepath=workflow.stdout_file,
             content_test=self.workflow_test.stdout,
             workflow=workflow,
-            content_name="'{0}': stdout".format(self.workflow_test.name))]
+            content_name=f"'{self.workflow_test.name}': stdout")]
 
         tests += [ContentTestCollector.from_parent(
             name="stderr", parent=self,
             filepath=workflow.stderr_file,
             content_test=self.workflow_test.stderr,
             workflow=workflow,
-            content_name="'{0}': stderr".format(self.workflow_test.name))]
+            content_name=f"'{self.workflow_test.name}': stderr")]
 
         return tests
 
@@ -414,7 +414,7 @@ class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
                  desired_exit_code: int,
                  workflow: Workflow):
-        name = "exit code should be {0}".format(desired_exit_code)
+        name = f"exit code should be {desired_exit_code}"
         super().__init__(name, parent=parent)
         self.workflow = workflow
         self.desired_exit_code = desired_exit_code
