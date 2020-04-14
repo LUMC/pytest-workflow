@@ -106,7 +106,7 @@ def pytest_collect_file(path, parent):
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
-        return YamlFile(path, parent)
+        return YamlFile.from_parent(parent, fspath=path)
     return None
 
 
@@ -286,19 +286,14 @@ class YamlFile(pytest.File):
     """
     This class collects YAML files and turns them into test items.
     """
-
-    def __init__(self, path: str, parent: pytest.Collector):
-        # This super statement is important for pytest reasons. It should
-        # be in any collector!
-        super().__init__(path, parent=parent)
-
     def collect(self):
         """This function collects all the workflow tests from a single
         YAML file."""
         with self.fspath.open() as yaml_file:
             schema = yaml.safe_load(yaml_file)
 
-        return [WorkflowTestsCollector(test, self)
+        return [WorkflowTestsCollector.from_parent(parent=self,
+                                                   workflow_test=test)
                 for test in workflow_tests_from_schema(schema)]
 
 
@@ -386,21 +381,24 @@ class WorkflowTestsCollector(pytest.Collector):
         # Below structure makes it easy to append tests
         tests = []
 
-        tests += [FileTestCollector(self, filetest, workflow) for filetest
-                  in self.workflow_test.files]
+        tests += [
+            FileTestCollector.from_parent(
+                parent=self, filetest=filetest, workflow=workflow)
+            for filetest in self.workflow_test.files]
 
-        tests += [ExitCodeTest(parent=self,
-                               desired_exit_code=self.workflow_test.exit_code,
-                               workflow=workflow)]
+        tests += [ExitCodeTest.from_parent(
+            parent=self,
+            desired_exit_code=self.workflow_test.exit_code,
+            workflow=workflow)]
 
-        tests += [ContentTestCollector(
+        tests += [ContentTestCollector.from_parent(
             name="stdout", parent=self,
             filepath=workflow.stdout_file,
             content_test=self.workflow_test.stdout,
             workflow=workflow,
             content_name="'{0}': stdout".format(self.workflow_test.name))]
 
-        tests += [ContentTestCollector(
+        tests += [ContentTestCollector.from_parent(
             name="stderr", parent=self,
             filepath=workflow.stderr_file,
             content_test=self.workflow_test.stderr,

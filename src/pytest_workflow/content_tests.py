@@ -145,7 +145,7 @@ class ContentTestCollector(pytest.Collector):
         test_items = []
 
         test_items += [
-            ContentTestItem(
+            ContentTestItem.from_parent(
                 parent=self,
                 string=string,
                 should_contain=True,
@@ -154,7 +154,7 @@ class ContentTestCollector(pytest.Collector):
             for string in self.content_test.contains]
 
         test_items += [
-            ContentTestItem(
+            ContentTestItem.from_parent(
                 parent=self,
                 string=string,
                 should_contain=False,
