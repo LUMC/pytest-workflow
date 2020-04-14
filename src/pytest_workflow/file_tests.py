@@ -102,16 +102,13 @@ class FileExists(pytest.Item):
         assert self.file.exists() == self.should_exist
 
     def repr_failure(self, excinfo):
-        message = "'{path}' does {exist} while it {should}".format(
-            # self.file gives the actual path that was tested (including /tmp
-            # bits). self.parent.filetest.path gives the path that the user
-            # gave in the test yaml. self.file is probably more useful when
-            # debugging.
-            path=str(self.file),
-            exist="not exist" if self.should_exist else "exist",
-            should="should" if self.should_exist else "should not"
-        )
-        return message
+        exist = "not exist" if self.should_exist else "exist"
+        should = "should" if self.should_exist else "should not"
+        # self.file gives the actual path that was tested (including /tmp
+        # bits). self.parent.filetest.path gives the path that the user
+        # gave in the test yaml. self.file is probably more useful when
+        # debugging.
+        return f"'{str(self.file)}' does {exist} while it {should}"
 
 
 class FileMd5(pytest.Item):
@@ -138,15 +135,10 @@ class FileMd5(pytest.Item):
         assert self.observed_md5sum == self.expected_md5sum
 
     def repr_failure(self, excinfo):
-        message = (
-            "Observed md5sum '{observed}' not equal to expected md5sum "
-            "'{expected}' for file '{path}'"
-        ).format(
-            observed=self.observed_md5sum,
-            expected=self.expected_md5sum,
-            path=str(self.filepath)
+        return (
+            f"Observed md5sum '{self.observed_md5sum}' not equal to expected "
+            f"md5sum '{self.expected_md5sum}' for file '{self.filepath}'"
         )
-        return message
 
 
 def file_md5sum(filepath: Path) -> str:
