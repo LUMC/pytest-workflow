@@ -151,9 +151,6 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     """
     hasher = hashlib.md5()  # nosec: only used for file integrity
     with filepath.open('rb') as file_handler:  # Read the file in bytes
-        # Hardcode the blocksize at 8192 bytes here.
-        # This can be changed or made variable when the requirements compel us
-        # to do so.
         for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
     return hasher.hexdigest()
