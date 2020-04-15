@@ -22,7 +22,7 @@ from typing import List, Tuple  # noqa: F401  # Used in comments
 import pytest
 
 # message tests. Form: a tuple of a yaml file and expected messages.
-FAILURE_MESSAGE_TESTS: List[Tuple[str,str]] = [
+FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
     ("""\
     - name: fail_test
       command: grep
