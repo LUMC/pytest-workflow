@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import warnings
 from pathlib import Path
 from typing import List
 
@@ -60,4 +61,5 @@ def link_tree(src: Path, dest: Path) -> None:
     elif src.is_file() or src.is_symlink():
         os.symlink(str(src), str(dest), target_is_directory=False)
     else:  # Only copy files and symlinks, no devices etc.
-        pass
+        warnings.warn(f"Unsupported filetype. Skipping copying: '{str(src)}' "
+                      f"to {str(dest)}")
