@@ -138,11 +138,11 @@ def pytest_configure(config: PytestConfig):
     setattr(config, "workflow_queue", workflow_queue)
 
     # Save which workflows are run and which are not.
-    executed_workflows = {}  # type: Dict[str, str]
+    executed_workflows: Dict[str, str] = {}
     setattr(config, "executed_workflows", executed_workflows)
 
     # Save workflow for cleanup in this var.
-    workflow_cleanup_dirs = []  # type: List[str]
+    workflow_cleanup_dirs: List[str] = []
     setattr(config, "workflow_cleanup_dirs", workflow_cleanup_dirs)
 
     # When multiple workflows are started they should all be set in the same
@@ -171,14 +171,14 @@ def pytest_configure(config: PytestConfig):
     # Raise an error if the workflow temporary directory of the rootdir
     # (pytest's CWD). This will lead to infinite looping and copying.
     if is_in_dir(workflow_temp_dir, rootdir):
-        raise ValueError("'{0}' is a subdirectory of '{1}'. Please select a "
-                         "--basetemp that is not in pytest's current working "
-                         "directory.".format(workflow_temp_dir, rootdir))
+        raise ValueError(f"'{workflow_temp_dir}' is a subdirectory of "
+                         f"'{rootdir}'. Please select a --basetemp that is "
+                         f"not in pytest's current working directory.")
 
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
 
-def pytest_collection(session: pytest.Session):
+def pytest_collection():
     """This function is started at the beginning of collection"""
     # We print an empty line here to make the report look slightly better.
     # Without it pytest will output "Collecting ... " and the workflow commands
@@ -194,8 +194,8 @@ def pytest_collection_modifyitems(config: PytestConfig,
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker = item.get_closest_marker(
-            name="workflow")  # type: Optional[MarkDecorator] # noqa: E501
+        marker: Optional[MarkDecorator] = item.get_closest_marker(
+            name="workflow")
 
         if marker is None:
             continue
@@ -209,12 +209,12 @@ def pytest_collection_modifyitems(config: PytestConfig,
             # fixture lookup.
             marker.kwargs['name'] = workflow_name
         else:
-            raise TypeError("A workflow name should be defined in the "
-                            "workflow marker of {0}".format(item.nodeid))
+            raise TypeError(f"A workflow name should be defined in the "
+                            f"workflow marker of {item.nodeid}")
 
         if workflow_name not in config.executed_workflows.keys():
             skip_marker = pytest.mark.skip(
-                reason="'{0}' has not run.".format(workflow_name))
+                reason=f"'{workflow_name}' has not run.")
             item.add_marker(skip_marker)
 
 
@@ -229,19 +229,16 @@ def pytest_collectstart(collector: pytest.Collector):
     """This runs before the collector runs its collect attribute"""
 
     if isinstance(collector, WorkflowTestsCollector):
-        name = collector.workflow_test.name  # type: str
+        name: str = collector.workflow_test.name
 
         # Executed workflows contains workflow name as key and nodeid as value.
-        executed_workflows = collector.config.executed_workflows  # type: Dict[str,str]  # noqa: E501
+        executed_workflows: Dict[str, str] = (
+            collector.config.executed_workflows)
 
         if name in executed_workflows.keys():
             raise ValueError(
-                "Workflow name '{this}' used more than once. Conflicting "
-                "tests: {this_test}, {existing_test}. ".format(
-                    this=name,
-                    this_test=collector.nodeid,
-                    existing_test=executed_workflows[name]
-                )
+                f"Workflow name '{name}' used more than once. Conflicting "
+                f"tests: {collector.nodeid}, {executed_workflows[name]}. "
             )
 
 
@@ -281,8 +278,8 @@ def workflow_dir(request: SubRequest):
             workflow_name = marker.kwargs['name']
         except KeyError:
             raise TypeError(
-                "A workflow name should be defined in the "
-                "workflow marker of {0}".format(request.node.nodeid))
+                f"A workflow name should be defined in the "
+                f"workflow marker of {request.node.nodeid}")
         return workflow_temp_dir / Path(replace_whitespace(workflow_name))
     else:
         raise ValueError("workflow_dir can only be requested in tests marked"
@@ -344,7 +341,7 @@ class WorkflowTestsCollector(pytest.Collector):
         # to work properly.
         if tempdir.exists():
             warnings.warn(
-                "'{0}' already exists. Deleting ...".format(tempdir))
+                f"'{tempdir}' already exists. Deleting ...")
             shutil.rmtree(str(tempdir))
 
         # Copy the project directory to the temporary directory using pytest's
@@ -412,14 +409,14 @@ class WorkflowTestsCollector(pytest.Collector):
             filepath=workflow.stdout_file,
             content_test=self.workflow_test.stdout,
             workflow=workflow,
-            content_name="'{0}': stdout".format(self.workflow_test.name))]
+            content_name=f"'{self.workflow_test.name}': stdout")]
 
         tests += [ContentTestCollector.from_parent(
             name="stderr", parent=self,
             filepath=workflow.stderr_file,
             content_test=self.workflow_test.stderr,
             workflow=workflow,
-            content_name="'{0}': stderr".format(self.workflow_test.name))]
+            content_name=f"'{self.workflow_test.name}': stderr")]
 
         return tests
 
@@ -428,7 +425,7 @@ class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
                  desired_exit_code: int,
                  workflow: Workflow):
-        name = "exit code should be {0}".format(desired_exit_code)
+        name = f"exit code should be {desired_exit_code}"
         super().__init__(name, parent=parent)
         self.workflow = workflow
         self.desired_exit_code = desired_exit_code
@@ -437,10 +434,8 @@ class ExitCodeTest(pytest.Item):
         # workflow.exit_code waits for workflow to finish.
         assert self.workflow.exit_code == self.desired_exit_code
 
-    def repr_failure(self, excinfo):
-        message = ("'{workflow_name}' exited with exit code " +
-                   "'{exit_code}' instead of '{desired_exit_code}'."
-                   ).format(workflow_name=self.workflow.name,
-                            exit_code=self.workflow.exit_code,
-                            desired_exit_code=self.desired_exit_code)
+    def repr_failure(self, excinfo, style=None):
+        message = (f"'{self.workflow.name}' exited with exit code " +
+                   f"'{self.workflow.exit_code}' instead of "
+                   f"'{self.desired_exit_code}'.")
         return message

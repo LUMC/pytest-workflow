@@ -14,13 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
-from .test_success_messages import SIMPLE_ECHO
+from .test_success_messages import MOO_FILE
 
 
 # Add a test to make sure no deprecation, or other warnings occur due to
 # changes in upstream libraries.
 def test_no_warnings(testdir):
-    testdir.makefile(".yml", test_a=SIMPLE_ECHO)
+    testdir.makefile(".yml", test_a=MOO_FILE)
     result = testdir.runpytest()
     outcomes = result.parseoutcomes()
     assert outcomes.get('warnings', 0) == 0

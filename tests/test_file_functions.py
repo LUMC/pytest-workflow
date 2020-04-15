@@ -22,11 +22,11 @@ import pytest
 
 from pytest_workflow.file_tests import file_md5sum
 
-HASH_FILE_DIR = Path(Path(__file__).parent / Path("hash_files"))
+HASH_FILE_DIR = Path(__file__).parent / Path("hash_files")
 
-HASH_FILES_RELATIVE = os.listdir(HASH_FILE_DIR.absolute().__str__())
+HASH_FILES_RELATIVE = os.listdir(str(HASH_FILE_DIR.absolute()))
 
-HASH_FILES = [Path(HASH_FILE_DIR / Path(x)) for x in HASH_FILES_RELATIVE]
+HASH_FILES = [Path(HASH_FILE_DIR, x) for x in HASH_FILES_RELATIVE]
 
 
 @pytest.mark.parametrize("hash_file", HASH_FILES)

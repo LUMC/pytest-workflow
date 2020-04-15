@@ -22,7 +22,7 @@ from typing import List, Tuple  # noqa: F401  # Used in comments
 import pytest
 
 # message tests. Form: a tuple of a yaml file and expected messages.
-FAILURE_MESSAGE_TESTS = [
+FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
     ("""\
     - name: fail_test
       command: grep
@@ -124,7 +124,7 @@ FAILURE_MESSAGE_TESTS = [
     """,
      "moo.txt' does not exist and cannot be searched for "
      "not containing 'miaow'.")
-]  # type: List[Tuple[str,str]]
+]
 
 
 @pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)

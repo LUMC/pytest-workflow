@@ -52,8 +52,7 @@ def test_basetemp_correct(testdir):
     message = (f"start 'simple echo' with command 'echo moo' in "
                f"'{tempdir}/simple_echo'. "
                f"stdout: '{tempdir}/simple_echo/log.out'. "
-               f"stderr: '{tempdir}/simple_echo/log.err'."
-               )
+               f"stderr: '{tempdir}/simple_echo/log.err'.")
     assert message in result.stdout.str()
 
 
@@ -94,9 +93,7 @@ def test_basetemp_can_not_be_in_rootdir(testdir):
     testdir_path = Path(str(testdir.tmpdir))
     tempdir = testdir_path / Path("tmp")
     result = testdir.runpytest("-v", "--basetemp", str(tempdir))
-    message = "'{tempdir}' is a subdirectory of '{rootdir}'".format(
-        tempdir=str(tempdir),
-        rootdir=str(testdir_path))
+    message = f"'{str(tempdir)}' is a subdirectory of '{str(testdir_path)}'"
     assert message in result.stderr.str()
 
 

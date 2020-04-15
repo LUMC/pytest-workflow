@@ -11,10 +11,18 @@ version 1.3-dev
 ---------------------------
 Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.
 This was necessary for fixing the deprecation warning issue and the issue with
-the subdirectory evaluation.
+the subdirectory evaluation. This also gave the opportunity to simplify the
+source code using new python 3.6 syntax.
 
 Changes
 +++++++++++++++++++++++++++
++ Refactored the code base. Python 3.6's f-strings and type annotation were
+  used consistently throughout the project. Some code was rewritten to be more
+  concise and readable.
++ Improved speed for searching string content in files. This was achieved by
+  removing intermediate functions and simplifying the search function.
++ Improved speed for calculating md5sums by increasing the read buffer size
+  from 8k to 64k.
 + Solve issue where pytest would display a lot of deprecation warnings when
   running pytest-workflow. (`Issue #98
   <https://github.com/LUMC/pytest-workflow/issues/98>`_)

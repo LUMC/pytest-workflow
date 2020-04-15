@@ -20,10 +20,9 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.content_tests import check_content, \
-    file_to_string_generator
+from pytest_workflow.content_tests import check_content
 
-LICENSE = Path(__file__).parent / Path("content_files") / Path("LICENSE")
+LICENSE = Path(__file__).parent / Path("content_files", "LICENSE")
 LICENSE_ZIPPED = LICENSE.parent / Path("LICENSE.gz")
 
 # Yes we are checking the AGPLv3+. I am pretty sure some strings will not be
@@ -43,19 +42,9 @@ SUCCEEDING_TESTS = [
                          SUCCEEDING_TESTS)
 def test_check_content_succeeding(contains_strings, does_not_contain_strings):
     all_strings = set(contains_strings).union(set(does_not_contain_strings))
-    found_strings = check_content(list(all_strings),
-                                  file_to_string_generator(LICENSE))
-    assert set(contains_strings) == found_strings
-    assert set(does_not_contain_strings) == all_strings - found_strings
-
-
-@pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
-                         SUCCEEDING_TESTS)
-def test_check_content_succeeding_gzipped(contains_strings,
-                                          does_not_contain_strings):
-    all_strings = set(contains_strings).union(set(does_not_contain_strings))
-    found_strings = check_content(list(all_strings),
-                                  file_to_string_generator(LICENSE_ZIPPED))
+    with LICENSE.open("rt") as license_h:
+        found_strings = check_content(list(all_strings),
+                                      license_h)
     assert set(contains_strings) == found_strings
     assert set(does_not_contain_strings) == all_strings - found_strings
 
@@ -68,9 +57,3 @@ def test_multiple_finds_one_line():
     contains = ["dream", "day", "nation", "creed", "truths"]
     found_strings = check_content(contains, content)
     assert set(contains) == found_strings
-
-
-def test_file_to_string_iterator():
-    license_iterator = file_to_string_generator(LICENSE)
-    # This was checked using `wc -l`
-    assert len(list(license_iterator)) == 661
