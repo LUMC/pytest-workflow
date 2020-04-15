@@ -23,7 +23,7 @@ import functools
 import gzip
 import threading
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
+from typing import Iterable, Optional, Set
 
 import pytest
 
@@ -31,7 +31,7 @@ from .schema import ContentTest
 from .workflow import Workflow
 
 
-def check_content(strings: List[str],
+def check_content(strings: Iterable[str],
                   text_lines: Iterable[str]) -> Set[str]:
     """
     Checks whether any of the strings is present in the text lines
