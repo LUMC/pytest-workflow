@@ -159,6 +159,7 @@ class ContentTestItem(pytest.Item):
         contain = "contains" if should_contain else "does not contain"
         name = f"{contain} '{string}'"
         super().__init__(name, parent=parent)
+        self.parent: ContentTestCollector = parent  # explicitly declare type
         self.should_contain = should_contain
         self.string = string
         self.content_name = content_name

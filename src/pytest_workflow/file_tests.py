@@ -134,7 +134,7 @@ class FileMd5(pytest.Item):
         self.observed_md5sum = file_md5sum(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
 
-    def repr_failure(self, excinfo):
+    def repr_failure(self, excinfo, style=None):
         return (
             f"Observed md5sum '{self.observed_md5sum}' not equal to expected "
             f"md5sum '{self.expected_md5sum}' for file '{self.filepath}'"
