@@ -137,7 +137,7 @@ def test_directory_of_symlinks(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     subdir = testdir.mkdir("subdir")
     Path(str(subdir), "subfile.txt").write_text("test")
-    result = testdir.runpytest("-v", "--symlinks", "--kwd")
+    result = testdir.runpytest("-v", "--symlink", "--kwd")
     working_dir = re.search(
         r"with command 'echo moo' in '([\w/_-]*)'",
         result.stdout.str()).group(1)

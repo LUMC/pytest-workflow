@@ -60,7 +60,7 @@ def pytest_addoption(parser: PytestParser):
         type=int,
         help="The number of workflows to run simultaneously.")
     parser.addoption(
-        "--symlinks", action="store_true",
+        "--symlink", action="store_true",
         help="Instead of copying the current working directory, create a "
              "similar directory structure where all files are replaced with "
              "symbolic links. This saves disk space, but should only be used "
@@ -346,7 +346,7 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        if self.config.getoption("symlinks"):
+        if self.config.getoption("symlink"):
             link_tree(Path(str(self.config.rootdir)), tempdir)
         else:
             shutil.copytree(str(self.config.rootdir), str(tempdir))
