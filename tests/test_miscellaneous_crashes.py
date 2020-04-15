@@ -25,8 +25,5 @@ def test_same_name_different_files(testdir):
     assert ("Workflow name 'simple echo' used more than once"
             in result.stdout.str())
     conflicting_message = (
-        "Conflicting tests: {0}, {1}.".format(
-            "test_b.yml::" + "simple echo",
-            "test_a.yml::" + "simple echo")
-    )
+        "Conflicting tests: test_b.yml::simple echo, test_a.yml::simple echo.")
     assert conflicting_message in result.stdout.str()

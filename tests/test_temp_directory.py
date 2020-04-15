@@ -47,11 +47,10 @@ def test_basetemp_correct(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
-    message = ("start 'simple echo' with command 'echo moo' in "
-               "'{tempdir}/simple_echo'. "
-               "stdout: '{tempdir}/simple_echo/log.out'. "
-               "stderr: '{tempdir}/simple_echo/log.err'."
-               ).format(tempdir=str(tempdir))
+    message = (f"start 'simple echo' with command 'echo moo' in "
+               f"'{tempdir}/simple_echo'. "
+               f"stdout: '{tempdir}/simple_echo/log.out'. "
+               f"stderr: '{tempdir}/simple_echo/log.err'.")
     assert message in result.stdout.str()
 
 
@@ -66,8 +65,7 @@ def test_basetemp_can_be_used_twice(testdir):
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
                                tempdir)
     exit_code = result.ret
-    assert "'{0}/simple_echo' already exists. Deleting ...".format(
-        tempdir) in result.stdout.str()
+    assert "'{tempdir}/simple_echo' already exists. Deleting ..."
     assert exit_code == 0
 
 
@@ -90,9 +88,7 @@ def test_basetemp_can_not_be_in_rootdir(testdir):
     testdir_path = Path(str(testdir.tmpdir))
     tempdir = testdir_path / Path("tmp")
     result = testdir.runpytest("-v", "--basetemp", str(tempdir))
-    message = "'{tempdir}' is a subdirectory of '{rootdir}'".format(
-        tempdir=str(tempdir),
-        rootdir=str(testdir_path))
+    message = f"'{str(tempdir)}' is a subdirectory of '{str(testdir_path)}'"
     assert message in result.stderr.str()
 
 
