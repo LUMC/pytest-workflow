@@ -34,7 +34,7 @@ import yaml
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .util import is_in_dir, replace_whitespace, rm_dirs, link_tree
+from .util import is_in_dir, link_tree, replace_whitespace, rm_dirs
 from .workflow import Workflow, WorkflowQueue
 
 
