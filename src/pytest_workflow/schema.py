@@ -38,26 +38,6 @@ def workflow_tests_from_schema(schema):
     return [WorkflowTest.from_schema(x) for x in schema]
 
 
-def test_contains_concordance(dictionary: dict, name: str):
-    """
-    Test whether contains and must not contain have the same members.
-    :param dictionary: part of the schema dictionary.
-    :param name: The name of the object the dictionary originates from.
-    This makes the error easier to comprehend for the user.
-    :return: An error if the test fails.
-    """
-    contains = dictionary.get("contains", [])
-    must_not_contain = dictionary.get("must_not_contain", [])
-    if len(contains) > 0 and len(must_not_contain) > 0:
-        common_members = set(contains).intersection(set(must_not_contain))
-        if common_members != set():
-            raise jsonschema.ValidationError(
-                f"contains and must_not_contain are not allowed to have "
-                f"the same members for the same object. "
-                f"Object: {name}. Common members: {common_members}"
-            )
-
-
 def validate_schema(instance):
     """
     Validates the pytest-workflow schema
@@ -77,6 +57,25 @@ def validate_schema(instance):
         raise jsonschema.ValidationError(
             f"Some names were not unique when whitespace was removed. "
             f"Defined names: {test_names}")
+
+    def test_contains_concordance(dictionary: dict, name: str):
+        """
+        Test whether contains and must not contain have the same members.
+        :param dictionary: part of the schema dictionary.
+        :param name: The name of the object the dictionary originates from.
+        This makes the error easier to comprehend for the user.
+        :return: An error if the test fails.
+        """
+        contains = dictionary.get("contains", [])
+        must_not_contain = dictionary.get("must_not_contain", [])
+        if len(contains) > 0 and len(must_not_contain) > 0:
+            common_members = set(contains).intersection(set(must_not_contain))
+            if common_members != set():
+                raise jsonschema.ValidationError(
+                    f"contains and must_not_contain are not allowed to have "
+                    f"the same members for the same object. "
+                    f"Object: {name}. Common members: {common_members}"
+                )
 
     for test in instance:
         test_contains_concordance(test.get('stdout', {}),
