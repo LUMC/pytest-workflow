@@ -28,8 +28,8 @@ from pytest_workflow.schema import FileTest, WorkflowTest, validate_schema, \
 
 import yaml
 
-VALID_YAML_DIR = Path(__file__).parent / Path("yamls") / Path("valid")
-VALID_YAMLS = os.listdir(VALID_YAML_DIR.__str__())
+VALID_YAML_DIR = Path(__file__).parent / Path("yamls", "valid")
+VALID_YAMLS = os.listdir(VALID_YAML_DIR)
 
 
 @pytest.mark.parametrize("yaml_path", VALID_YAMLS)
@@ -147,7 +147,7 @@ def test_workflow_test_defaults():
     assert workflow_test.exit_code == 0
 
 
-def test_filtest_defaults():
+def test_filetest_defaults():
     file_test = FileTest(path="bla")
     assert file_test.contains == []
     assert file_test.must_not_contain == []
