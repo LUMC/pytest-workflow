@@ -62,4 +62,4 @@ def link_tree(src: Path, dest: Path) -> None:
         os.symlink(str(src), str(dest), target_is_directory=False)
     else:  # Only copy files and symlinks, no devices etc.
         warnings.warn(f"Unsupported filetype. Skipping copying: '{str(src)}' "
-                      f"to {str(dest)}")
+                      f"to '{str(dest)}'.")

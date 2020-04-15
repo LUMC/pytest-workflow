@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
-
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -71,3 +71,15 @@ def test_link_tree():
             Path(pipelines_dir, "wdl", "simple.options.json"))
     assert wdl_simplewdl.is_symlink()
     assert wdl_simplewdl.resolve() == Path(pipelines_dir, "wdl", "simple.wdl")
+    shutil.rmtree(str(tempdir))
+
+
+def test_link_tree_warning():
+    urandom = Path("/dev/urandom")
+    dest = Path("notexist")
+    with pytest.warns(UserWarning,
+                      match="Unsupported filetype. Skipping copying: "
+                            "'/dev/urandom' to 'notexist'."):
+        link_tree(urandom, dest)
+    # Destination should not be created
+    assert not dest.exists()
