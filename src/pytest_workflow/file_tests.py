@@ -53,13 +53,14 @@ class FileTestCollector(pytest.Collector):
         # certain conditions are met.
         tests = []
 
-        tests += [FileExists(parent=self,
-                             filepath=filepath,
-                             should_exist=self.filetest.should_exist,
-                             workflow=self.workflow)]
+        tests += [FileExists.from_parent(
+            parent=self,
+            filepath=filepath,
+            should_exist=self.filetest.should_exist,
+            workflow=self.workflow)]
 
         if self.filetest.contains or self.filetest.must_not_contain:
-            tests += [ContentTestCollector(
+            tests += [ContentTestCollector.from_parent(
                 name="content",
                 parent=self,
                 filepath=filepath,
@@ -68,7 +69,7 @@ class FileTestCollector(pytest.Collector):
                 workflow=self.workflow)]
 
         if self.filetest.md5sum:
-            tests += [FileMd5(
+            tests += [FileMd5.from_parent(
                 parent=self,
                 filepath=filepath,
                 md5sum=self.filetest.md5sum,
@@ -100,17 +101,14 @@ class FileExists(pytest.Item):
         self.workflow.wait()
         assert self.file.exists() == self.should_exist
 
-    def repr_failure(self, excinfo):
-        message = "'{path}' does {exist} while it {should}".format(
-            # self.file gives the actual path that was tested (including /tmp
-            # bits). self.parent.filetest.path gives the path that the user
-            # gave in the test yaml. self.file is probably more useful when
-            # debugging.
-            path=str(self.file),
-            exist="not exist" if self.should_exist else "exist",
-            should="should" if self.should_exist else "should not"
-        )
-        return message
+    def repr_failure(self, excinfo, style=None):
+        exist = "not exist" if self.should_exist else "exist"
+        should = "should" if self.should_exist else "should not"
+        # self.file gives the actual path that was tested (including /tmp
+        # bits). self.parent.filetest.path gives the path that the user
+        # gave in the test yaml. self.file is probably more useful when
+        # debugging.
+        return f"'{str(self.file)}' does {exist} while it {should}"
 
 
 class FileMd5(pytest.Item):
@@ -136,30 +134,23 @@ class FileMd5(pytest.Item):
         self.observed_md5sum = file_md5sum(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
 
-    def repr_failure(self, excinfo):
-        message = (
-            "Observed md5sum '{observed}' not equal to expected md5sum "
-            "'{expected}' for file '{path}'"
-        ).format(
-            observed=self.observed_md5sum,
-            expected=self.expected_md5sum,
-            path=str(self.filepath)
+    def repr_failure(self, excinfo, style=None):
+        return (
+            f"Observed md5sum '{self.observed_md5sum}' not equal to expected "
+            f"md5sum '{self.expected_md5sum}' for file '{self.filepath}'"
         )
-        return message
 
 
-def file_md5sum(filepath: Path) -> str:
+# block_size 64k with python is a few percent faster than linux native md5sum.
+def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     """
     Generates a md5sum for a file. Reads file in blocks to save memory.
     :param filepath: a pathlib. Path to the file
+    :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-
     hasher = hashlib.md5()  # nosec: only used for file integrity
     with filepath.open('rb') as file_handler:  # Read the file in bytes
-        # Hardcode the blocksize at 8192 bytes here.
-        # This can be changed or made variable when the requirements compel us
-        # to do so.
-        for block in iter(lambda: file_handler.read(8192), b''):
+        for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
     return hasher.hexdigest()

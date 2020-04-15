@@ -42,7 +42,7 @@ def test_workflow_queue_process_empty():
 
 
 def generate_sleep_workflows(number: int, sleep_time: float):
-    return [Workflow("sleep {0}".format(sleep_time)) for i in range(number)]
+    return [Workflow(f"sleep {sleep_time}") for _ in range(number)]
 
 
 QUEUE_TESTS = [

@@ -55,8 +55,8 @@ def validate_schema(instance):
     test_names = [replace_whitespace(test['name'], ' ') for test in instance]
     if len(test_names) != len(set(test_names)):
         raise jsonschema.ValidationError(
-            "Some names were not unique when whitespace was removed. "
-            "Defined names: {0}".format(test_names))
+            f"Some names were not unique when whitespace was removed. "
+            f"Defined names: {test_names}")
 
     def test_contains_concordance(dictionary: dict, name: str):
         """
@@ -72,10 +72,9 @@ def validate_schema(instance):
             common_members = set(contains).intersection(set(must_not_contain))
             if common_members != set():
                 raise jsonschema.ValidationError(
-                    "contains and must_not_contain are not allowed to have the"
-                    " same members for the same object."
-                    " Object: {0}. Common members: {1}".format(name,
-                                                               common_members)
+                    f"contains and must_not_contain are not allowed to have "
+                    f"the same members for the same object. "
+                    f"Object: {name}. Common members: {common_members}"
                 )
 
     for test in instance:
@@ -93,15 +92,17 @@ def validate_schema(instance):
                 for check in ["md5sum", "contains", "must_not_contain"]:
                     if check in keys:
                         raise jsonschema.ValidationError(
-                            "Content checking not allowed " +
-                            "on non existing file: {0}. Key = {1}".format(
-                                test_file["path"], check))
+                            f"Content checking not allowed on non existing "
+                            f"file: {test_file['path']}. Key = {check}")
 
 
 # Schema classes below
 # These classes are created so that the test yaml does not have to be passed
 # around between test objects. But instead these objects which have self-
 # documenting members
+# TODO: Rewrite these into @Dataclass classes when python 3.7 becomes the
+# TODO: minimum required version.
+
 
 class ContentTest(object):
     """
@@ -111,26 +112,12 @@ class ContentTest(object):
     """
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None):
-        if contains:
-            self.contains = contains
-        else:
-            self.contains = []
-        if must_not_contain:
-            self.must_not_contain = must_not_contain
-        else:
-            self.must_not_contain = []
-
-    @classmethod
-    def from_dict(cls, dictionary: dict):
-        return cls(
-            contains=dictionary.get("contains"),
-            must_not_contain=dictionary.get("must_not_contain")
-        )
+        self.contains: List[str] = contains or []
+        self.must_not_contain: List[str] = must_not_contain or []
 
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
-
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
@@ -148,23 +135,6 @@ class FileTest(ContentTest):
         self.path = Path(path)
         self.md5sum = md5sum
         self.should_exist = should_exist
-
-    @classmethod
-    def from_dict(cls, dictionary: dict):
-        """
-        Creates a FileTest object from a dictionary
-        :param dictionary: dictionary containing at least a "path" key
-        :return: a FileTest object
-        """
-        return cls(
-            path=dictionary["path"],  # Compulsory value should fail
-            # when not present
-            md5sum=dictionary.get("md5sum"),
-            should_exist=dictionary.get("should_exist",
-                                        DEFAULT_FILE_SHOULD_EXIST),
-            contains=dictionary.get("contains"),
-            must_not_contain=dictionary.get("must_not_contain")
-        )
 
 
 class WorkflowTest(object):
@@ -190,21 +160,21 @@ class WorkflowTest(object):
         self.exit_code = exit_code
         self.stdout = stdout
         self.stderr = stderr
-        self.files = files if files is not None else []
-        self.tags = tags if tags is not None else []
+        self.files = files or []
+        self.tags = tags or []
 
     @classmethod
     def from_schema(cls, schema: dict):
         """Generate a WorkflowTest object from schema objects"""
         test_file_dicts = schema.get("files", [])
-        test_files = [FileTest.from_dict(x) for x in test_file_dicts]
+        test_files = [FileTest(**d) for d in test_file_dicts]
 
         return cls(
             name=schema["name"],
             command=schema["command"],
             tags=schema.get("tags"),
             exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
-            stdout=ContentTest.from_dict(schema.get("stdout", {})),
-            stderr=ContentTest.from_dict(schema.get("stderr", {})),
+            stdout=ContentTest(**schema.get("stdout", {})),
+            stderr=ContentTest(**schema.get("stderr", {})),
             files=test_files
         )
