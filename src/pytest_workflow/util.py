@@ -55,7 +55,7 @@ def link_tree(src: Path, dest: Path) -> None:
     :param dest: The destination directory
     """
     if src.is_dir():
-        dest.mkdir()
+        dest.mkdir(parents=True)
         for path in os.listdir(str(src)):
             link_tree(Path(src, path), Path(dest, path))
     elif src.is_file() or src.is_symlink():

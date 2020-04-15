@@ -129,3 +129,16 @@ def test_directory_not_kept_on_succes(testdir):
     assert not Path(working_dir).exists()
     assert ("All tests succeeded. Removing temporary directories and logs." in
             result.stdout.str())
+
+
+def test_directory_of_symlinks(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    subdir = testdir.mkdir("subdir")
+    Path(str(subdir), "subfile.txt").write_text("test")
+    result = testdir.runpytest("-v", "--symlinks", "--kwd")
+    working_dir = re.search(
+        r"with command 'echo moo' in '([\w/_-]*)'",
+        result.stdout.str()).group(1)
+    assert Path(working_dir, "test.yml").is_symlink()
+    assert Path(working_dir, "subdir").is_dir()
+    assert Path(working_dir, "subdir", "subfile.txt").is_symlink()
