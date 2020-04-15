@@ -148,7 +148,7 @@ def test_workflow_test_defaults():
 
 
 def test_filtest_defaults():
-    file_test = FileTest.from_dict(dict(path="bla"))
+    file_test = FileTest(path="bla")
     assert file_test.contains == []
     assert file_test.must_not_contain == []
     assert file_test.md5sum is None

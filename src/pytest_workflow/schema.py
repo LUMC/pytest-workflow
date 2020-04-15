@@ -116,13 +116,6 @@ class ContentTest(object):
         self.contains: List[str] = contains or []
         self.must_not_contain: List[str] = must_not_contain or []
 
-    @classmethod
-    def from_dict(cls, dictionary: dict):
-        return cls(
-            contains=dictionary.get("contains"),
-            must_not_contain=dictionary.get("must_not_contain")
-        )
-
 
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
@@ -143,23 +136,6 @@ class FileTest(ContentTest):
         self.path = Path(path)
         self.md5sum = md5sum
         self.should_exist = should_exist
-
-    @classmethod
-    def from_dict(cls, dictionary: dict):
-        """
-        Creates a FileTest object from a dictionary
-        :param dictionary: dictionary containing at least a "path" key
-        :return: a FileTest object
-        """
-        return cls(
-            path=dictionary["path"],  # Compulsory value should fail
-            # when not present
-            md5sum=dictionary.get("md5sum"),
-            should_exist=dictionary.get("should_exist",
-                                        DEFAULT_FILE_SHOULD_EXIST),
-            contains=dictionary.get("contains"),
-            must_not_contain=dictionary.get("must_not_contain")
-        )
 
 
 class WorkflowTest(object):
@@ -192,14 +168,14 @@ class WorkflowTest(object):
     def from_schema(cls, schema: dict):
         """Generate a WorkflowTest object from schema objects"""
         test_file_dicts = schema.get("files", [])
-        test_files = [FileTest.from_dict(x) for x in test_file_dicts]
+        test_files = [FileTest(**d) for d in test_file_dicts]
 
         return cls(
             name=schema["name"],
             command=schema["command"],
             tags=schema.get("tags"),
             exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
-            stdout=ContentTest.from_dict(schema.get("stdout", {})),
-            stderr=ContentTest.from_dict(schema.get("stderr", {})),
+            stdout=ContentTest(**schema.get("stdout", {})),
+            stderr=ContentTest(**schema.get("stderr", {})),
             files=test_files
         )
