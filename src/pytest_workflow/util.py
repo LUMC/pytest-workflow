@@ -1,3 +1,4 @@
+import os
 import re
 import shutil
 from pathlib import Path
@@ -43,3 +44,20 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
             # No break: If we did not find any mismatches child is in parent.
             return True
     return False
+
+
+def link_tree(src: Path, dest: Path) -> None:
+    """
+    Copies a tree by mimicking the directory structure and soft-linking the
+    files
+    :param src: The source directory
+    :param dest: The destination directory
+    """
+    if src.is_dir():
+        dest.mkdir()
+        for path in os.listdir(str(src)):
+            link_tree(Path(src, path), Path(dest, path))
+    elif src.is_file() or src.is_symlink():
+        os.symlink(str(src), str(dest), target_is_directory=False)
+    else:  # Only copy files and symlinks, no devices etc.
+        pass
