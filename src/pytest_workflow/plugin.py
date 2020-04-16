@@ -20,12 +20,12 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional  # noqa: F401 needed for typing.
+from typing import Dict, List, Optional
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.fixtures import SubRequest
-from _pytest.mark import MarkDecorator  # noqa: F401 used for typing
+from _pytest.mark import MarkDecorator
+from _pytest.python import FunctionDefinition, Metafunc
 
 import pytest
 
@@ -189,33 +189,27 @@ def pytest_collection():
     print()
 
 
-def pytest_collection_modifyitems(config: PytestConfig,
-                                  items: List[pytest.Item]):
-    """Here we skip all tests related to workflows that are not executed"""
-
-    for item in items:
-        marker: Optional[MarkDecorator] = item.get_closest_marker(
-            name="workflow")
-
-        if marker is None:
-            continue
-
-        if 'name' in marker.kwargs:
-            workflow_name = marker.kwargs['name']
-        # If name key is not defined use the first arg.
-        elif 'name' not in marker.kwargs and len(marker.args) >= 1:
-            workflow_name = marker.args[0]
-            # Make sure a name attribute is added anyway for the
-            # fixture lookup.
-            marker.kwargs['name'] = workflow_name
-        else:
-            raise TypeError(f"A workflow name should be defined in the "
-                            f"workflow marker of {item.nodeid}")
-
-        if workflow_name not in config.executed_workflows.keys():
-            skip_marker = pytest.mark.skip(
-                reason=f"'{workflow_name}' has not run.")
-            item.add_marker(skip_marker)
+def pytest_generate_tests(metafunc: Metafunc):
+    if "workflow_dir" not in metafunc.fixturenames:
+        return
+    definition: FunctionDefinition = metafunc.definition
+    marker: Optional[MarkDecorator] = definition.get_closest_marker(
+        name="workflow")
+    if marker is None:
+        raise ValueError("workflow_dir can only be requested in tests marked"
+                         " with the workflow mark.")
+    workflow_names: List[str] = (marker.args or
+                                 marker.kwargs['names'] or
+                                 [marker.kwargs['name']])
+    run_workflows = metafunc.config.executed_workflows.keys()
+    applicable_workflows = set(workflow_names).intersection(run_workflows)
+    if not applicable_workflows:
+        return
+    workflow_temp_dir = metafunc.config.workflow_temp_dir
+    workflow_dirs = [Path(workflow_temp_dir, replace_whitespace(name))
+                     for name in applicable_workflows]
+    metafunc.parametrize("workflow_dir", workflow_dirs,
+                         ids=applicable_workflows)
 
 
 def pytest_runtestloop(session: pytest.Session):
@@ -262,28 +256,6 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
         rm_dirs(session.config.workflow_cleanup_dirs)
-
-
-@pytest.fixture()
-def workflow_dir(request: SubRequest):
-    """Returns the workflow_dir of the workflow named in the mark. This fixture
-    is only provided for tests that are marked with the workflow mark."""
-
-    # request.node refers to the node that has the mark. This is a pytest.Node
-    marker = request.node.get_closest_marker(name="workflow")
-
-    if marker is not None:
-        workflow_temp_dir = request.config.workflow_temp_dir
-        try:
-            workflow_name = marker.kwargs['name']
-        except KeyError:
-            raise TypeError(
-                f"A workflow name should be defined in the "
-                f"workflow marker of {request.node.nodeid}")
-        return workflow_temp_dir / Path(replace_whitespace(workflow_name))
-    else:
-        raise ValueError("workflow_dir can only be requested in tests marked"
-                         " with the workflow mark.")
 
 
 class YamlFile(pytest.File):
