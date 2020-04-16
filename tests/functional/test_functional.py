@@ -18,10 +18,13 @@ from pathlib import Path
 import pytest
 
 SIMPLE_WDL_YAML = Path(__file__).parent / Path("simple_wdl_test_cases.yml")
+SNAKEFILE_YAML = (Path(__file__).parent /
+                  Path("simple_snakefile_test_cases.yml"))
 PIPELINE_DIR = Path(__file__).parent.parent / Path("pipelines")
 SIMPLE_WDL = Path(PIPELINE_DIR, "wdl", "simple.wdl")
 SIMPLE_WDL_JSON = Path(PIPELINE_DIR, "wdl", "simple.json")
 SIMPLE_WDL_OPTIONS_JSON = Path(PIPELINE_DIR, "wdl", "simple.options.json")
+SNAKEFILE = Path(PIPELINE_DIR, "snakemake", "SimpleSnakefile")
 
 
 @pytest.mark.functional
@@ -46,3 +49,12 @@ def test_miniwdl(testdir):
     result = testdir.runpytest("-v", "--tag", "miniwdl",
                                "--keep-workflow-wd-on-fail")
     assert result.ret == 0
+
+
+@pytest.mark.functional
+def test_snakemake(testdir):
+    testdir.makefile(ext="", SimpleSnakefile=SNAKEFILE.read_text())
+    testdir.makefile(ext=".yml", test_snakemake=SNAKEFILE_YAML.read_text())
+    result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
+    exit_code = result.ret
+    assert exit_code == 0
