@@ -17,26 +17,16 @@ from pathlib import Path
 
 import pytest
 
-
-@pytest.fixture
-def snakefile_yaml():
-    yaml_path = Path(__file__).parent / Path("simple_snakefile_test_cases.yml")
-    with yaml_path.open("r") as yaml_handle:
-        return yaml_handle.read()
-
-
-@pytest.fixture
-def snakefile_contents():
-    snake_path = (Path(__file__).parent.parent / Path("pipelines") /
-                  Path("snakemake") / Path("SimpleSnakefile"))
-    with snake_path.open("r") as snake_handle:
-        return snake_handle.read()
+SNAKEFILE_YAML = (Path(__file__).parent /
+                  Path("simple_snakefile_test_cases.yml"))
+SNAKEFILE = (Path(__file__).parent.parent /
+             Path("pipelines", "snakemake", "SimpleSnakefile"))
 
 
 @pytest.mark.functional
-def test_snakemake(testdir, snakefile_contents, snakefile_yaml):
-    testdir.makefile(ext="", SimpleSnakefile=snakefile_contents)
-    testdir.makefile(ext=".yml", test_snakemake=snakefile_yaml)
+def test_snakemake(testdir):
+    testdir.makefile(ext="", SimpleSnakefile=SNAKEFILE.read_text())
+    testdir.makefile(ext=".yml", test_snakemake=SNAKEFILE_YAML.read_text())
     result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
     exit_code = result.ret
     assert exit_code == 0

@@ -17,45 +17,20 @@ from pathlib import Path
 
 import pytest
 
-
-@pytest.fixture
-def simple_wdl_yaml():
-    yaml_path = Path(__file__).parent / Path("simple_wdl_test_cases.yml")
-    with yaml_path.open("r") as yaml_handle:
-        return yaml_handle.read()
-
-
-@pytest.fixture
-def simple_wdl_contents():
-    wdl_path = (Path(__file__).parent.parent / Path("pipelines") /
-                Path("wdl") / Path("simple.wdl"))
-    with wdl_path.open("r") as wdl_handle:
-        return wdl_handle.read()
-
-
-@pytest.fixture
-def simple_wdl_json():
-    json_path = (Path(__file__).parent.parent / Path("pipelines") /
-                 Path("wdl") / Path("simple.json"))
-    with json_path.open("r") as json_handle:
-        return json_handle.read()
-
-
-@pytest.fixture
-def simple_wdl_options_json():
-    json_path = (Path(__file__).parent.parent / Path("pipelines") /
-                 Path("wdl") / Path("simple.options.json"))
-    with json_path.open("r") as json_handle:
-        return json_handle.read()
+SIMPLE_WDL_YAML = Path(__file__).parent / Path("simple_wdl_test_cases.yml")
+PIPELINE_DIR = Path(__file__).parent.parent / Path("pipelines")
+SIMPLE_WDL = Path(PIPELINE_DIR, "wdl", "simple.wdl")
+SIMPLE_WDL_JSON = Path(PIPELINE_DIR, "wdl", "simple.json")
+SIMPLE_WDL_OPTIONS_JSON = Path(PIPELINE_DIR, "wdl", "simple.options.json")
 
 
 @pytest.mark.functional
-def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
-                  simple_wdl_json, simple_wdl_options_json):
-    testdir.makefile(ext=".json", simple=simple_wdl_json)
-    testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
-    testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
-    testdir.makefile(ext=".options.json", simple=simple_wdl_options_json)
+def test_cromwell(testdir):
+    testdir.makefile(ext=".json", simple=SIMPLE_WDL_JSON.read_text())
+    testdir.makefile(ext=".wdl", simple=SIMPLE_WDL.read_text())
+    testdir.makefile(ext=".yml", test_wdl=SIMPLE_WDL_YAML.read_text())
+    testdir.makefile(ext=".options.json",
+                     simple=SIMPLE_WDL_OPTIONS_JSON.read_text())
     result = testdir.runpytest("-v", "--tag", "cromwell",
                                "--keep-workflow-wd-on-fail")
     exit_code = result.ret
@@ -64,11 +39,10 @@ def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
 
 
 @pytest.mark.functional
-def test_miniwdl(testdir, simple_wdl_yaml, simple_wdl_contents,
-                 simple_wdl_json):
-    testdir.makefile(ext=".json", simple=simple_wdl_json)
-    testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
-    testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
+def test_miniwdl(testdir):
+    testdir.makefile(ext=".json", simple=SIMPLE_WDL_JSON.read_text())
+    testdir.makefile(ext=".wdl", simple=SIMPLE_WDL.read_text())
+    testdir.makefile(ext=".yml", test_wdl=SIMPLE_WDL_YAML.read_text())
     result = testdir.runpytest("-v", "--tag", "miniwdl",
                                "--keep-workflow-wd-on-fail")
     assert result.ret == 0
