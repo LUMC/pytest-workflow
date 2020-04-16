@@ -125,8 +125,8 @@ def pytest_configure(config: PytestConfig):
     # Errors are now emitted when unknown marks are included
     config.addinivalue_line(
         "markers",
-        "workflow(name): mark test to run only with the given "
-        "workflow name. Also provides access to the workflow_dir "
+        "workflow('name', 'name2', ...): mark test to run only with the given "
+        "workflow name or names. Also provides access to the workflow_dir "
         "fixture."
     )
     # We need to add a workflow queue to some central variable. Instead of
