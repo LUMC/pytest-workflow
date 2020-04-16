@@ -233,39 +233,50 @@ def test_same_custom_test_multiple_times(testdir):
     result.assert_outcomes(passed=9, failed=0, skipped=0, error=0)
 
 
+TEST_WORKFLOWS = textwrap.dedent("""\
+- name: one_two_three
+  command: >-
+    bash -c '
+    echo 123 > numbers.txt' ;
+  files:
+    - path: numbers.txt
+- name: two_three_five
+  command: >-
+    bash -c '
+    echo 235 > numbers.txt' ;
+  files:
+    - path: numbers.txt
+- name: three_four_five
+  command: >-
+    bash -c '
+    echo 345 > numbers.txt' ;
+  files:
+    - path: numbers.txt""")
+
+TEST_DIV_BY_THREE = textwrap.dedent("""\
+import pytest
+from pathlib import Path
+
+@pytest.mark.workflow("one_two_three", "two_three_five", "three_four_five")
+def test_div_by_three(workflow_dir):
+    number_file = workflow_dir / Path("numbers.txt")
+    assert int(number_file.read_text()) % 3 == 0
+""")
+
+
 def test_same_custom_test_multiple_times_one_error(testdir):
-    test_workflow = textwrap.dedent("""\
-    - name: one_two_three
-      command: >-
-        bash -c '
-        echo 123 > numbers.txt' ;
-      files:
-        - path: numbers.txt
-    - name: two_three_five
-      command: >-
-        bash -c '
-        echo 235 > numbers.txt' ;
-      files:
-        - path: numbers.txt
-    - name: three_four_five
-      command: >-
-        bash -c '
-        echo 345 > numbers.txt' ;
-      files:
-        - path: numbers.txt""")
-    test_div_by_three = textwrap.dedent("""\
-    import pytest
-    from pathlib import Path
-
-    @pytest.mark.workflow("one_two_three", "two_three_five", "three_four_five")
-    def test_div_by_three(workflow_dir):
-        number_file = workflow_dir / Path("numbers.txt")
-        assert int(number_file.read_text()) % 3 == 0
-    """)
-
-    testdir.makefile(".yml", test_aworkflow=test_workflow)
-    testdir.makefile(".py", test_div=test_div_by_three)
+    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
     result = testdir.runpytest("-v")
     result.assert_outcomes(passed=8, failed=1, skipped=0, error=0)
     assert ("test_div.py::test_div_by_three[two_three_five] FAILED "
+            in result.stdout.str())
+
+
+def test_custom_tests_properly_skipped(testdir):
+    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
+    result = testdir.runpytest("-v", "--tag", "one_two_three")
+    result.assert_outcomes(passed=3, failed=0, skipped=2, error=0)
+    assert ("test_div.py::test_div_by_three[two_three_five] SKIPPED "
             in result.stdout.str())
