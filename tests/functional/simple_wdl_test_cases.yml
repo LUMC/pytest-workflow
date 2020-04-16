@@ -1,4 +1,6 @@
-- name: simple wdl
+- name: simple wdl cromwell
+  tags:
+    - "cromwell"
   command: >-
      cromwell run -i simple.json -o simple.options.json simple.wdl
   files:
@@ -36,3 +38,42 @@
   stdout:
     contains:
       - "WorkflowSucceededState"
+
+
+- name: simple wdl miniwdl
+  tags:
+    - "miniwdl"
+  command: >-
+    miniwdl run -i simple.json -d test-output/. simple.wdl
+  files:
+    - path: test-output/output_links/rand_files/0/0.bin
+    - path: test-output/output_links/rand_files/1/1.bin
+    - path: test-output/output_links/rand_files/2/2.bin
+    - path: test-output/output_links/rand_files/3/3.bin
+    - path: test-output/output_links/rand_files/4/4.bin
+    - path: test-output/output_links/rand_files/5/5.bin
+    - path: test-output/output_links/rand_files/6/6.bin
+    - path: test-output/output_links/rand_files/7/7.bin
+    - path: test-output/output_links/rand_files/8/8.bin
+    - path: test-output/output_links/rand_files/9/9.bin
+    - path: test-output/output_links/base64_files/0/0.txt
+    - path: test-output/output_links/base64_files/1/1.txt
+    - path: test-output/output_links/base64_files/2/2.txt
+    - path: test-output/output_links/base64_files/3/3.txt
+    - path: test-output/output_links/base64_files/4/4.txt
+    - path: test-output/output_links/base64_files/5/5.txt
+    - path: test-output/output_links/base64_files/6/6.txt
+    - path: test-output/output_links/base64_files/7/7.txt
+    - path: test-output/output_links/base64_files/8/8.txt
+    - path: test-output/output_links/base64_files/9/9.txt
+    - path: test-output/output_links/gzip_files/0/0.txt.gz
+    - path: test-output/output_links/gzip_files/1/1.txt.gz
+    - path: test-output/output_links/gzip_files/2/2.txt.gz
+    - path: test-output/output_links/gzip_files/3/3.txt.gz
+    - path: test-output/output_links/gzip_files/4/4.txt.gz
+    - path: test-output/output_links/gzip_files/5/5.txt.gz
+    - path: test-output/output_links/gzip_files/6/6.txt.gz
+    - path: test-output/output_links/gzip_files/7/7.txt.gz
+    - path: test-output/output_links/gzip_files/8/8.txt.gz
+    - path: test-output/output_links/gzip_files/9/9.txt.gz
+    - path: test-output/output_links/zipped_file/all_data.gz
