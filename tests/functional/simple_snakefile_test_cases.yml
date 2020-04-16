@@ -19,7 +19,8 @@
     contains:
       - "N_LINES_TO_READ must at least be 1."
 - name: test-snakemake-run
-  command: snakemake -r -p -s SimpleSnakefile --config N_LINES_TO_READ=500
+  command: >-
+    snakemake --cores 1 -r -p -s SimpleSnakefile --config N_LINES_TO_READ=500
   files:
     - path: rand/0.txt
     - path: rand/1.txt

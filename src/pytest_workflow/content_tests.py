@@ -23,7 +23,7 @@ import functools
 import gzip
 import threading
 from pathlib import Path
-from typing import Iterable, List, Optional, Set
+from typing import Iterable, Optional, Set
 
 import pytest
 
@@ -31,7 +31,7 @@ from .schema import ContentTest
 from .workflow import Workflow
 
 
-def check_content(strings: List[str],
+def check_content(strings: Iterable[str],
                   text_lines: Iterable[str]) -> Set[str]:
     """
     Checks whether any of the strings is present in the text lines
@@ -46,51 +46,21 @@ def check_content(strings: List[str],
 
     # Create two sets. By default all strings are not found.
     strings_to_check = set(strings)
-    found_strings = set()  # type: Set[str]
+    found_strings: Set[str] = set()
 
     for line in text_lines:
         # Break the loop if all strings are found
-        # First do length check for speed as this runs every loop.
-        if len(found_strings) == len(strings_to_check):
-            # Then true check
-            if found_strings == strings_to_check:
-                break
-            else:
-                raise ValueError(
-                    "The number of strings found is equal to the "
-                    "number of strings to be checked. But the"
-                    " sets are not equal. Please contact the "
-                    "developers to fix this issue.")
+        # Python implements fast set equality checking by checking length first
+        if found_strings == strings_to_check:
+            break
 
         for string in strings_to_check:
             if string not in found_strings and string in line:
                 found_strings.add(string)
-
-    if not found_strings.issubset(strings_to_check):
-        raise ValueError(
-            "Strings where found that were not searched for. Please contact"
-            " the developers to fix this issue. \n" +
-            "Searched for strings: {0}\n".format(strings_to_check) +
-            "Found strings: {0}\n".format(found_strings)
-        )
-
+        # Remove found strings for faster searching. This should be done
+        # outside of the loop above.
+        strings_to_check -= found_strings
     return found_strings
-
-
-def file_to_string_generator(filepath: Path) -> Iterable[str]:
-    """
-    Turns a file into a line generator. Files ending with .gz are automatically
-    decompressed.
-    :param filepath: the file path
-    :return: yields lines of the file
-    """
-    file_open = (functools.partial(gzip.open, str(filepath))
-                 if filepath.suffix == ".gz" else
-                 filepath.open)
-    # Use 'rt' here explicitly as opposed to 'rb'
-    with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
-        for line in file_handler:
-            yield line
 
 
 class ContentTestCollector(pytest.Collector):
@@ -129,10 +99,15 @@ class ContentTestCollector(pytest.Collector):
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
+        file_open = (functools.partial(gzip.open, str(self.filepath))
+                     if self.filepath.suffix == ".gz" else
+                     self.filepath.open)
         try:
-            self.found_strings = check_content(
-                strings=strings_to_check,
-                text_lines=file_to_string_generator(self.filepath))
+            # Use 'rt' here explicitly as opposed to 'rb'
+            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
+                self.found_strings = check_content(
+                    strings=strings_to_check,
+                    text_lines=file_handler)
         except FileNotFoundError:
             self.file_not_found = True
 
@@ -145,7 +120,7 @@ class ContentTestCollector(pytest.Collector):
         test_items = []
 
         test_items += [
-            ContentTestItem(
+            ContentTestItem.from_parent(
                 parent=self,
                 string=string,
                 should_contain=True,
@@ -154,7 +129,7 @@ class ContentTestCollector(pytest.Collector):
             for string in self.content_test.contains]
 
         test_items += [
-            ContentTestItem(
+            ContentTestItem.from_parent(
                 parent=self,
                 string=string,
                 should_contain=False,
@@ -182,8 +157,9 @@ class ContentTestItem(pytest.Item):
         debugging if the test fails
         """
         contain = "contains" if should_contain else "does not contain"
-        name = "{0} '{1}'".format(contain, string)
+        name = f"{contain} '{string}'"
         super().__init__(name, parent=parent)
+        self.parent: ContentTestCollector = parent  # explicitly declare type
         self.should_contain = should_contain
         self.string = string
         self.content_name = content_name
@@ -202,24 +178,18 @@ class ContentTestItem(pytest.Item):
         assert ((self.string in self.parent.found_strings) ==
                 self.should_contain)
 
-    def repr_failure(self, excinfo):
+    def repr_failure(self, excinfo, style=None):
         if self.parent.file_not_found:
+            containing = ("containing" if self.should_contain else
+                          "not containing")
             return (
-                "'{content}' does not exist and cannot be searched "
-                "for {containing} '{string}'."
-            ).format(
-                content=self.content_name,
-                containing="containing" if self.should_contain
-                else "not containing",
-                string=self.string)
-
+                f"'{self.content_name}' does not exist and cannot be searched "
+                f"for {containing} '{self.string}'."
+            )
         else:
+            found = "not found" if self.should_contain else "found"
+            should = "should" if self.should_contain else "should not"
             return (
-                "'{string}' was {found} in {content} "
-                "while it {should} be there."
-            ).format(
-                string=self.string,
-                found="not found" if self.should_contain else "found",
-                content=self.content_name,
-                should="should" if self.should_contain else "should not"
+                f"'{self.string}' was {found} in {self.content_name} "
+                f"while it {should} be there."
             )

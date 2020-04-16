@@ -2,7 +2,7 @@ language: python
 install:
   - pip install tox
 dist: xenial
-python: 3.5  # Use the oldest supported version of python as default.
+python: 3.6  # Use the oldest supported version of python as default.
 script:
     - tox -e $TOX_ENV
 matrix:
@@ -11,22 +11,18 @@ matrix:
     # Use default python3 version here.
     - env: TOX_ENV=docs
     - env: TOX_ENV=lint
-
     # UNIT TESTS
     # On most recent versions of python.
-    - python: 3.6
-      env: TOX_ENV=py36
-    - python: 3.7
-      env: TOX_ENV=py37
-    - python: 3.8
-      env: TOX_ENV=py38
-    - python: 3.5
-      env: TOX_ENV=py35
+    - env: TOX_ENV=py36
       install:
         - pip install codecov
         - pip install tox
       after_success:
         - codecov -v  # -v to make sure coverage upload works.
+    - python: 3.7
+      env: TOX_ENV=py37
+    - python: 3.8
+      env: TOX_ENV=py38
 
     # FUNCTIONAL TESTS
     - python: 3.6
@@ -46,5 +42,6 @@ matrix:
         - conda config --add channels defaults
         - conda config --add channels bioconda
         - conda config --add channels conda-forge
-        - conda create -n my_env cromwell tox  # Install tox for good integration within the conda env.
+        # TODO: Upgrade cromwell once https://github.com/broadinstitute/cromwell/pull/5456 is fixed.
+        - conda create -n my_env cromwell=48 tox  # Install tox for good integration within the conda env.
         - source activate my_env

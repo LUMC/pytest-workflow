@@ -25,7 +25,7 @@ import yaml
 # seconds on pytest-workflow 0.2 (without multithreading. So we should be a
 # a safe margin above that.
 SLEEP_TIME = 0.75
-SLEEP_COMMAND = "sleep {0}".format(SLEEP_TIME)
+SLEEP_COMMAND = f"sleep {SLEEP_TIME}"
 
 MULTHITHREADED_TEST = [
     dict(name="Doornroosje", command=SLEEP_COMMAND),

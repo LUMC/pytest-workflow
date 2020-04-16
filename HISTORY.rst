@@ -7,6 +7,34 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.3.0-dev
+---------------------------
+Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.
+This was necessary for fixing the deprecation warning issue and the issue with
+the subdirectory evaluation. This also gave the opportunity to simplify the
+source code using new python 3.6 syntax.
+
++ Added a ``--symlink`` flag to the CLI that changes the copying behavior.
+  Instead of copying, it creates a similar directory structure where all files
+  are linked to with symbolic links. (`Issue #96
+  <https://github.com/LUMC/pytest-workflow/issues/98>`_)
++ Refactored the code base. Python 3.6's f-strings and type annotation were
+  used consistently throughout the project. Some code was rewritten to be more
+  concise and readable.
++ Improved speed for searching string content in files. This was achieved by
+  removing intermediate functions and simplifying the search function.
++ Improved speed for calculating md5sums by increasing the read buffer size
+  from 8k to 64k.
++ Solve issue where pytest would display a lot of deprecation warnings when
+  running pytest-workflow. (`Issue #98
+  <https://github.com/LUMC/pytest-workflow/issues/98>`_)
++ Fix issues with later versions of Cromwell and Snakemake in CI testing.
++ Add correct subdirectory evaluation to fix issue where ``/parent-dir/child``
+  was evaluated as a subdirectory of ``/parent`` due to starting with the same
+  string. (`Issue #95 <https://github.com/LUMC/pytest-workflow/issues/95>`_)
++ Fix error in cromwell example which did not allow it to remove folders
+  correctly.
+
 version 1.2.3
 ---------------------------
 + Added missing ``help`` section for ``--tag`` on the CLI.

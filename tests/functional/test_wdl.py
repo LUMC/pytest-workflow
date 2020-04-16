@@ -56,7 +56,8 @@ def test_cromwell(testdir, simple_wdl_yaml, simple_wdl_contents,
     testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
     testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
     testdir.makefile(ext=".options.json", simple=simple_wdl_options_json)
-    result = testdir.runpytest("-v", "--tag", "cromwell")
+    result = testdir.runpytest("-v", "--tag", "cromwell",
+                               "--keep-workflow-wd-on-fail")
     exit_code = result.ret
     assert exit_code == 0
     assert "simple wdl" in result.stdout.str()
@@ -68,5 +69,6 @@ def test_miniwdl(testdir, simple_wdl_yaml, simple_wdl_contents,
     testdir.makefile(ext=".json", simple=simple_wdl_json)
     testdir.makefile(ext=".wdl", simple=simple_wdl_contents)
     testdir.makefile(ext=".yml", test_cromwell=simple_wdl_yaml)
-    result = testdir.runpytest("-v", "--tag", "miniwdl")
+    result = testdir.runpytest("-v", "--tag", "miniwdl",
+                               "--keep-workflow-wd-on-fail")
     assert result.ret == 0

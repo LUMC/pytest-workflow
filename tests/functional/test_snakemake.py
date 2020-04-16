@@ -37,6 +37,6 @@ def snakefile_contents():
 def test_snakemake(testdir, snakefile_contents, snakefile_yaml):
     testdir.makefile(ext="", SimpleSnakefile=snakefile_contents)
     testdir.makefile(ext=".yml", test_snakemake=snakefile_yaml)
-    result = testdir.runpytest("-v")
+    result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
     exit_code = result.ret
     assert exit_code == 0
