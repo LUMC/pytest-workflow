@@ -189,6 +189,20 @@ def pytest_collection():
     print()
 
 
+def get_workflow_names_from_workflow_marker(marker: MarkDecorator
+                                            ) -> List[str]:
+    if not marker.name == "workflow":
+        raise ValueError(
+            f"Can only get names from markers named 'workflow' "
+            f"not '{marker.name}'.")
+    if marker.args:
+        return marker.args
+    elif 'name' in marker.kwargs:
+        return [marker.kwargs['name']]
+    else:
+        return []
+
+
 def pytest_generate_tests(metafunc: Metafunc):
     if "workflow_dir" not in metafunc.fixturenames:
         return
@@ -198,9 +212,10 @@ def pytest_generate_tests(metafunc: Metafunc):
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
-    workflow_names: List[str] = (marker.args or
-                                 marker.kwargs['names'] or
-                                 [marker.kwargs['name']])
+    workflow_names: List[str] = get_workflow_names_from_workflow_marker(marker)
+    if not workflow_names:
+        raise ValueError(f"A workflow name or names should be defined in "
+                         f"the workflow marker of {definition.nodeid}")
     run_workflows = metafunc.config.executed_workflows.keys()
     applicable_workflows = set(workflow_names).intersection(run_workflows)
     if not applicable_workflows:
@@ -210,6 +225,27 @@ def pytest_generate_tests(metafunc: Metafunc):
                      for name in applicable_workflows]
     metafunc.parametrize("workflow_dir", workflow_dirs,
                          ids=applicable_workflows)
+
+
+def pytest_collection_modifyitems(config: PytestConfig,
+                                  items: List[pytest.Item]):
+    """Here we skip all tests related to workflows that are not executed"""
+
+    for item in items:
+        marker: Optional[MarkDecorator] = item.get_closest_marker(
+            name="workflow")
+
+        if marker is None:
+            continue
+
+        workflow_names: List[str] = get_workflow_names_from_workflow_marker(
+            marker)
+
+        for workflow_name in workflow_names:
+            if workflow_name not in config.executed_workflows.keys():
+                skip_marker = pytest.mark.skip(
+                    reason=f"'{workflow_name}' has not run.")
+                item.add_marker(skip_marker)
 
 
 def pytest_runtestloop(session: pytest.Session):

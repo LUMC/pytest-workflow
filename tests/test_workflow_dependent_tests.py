@@ -138,7 +138,6 @@ def test_fixture_unmarked_test(testdir):
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE_UNMARKED_TEST)
     result = testdir.runpytest("-v", "-r", "s")
-    result.assert_outcomes(error=1, passed=4)
     assert ("workflow_dir can only be requested in tests marked with "
             "the workflow mark.") in result.stdout.str()
 
@@ -163,7 +162,7 @@ def test_mark_wrong_key_with_fixture(testdir):
             "workflow marker of test_fixture.py::test_fixture_impl"
             ) in result.stdout.str()
     # Assert that no tests were run.
-    result.assert_outcomes(passed=0, failed=0, skipped=0)
+    result.assert_outcomes(passed=0, failed=0, skipped=0, error=1)
 
 
 def test_fixture_usable_for_file_tests(testdir):
@@ -258,8 +257,7 @@ def test_same_custom_test_multiple_times_one_error(testdir):
     import pytest
     from pathlib import Path
 
-    @pytest.mark.workflow(names=["one_two_three", "two_three_five",
-     "three_four_five"])
+    @pytest.mark.workflow("one_two_three", "two_three_five", "three_four_five")
     def test_div_by_three(workflow_dir):
         number_file = workflow_dir / Path("numbers.txt")
         assert int(number_file.read_text()) % 3 == 0
@@ -269,5 +267,5 @@ def test_same_custom_test_multiple_times_one_error(testdir):
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
     result.assert_outcomes(passed=8, failed=1, skipped=0, error=0)
-    assert "test_div.py::test_div_by_three::two_three_five:: Failed" \
-           in result.stdout.str()
+    assert ("test_div.py::test_div_by_three[two_three_five] FAILED "
+            in result.stdout.str())
