@@ -204,27 +204,32 @@ def get_workflow_names_from_workflow_marker(marker: MarkDecorator
 
 
 def pytest_generate_tests(metafunc: Metafunc):
+    """
+    This runs at the end of the collection phase.
+    :param metafunc: A function before it is fully parametrized.
+    :return: None
+    """
+    # If workflow_dir is not present we do not need to parametrize it.
     if "workflow_dir" not in metafunc.fixturenames:
         return
+
     definition: FunctionDefinition = metafunc.definition
     marker: Optional[MarkDecorator] = definition.get_closest_marker(
         name="workflow")
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
+
     workflow_names: List[str] = get_workflow_names_from_workflow_marker(marker)
     if not workflow_names:
         raise ValueError(f"A workflow name or names should be defined in "
                          f"the workflow marker of {definition.nodeid}")
-    run_workflows = metafunc.config.executed_workflows.keys()
-    applicable_workflows = set(workflow_names).intersection(run_workflows)
-    if not applicable_workflows:
-        return
+
     workflow_temp_dir = metafunc.config.workflow_temp_dir
     workflow_dirs = [Path(workflow_temp_dir, replace_whitespace(name))
-                     for name in applicable_workflows]
+                     for name in workflow_names]
     metafunc.parametrize("workflow_dir", workflow_dirs,
-                         ids=applicable_workflows)
+                         ids=workflow_names)
 
 
 def pytest_collection_modifyitems(config: PytestConfig,
