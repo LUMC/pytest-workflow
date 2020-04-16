@@ -198,6 +198,13 @@ def get_workflow_names_from_workflow_marker(marker: MarkDecorator
     if marker.args:
         return marker.args
     elif 'name' in marker.kwargs:
+        # TODO: Remove this as soon as version reaches 1.4.0-dev
+        # This means also the entire get_workflow_names_from_workflow_marker
+        # function can be removed. As simply marker.args can be used.
+        warnings.warn(PendingDeprecationWarning(
+            "Using pytest.mark.workflow(name='workflow name') is "
+            "deprecated. Use pytest.mark.workflow('workflow_name') instead. "
+            "This behavior will be removed in a later version."))
         return [marker.kwargs['name']]
     else:
         return []
