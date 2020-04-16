@@ -221,15 +221,11 @@ def test_same_custom_test_multiple_times(testdir):
     import pytest
     from pathlib import Path
 
-    @pytest.mark.workflow(["one_two_three", "two_three_four",
-     "three_four_five"])
+    @pytest.mark.workflow("one_two_three", "two_three_four",
+     "three_four_five")
     def test_div_by_three(workflow_dir):
         number_file = workflow_dir / Path("numbers.txt")
-
-        with number_file.open('rt') as file_h:
-            number_file_content = file_h.read()
-
-        assert int(number_file_content) % 3 == 0
+        assert int(number_file.read_text()) % 3 == 0
     """)
 
     testdir.makefile(".yml", test_aworkflow=test_workflow)
@@ -262,18 +258,16 @@ def test_same_custom_test_multiple_times_one_error(testdir):
     import pytest
     from pathlib import Path
 
-    @pytest.mark.workflow(["one_two_three", "two_three_five",
+    @pytest.mark.workflow(names=["one_two_three", "two_three_five",
      "three_four_five"])
     def test_div_by_three(workflow_dir):
         number_file = workflow_dir / Path("numbers.txt")
-
-        with number_file.open('rt') as file_h:
-            number_file_content = file_h.read()
-        assert int(number_file_content) % 3 == 0
+        assert int(number_file.read_text()) % 3 == 0
     """)
 
     testdir.makefile(".yml", test_aworkflow=test_workflow)
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
     result.assert_outcomes(passed=8, failed=1, skipped=0, error=0)
-    assert "test_div.py::test_div_by_three::two_three_five:: Failed" in result.stdout.str()
+    assert "test_div.py::test_div_by_three::two_three_five:: Failed" \
+           in result.stdout.str()
