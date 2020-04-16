@@ -18,7 +18,8 @@ Changes
 +++++++++++++++++++++++++++
 + Added a ``--symlink`` flag to the CLI that changes the copying behavior.
   Instead of copying, it creates a similar directory structure where all files
-  are linked to with symbolic links.
+  are linked to with symbolic links. (`Issue #96
+  <https://github.com/LUMC/pytest-workflow/issues/98>`_)
 + Refactored the code base. Python 3.6's f-strings and type annotation were
   used consistently throughout the project. Some code was rewritten to be more
   concise and readable.
