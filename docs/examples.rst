@@ -55,9 +55,9 @@ created by the same user that runs the test (docker containers run as root by
 default). This will ensure that files can be deleted by pytest-workflow
 afterwards.
 
-The following yaml file tests a Cromwell pipeline. In this case Cromwell is
-installed via conda. The conda installation adds a wrapper to Cromwell so it
-can be used as a command, instead of having to use the jar.
+The following yaml file tests a WDL pipeline run with Cromwell. In this case
+Cromwell is installed via conda. The conda installation adds a wrapper to
+Cromwell so it can be used as a command, instead of having to use the jar.
 
 .. code-block:: yaml
 
@@ -70,3 +70,42 @@ can be used as a command, instead of having to use the jar.
       contains:
         - "WorkflowSucceededState"
 
+WDL with miniwdl example
+------------------------
+
+For miniwdl please consult the `runner reference
+<https://miniwdl.readthedocs.io/en/stable/runner_reference.html>`_ for more
+information on the localization of output files as well as options to modify
+the running of miniwdl from the environment.
+
+Miniwdl will localize all the output files to an ``output_links`` directory
+inside the test output directory. If you have a workflow with the output:
+
+.. code-block::
+
+        output {
+            File moo_file = moo_task.out
+            Array[File] stats = moo_task.stats_files
+        }
+
+Inside the ``output_links`` directory the directories ``moo_file`` and
+``stats`` will be created. Inside these directories will be the produced files.
+
+The following yaml file tests a WDL pipeline run with miniwdl.
+
+.. code-block:: yaml
+
+  - name: My pipeline
+    command: miniwdl run -i inputs.json -d test-output/ moo.wdl
+    files:
+      - path: test-output/output_links/moo_file/moo.txt.gz
+        md5sum: 173fd8023240a8016033b33f42db14a2
+      - path: test-output/output_links/stats/number_of_moos_per_cow.tsv
+        contains:
+          - 42
+      - path: test-output/output_links/stats/joy_invoking_moos.tsv
+        must_not_contain:
+          - 0
+
+Please note that the trailing slash in ``-d test-output/`` is important. It
+will ensure the files end up in the ``test-output`` directory.
