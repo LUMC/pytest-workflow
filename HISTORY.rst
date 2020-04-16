@@ -14,8 +14,6 @@ This was necessary for fixing the deprecation warning issue and the issue with
 the subdirectory evaluation. This also gave the opportunity to simplify the
 source code using new python 3.6 syntax.
 
-Changes
-+++++++++++++++++++++++++++
 + Added a ``--symlink`` flag to the CLI that changes the copying behavior.
   Instead of copying, it creates a similar directory structure where all files
   are linked to with symbolic links. (`Issue #96
