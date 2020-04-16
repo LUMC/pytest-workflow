@@ -25,12 +25,11 @@ matrix:
       env: TOX_ENV=py38
 
     # FUNCTIONAL TESTS
-    - python: 3.6
-      env: TOX_ENV=snakemake
-    - python: 3.7
-      env: TOX_ENV=snakemake
+    # Use default python here.
+    - env: TOX_ENV=snakemake
+    - env: TOX_ENV=miniwdl
     - env: TOX_ENV=cromwell
-      before_install:
+      install:
         # Install conda
         - export MINICONDA=${HOME}/miniconda
         - export PATH=${MINICONDA}/bin:${PATH}
