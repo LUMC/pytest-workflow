@@ -241,7 +241,7 @@ def pytest_generate_tests(metafunc: Metafunc):
 
 
 def pytest_collection_modifyitems(config: PytestConfig,
-                                  items: List[pytest.Item]):
+                                  items: List[pytest.Function]):
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
@@ -253,12 +253,20 @@ def pytest_collection_modifyitems(config: PytestConfig,
 
         workflow_names: List[str] = get_workflow_names_from_workflow_marker(
             marker)
+        if len(workflow_names) == 1:
+            workflow_name = workflow_names[0]
+        elif "workflow_dir" in item.fixturenames:
+            # nodeid looks like test_bla.py::test_bla[parametrizedvalue]
+            # this parametrizedvalue should be the workflow name.
+            workflow_name = item.nodeid.split('[')[-1].strip(']')
+        else:
+            raise NotImplementedError(f"Cannot determine workflow name for "
+                                      f"{item.nodeid}")
 
-        for workflow_name in workflow_names:
-            if workflow_name not in config.executed_workflows.keys():
-                skip_marker = pytest.mark.skip(
-                    reason=f"'{workflow_name}' has not run.")
-                item.add_marker(skip_marker)
+        if workflow_name not in config.executed_workflows.keys():
+            skip_marker = pytest.mark.skip(
+                reason=f"'{workflow_name}' has not run.")
+            item.add_marker(skip_marker)
 
 
 def pytest_runtestloop(session: pytest.Session):
