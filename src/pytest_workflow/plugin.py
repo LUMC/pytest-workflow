@@ -34,7 +34,7 @@ import yaml
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .util import is_in_dir, replace_whitespace, rm_dirs
+from .util import is_in_dir, link_tree, replace_whitespace, rm_dirs
 from .workflow import Workflow, WorkflowQueue
 
 
@@ -59,6 +59,13 @@ def pytest_addoption(parser: PytestParser):
         default=1,
         type=int,
         help="The number of workflows to run simultaneously.")
+    parser.addoption(
+        "--symlink", action="store_true",
+        help="Instead of copying the current working directory, create a "
+             "similar directory structure where all files are replaced with "
+             "symbolic links. This saves disk space, but should only be used "
+             "for tests that do use these files read-only."
+    )
 
     # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
     # `-m` uses a "mark expression". So you have to type a piece of python
@@ -339,7 +346,10 @@ class WorkflowTestsCollector(pytest.Collector):
 
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        shutil.copytree(str(self.config.rootdir), str(tempdir))
+        if self.config.getoption("symlink"):
+            link_tree(Path(str(self.config.rootdir)), tempdir)
+        else:
+            shutil.copytree(str(self.config.rootdir), str(tempdir))
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,

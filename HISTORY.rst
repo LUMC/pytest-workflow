@@ -7,15 +7,17 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.3-dev
+version 1.3.0-dev
 ---------------------------
 Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.
 This was necessary for fixing the deprecation warning issue and the issue with
 the subdirectory evaluation. This also gave the opportunity to simplify the
 source code using new python 3.6 syntax.
 
-Changes
-+++++++++++++++++++++++++++
++ Added a ``--symlink`` flag to the CLI that changes the copying behavior.
+  Instead of copying, it creates a similar directory structure where all files
+  are linked to with symbolic links. (`Issue #96
+  <https://github.com/LUMC/pytest-workflow/issues/98>`_)
 + Refactored the code base. Python 3.6's f-strings and type annotation were
   used consistently throughout the project. Some code was rewritten to be more
   concise and readable.

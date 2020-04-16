@@ -16,6 +16,7 @@
 """Tests whether the temporary directories are correctly saved/destroyed"""
 
 import re
+import shutil
 import tempfile
 from pathlib import Path
 
@@ -30,6 +31,7 @@ def test_directory_kept(testdir):
     assert Path(working_dir).exists()
     assert Path(working_dir / Path("log.out")).exists()
     assert Path(working_dir / Path("log.err")).exists()
+    shutil.rmtree(str(testdir))
 
 
 def test_directory_not_kept(testdir):
@@ -65,8 +67,10 @@ def test_basetemp_can_be_used_twice(testdir):
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
                                tempdir)
     exit_code = result.ret
-    assert "'{tempdir}/simple_echo' already exists. Deleting ..."
+    assert (f"'{tempdir}/simple_echo' already exists. Deleting ..." in
+            result.stdout.str())
     assert exit_code == 0
+    shutil.rmtree(tempdir)
 
 
 def test_basetemp_will_be_created(testdir):
@@ -81,6 +85,7 @@ def test_basetemp_will_be_created(testdir):
                                str(tempdir))
     assert tempdir.exists()
     assert result.ret == 0
+    shutil.rmtree(tempdir_base)
 
 
 def test_basetemp_can_not_be_in_rootdir(testdir):
@@ -114,6 +119,7 @@ def test_directory_kept_on_fail(testdir):
     assert Path(working_dir / Path("log.err")).exists()
     assert ("One or more tests failed. Keeping temporary directories and "
             "logs." in result.stdout.str())
+    shutil.rmtree(working_dir)
 
 
 def test_directory_not_kept_on_succes(testdir):
@@ -125,3 +131,17 @@ def test_directory_not_kept_on_succes(testdir):
     assert not Path(working_dir).exists()
     assert ("All tests succeeded. Removing temporary directories and logs." in
             result.stdout.str())
+
+
+def test_directory_of_symlinks(testdir):
+    testdir.makefile(".yml", test=SIMPLE_ECHO)
+    subdir = testdir.mkdir("subdir")
+    Path(str(subdir), "subfile.txt").write_text("test")
+    result = testdir.runpytest("-v", "--symlink", "--kwd")
+    working_dir = re.search(
+        r"with command 'echo moo' in '([\w/_-]*)'",
+        result.stdout.str()).group(1)
+    assert Path(working_dir, "test.yml").is_symlink()
+    assert Path(working_dir, "subdir").is_dir()
+    assert Path(working_dir, "subdir", "subfile.txt").is_symlink()
+    shutil.rmtree(working_dir)
