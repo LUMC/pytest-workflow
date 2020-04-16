@@ -212,7 +212,8 @@ def get_workflow_names_from_workflow_marker(marker: MarkDecorator
 
 def pytest_generate_tests(metafunc: Metafunc):
     """
-    This runs at the end of the collection phase.
+    This runs at the end of the collection phase. We use this hook to generate
+    the workflow_dir fixtures for custom test functions.
     :param metafunc: A function before it is fully parametrized.
     :return: None
     """
