@@ -26,8 +26,8 @@ Specific pytest options for pytest workflow
     :func: __pytest_workflow_cli
     :prog: pytest
 
-Temporary directory cleanup
----------------------------
+Temporary directory cleanup and creation
+----------------------------------------
 
 The temporary directories are cleaned up after the tests are completed.
 If you wish to inspect the output of a failing
@@ -50,6 +50,16 @@ use ``--basetemp <dir>`` to change pytest's base temp directory.
   again with the same ``basetemp`` directory.
   DO NOT use ``--basetemp`` on directories where none of the
   contents should be deleted.
+
+The temporary directories created are copies of pytest's root directory, the
+directory from which it runs the tests. If you have lots of tests, and if you
+have a large repository, this may take a lot of disk space. To alleviate this
+you can use the ``--symlink`` flag which will create the same directory layout
+but instead symlinks the files instead of copying them. This is *slower* for
+lots of small files, and it carries with it the risk that the tests may alter
+files from your work directory. If there are a lot of large files and files are
+used read-only in tests, then it will use a lot less disk space and be faster
+as well.
 
 Running multiple workflows simultaneously
 -----------------------------------------
