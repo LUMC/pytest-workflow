@@ -14,6 +14,10 @@ This was necessary for fixing the deprecation warning issue and the issue with
 the subdirectory evaluation. This also gave the opportunity to simplify the
 source code using new python 3.6 syntax.
 
++ Using the ``name`` keyword argument in workflow marks will be deprecated
+  from 1.4.0 onwards. A warning will be given if this is used. For example:
+  ``pytest.mark.workflow(name="my_workflow")``. Use the name as argument
+  instead: ``pytest.mark.workflow("my_workflow")``.
 + Allow running custom tests on multiple workflows. (`Issue #75`
   <https://github.com/LUMC/pytest-workflow/issues/75>`_)
 + Add a miniwdl example to the documentation.
