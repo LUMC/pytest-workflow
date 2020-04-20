@@ -18,8 +18,9 @@ source code using new python 3.6 syntax.
   from 1.4.0 onwards. A warning will be given if this is used. For example:
   ``pytest.mark.workflow(name="my_workflow")``. Use the name as argument
   instead: ``pytest.mark.workflow("my_workflow")``.
-+ Allow running custom tests on multiple workflows. (`Issue #75`
-  <https://github.com/LUMC/pytest-workflow/issues/75>`_)
++ Allow running custom tests on multiple workflows. You can now use
+  ``pytest.mark.workflow("worflow name 1", "workflow name 2", ...)``.
+  (`Issue #75 <https://github.com/LUMC/pytest-workflow/issues/75>`_)
 + Add a miniwdl example to the documentation.
 + Added a ``--symlink`` flag to the CLI that changes the copying behavior.
   Instead of copying, it creates a similar directory structure where all files
