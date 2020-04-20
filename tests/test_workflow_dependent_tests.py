@@ -138,7 +138,6 @@ def test_fixture_unmarked_test(testdir):
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_FIXTURE_UNMARKED_TEST)
     result = testdir.runpytest("-v", "-r", "s")
-    result.assert_outcomes(error=1, passed=4)
     assert ("workflow_dir can only be requested in tests marked with "
             "the workflow mark.") in result.stdout.str()
 
@@ -159,11 +158,11 @@ def test_mark_wrong_key_with_fixture(testdir):
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
     result = testdir.runpytest("-v", "-r", "s")
-    assert ("A workflow name should be defined in the "
+    assert ("A workflow name or names should be defined in the "
             "workflow marker of test_fixture.py::test_fixture_impl"
             ) in result.stdout.str()
     # Assert that no tests were run.
-    result.assert_outcomes(passed=0, failed=0, skipped=0)
+    result.assert_outcomes(passed=0, failed=0, skipped=0, error=1)
 
 
 def test_fixture_usable_for_file_tests(testdir):
@@ -195,3 +194,89 @@ def test_fixture_usable_for_file_tests(testdir):
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
     result.assert_outcomes(passed=4, failed=0, skipped=0, error=0)
+
+
+def test_same_custom_test_multiple_times(testdir):
+    test_workflow = textwrap.dedent("""\
+    - name: one_two_three
+      command: >-
+        bash -c '
+        echo 123 > numbers.txt' ;
+      files:
+        - path: numbers.txt
+    - name: two_three_four
+      command: >-
+        bash -c '
+        echo 234 > numbers.txt' ;
+      files:
+        - path: numbers.txt
+    - name: three_four_five
+      command: >-
+        bash -c '
+        echo 345 > numbers.txt' ;
+      files:
+        - path: numbers.txt""")
+    test_div_by_three = textwrap.dedent("""\
+    import pytest
+    from pathlib import Path
+
+    @pytest.mark.workflow("one_two_three", "two_three_four",
+     "three_four_five")
+    def test_div_by_three(workflow_dir):
+        number_file = workflow_dir / Path("numbers.txt")
+        assert int(number_file.read_text()) % 3 == 0
+    """)
+
+    testdir.makefile(".yml", test_aworkflow=test_workflow)
+    testdir.makefile(".py", test_div=test_div_by_three)
+    result = testdir.runpytest("-v")
+    result.assert_outcomes(passed=9, failed=0, skipped=0, error=0)
+
+
+TEST_WORKFLOWS = textwrap.dedent("""\
+- name: one_two_three
+  command: >-
+    bash -c '
+    echo 123 > numbers.txt' ;
+  files:
+    - path: numbers.txt
+- name: two_three_five
+  command: >-
+    bash -c '
+    echo 235 > numbers.txt' ;
+  files:
+    - path: numbers.txt
+- name: three_four_five
+  command: >-
+    bash -c '
+    echo 345 > numbers.txt' ;
+  files:
+    - path: numbers.txt""")
+
+TEST_DIV_BY_THREE = textwrap.dedent("""\
+import pytest
+from pathlib import Path
+
+@pytest.mark.workflow("one_two_three", "two_three_five", "three_four_five")
+def test_div_by_three(workflow_dir):
+    number_file = workflow_dir / Path("numbers.txt")
+    assert int(number_file.read_text()) % 3 == 0
+""")
+
+
+def test_same_custom_test_multiple_times_one_error(testdir):
+    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
+    result = testdir.runpytest("-v")
+    result.assert_outcomes(passed=8, failed=1, skipped=0, error=0)
+    assert ("test_div.py::test_div_by_three[two_three_five] FAILED "
+            in result.stdout.str())
+
+
+def test_custom_tests_properly_skipped(testdir):
+    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
+    result = testdir.runpytest("-v", "--tag", "one_two_three")
+    result.assert_outcomes(passed=3, failed=0, skipped=2, error=0)
+    assert ("test_div.py::test_div_by_three[two_three_five] SKIPPED "
+            in result.stdout.str())

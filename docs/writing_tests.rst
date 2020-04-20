@@ -86,23 +86,34 @@ workflow.
     import pathlib
     import pytest
 
-    @pytest.mark.workflow(name='files containing numbers')
+    @pytest.mark.workflow('files containing numbers')
     def test_div_by_three(workflow_dir):
         number_file = pathlib.Path(workflow_dir, "123.txt")
         number_file_content = number_file.read_text()
         assert int(number_file_content) % 3 == 0
 
-The ``@pytest.mark.workflow(name='files containing numbers')`` marks the test
-as belonging to a workflow named ``files containing numbers``. The mark can
-also be written without the explicit ``name`` key as
-``@pytest.mark.workflow('files containing nummbers')``. This test will only run
-if the workflow 'files containing numbers' has run.
+The ``@pytest.mark.workflow('files containing numbers')`` marks the test
+as belonging to a workflow named ``files containing numbers``. This test will
+only run if the workflow 'files containing numbers' has run.
+
+Multiple workflows can use the same custom test like this:
+
+.. code-block:: python
+
+    import pathlib
+    import pytest
+
+    @pytest.mark.workflow('my_workflow', 'another_workflow',
+                          'yet_another_workflow')
+    def test_ensure_long_logs_are_written(workflow_dir):
+        log = pathlib.Path(workflow_dir, "log.out")
+        assert len(log.readtext()) > 10000
 
 ``workflow_dir`` is a fixture. It does not work without a
 ``pytest.mark.workflow('workflow_name')`` mark.  This is a
 `pathlib.Path <https://docs.python.org/3/library/pathlib.html>`_ object that
-points to the folder where the named workflow was executed. This allows writing of
-advanced python tests for each file produced by the workflow.
+points to the folder where the named workflow was executed. This allows writing
+of advanced python tests for each file produced by the workflow.
 
 .. note::
 

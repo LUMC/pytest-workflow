@@ -20,12 +20,12 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional  # noqa: F401 needed for typing.
+from typing import Dict, List, Optional
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.fixtures import SubRequest
-from _pytest.mark import MarkDecorator  # noqa: F401 used for typing
+from _pytest.mark import MarkDecorator
+from _pytest.python import FunctionDefinition, Metafunc
 
 import pytest
 
@@ -125,8 +125,8 @@ def pytest_configure(config: PytestConfig):
     # Errors are now emitted when unknown marks are included
     config.addinivalue_line(
         "markers",
-        "workflow(name): mark test to run only with the given "
-        "workflow name. Also provides access to the workflow_dir "
+        "workflow('name', 'name2', ...): mark test to run only with the given "
+        "workflow name or names. Also provides access to the workflow_dir "
         "fixture."
     )
     # We need to add a workflow queue to some central variable. Instead of
@@ -189,8 +189,59 @@ def pytest_collection():
     print()
 
 
+def get_workflow_names_from_workflow_marker(marker: MarkDecorator
+                                            ) -> List[str]:
+    if not marker.name == "workflow":
+        raise ValueError(
+            f"Can only get names from markers named 'workflow' "
+            f"not '{marker.name}'.")
+    if marker.args:
+        return marker.args
+    elif 'name' in marker.kwargs:
+        # TODO: Remove this as soon as version reaches 1.4.0-dev
+        # This means also the entire get_workflow_names_from_workflow_marker
+        # function can be removed. As simply marker.args can be used.
+        warnings.warn(PendingDeprecationWarning(
+            "Using pytest.mark.workflow(name='workflow name') is "
+            "deprecated. Use pytest.mark.workflow('workflow_name') instead. "
+            "This behavior will be removed in a later version."))
+        return [marker.kwargs['name']]
+    else:
+        return []
+
+
+def pytest_generate_tests(metafunc: Metafunc):
+    """
+    This runs at the end of the collection phase. We use this hook to generate
+    the workflow_dir fixtures for custom test functions.
+    :param metafunc: A function before it is fully parametrized.
+    :return: None
+    """
+    # If workflow_dir is not present we do not need to parametrize it.
+    if "workflow_dir" not in metafunc.fixturenames:
+        return
+
+    definition: FunctionDefinition = metafunc.definition
+    marker: Optional[MarkDecorator] = definition.get_closest_marker(
+        name="workflow")
+    if marker is None:
+        raise ValueError("workflow_dir can only be requested in tests marked"
+                         " with the workflow mark.")
+
+    workflow_names: List[str] = get_workflow_names_from_workflow_marker(marker)
+    if not workflow_names:
+        raise ValueError(f"A workflow name or names should be defined in "
+                         f"the workflow marker of {definition.nodeid}")
+
+    workflow_temp_dir = metafunc.config.workflow_temp_dir
+    workflow_dirs = [Path(workflow_temp_dir, replace_whitespace(name))
+                     for name in workflow_names]
+    metafunc.parametrize("workflow_dir", workflow_dirs,
+                         ids=workflow_names)
+
+
 def pytest_collection_modifyitems(config: PytestConfig,
-                                  items: List[pytest.Item]):
+                                  items: List[pytest.Function]):
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
@@ -200,17 +251,17 @@ def pytest_collection_modifyitems(config: PytestConfig,
         if marker is None:
             continue
 
-        if 'name' in marker.kwargs:
-            workflow_name = marker.kwargs['name']
-        # If name key is not defined use the first arg.
-        elif 'name' not in marker.kwargs and len(marker.args) >= 1:
-            workflow_name = marker.args[0]
-            # Make sure a name attribute is added anyway for the
-            # fixture lookup.
-            marker.kwargs['name'] = workflow_name
+        workflow_names: List[str] = get_workflow_names_from_workflow_marker(
+            marker)
+        if len(workflow_names) == 1:
+            workflow_name = workflow_names[0]
+        elif "workflow_dir" in item.fixturenames:
+            # nodeid looks like test_bla.py::test_bla[parametrizedvalue]
+            # this parametrizedvalue should be the workflow name.
+            workflow_name = item.nodeid.split('[')[-1].strip(']')
         else:
-            raise TypeError(f"A workflow name should be defined in the "
-                            f"workflow marker of {item.nodeid}")
+            raise NotImplementedError(f"Cannot determine workflow name for "
+                                      f"{item.nodeid}")
 
         if workflow_name not in config.executed_workflows.keys():
             skip_marker = pytest.mark.skip(
@@ -262,28 +313,6 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
         rm_dirs(session.config.workflow_cleanup_dirs)
-
-
-@pytest.fixture()
-def workflow_dir(request: SubRequest):
-    """Returns the workflow_dir of the workflow named in the mark. This fixture
-    is only provided for tests that are marked with the workflow mark."""
-
-    # request.node refers to the node that has the mark. This is a pytest.Node
-    marker = request.node.get_closest_marker(name="workflow")
-
-    if marker is not None:
-        workflow_temp_dir = request.config.workflow_temp_dir
-        try:
-            workflow_name = marker.kwargs['name']
-        except KeyError:
-            raise TypeError(
-                f"A workflow name should be defined in the "
-                f"workflow marker of {request.node.nodeid}")
-        return workflow_temp_dir / Path(replace_whitespace(workflow_name))
-    else:
-        raise ValueError("workflow_dir can only be requested in tests marked"
-                         " with the workflow mark.")
 
 
 class YamlFile(pytest.File):
