@@ -7,7 +7,7 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.3.0-dev
+version 1.3.0
 ---------------------------
 Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.
 This was necessary for fixing the deprecation warning issue and the issue with
