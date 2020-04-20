@@ -21,7 +21,7 @@ with open("README.rst", "r") as readme_file:
 
 setup(
     name="pytest-workflow",
-    version="1.2.3",
+    version="1.3.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",
@@ -40,7 +40,6 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
@@ -49,9 +48,10 @@ setup(
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",
     ],
-    python_requires=">=3.5",  # Because we use type annotation.
+    # Because we use the resolve(strict=False) feature from pathlib.
+    python_requires=">=3.6",
     install_requires=[
-        "pytest>=4",
+        "pytest>=5.4.0",  # To use from_parent node instantiation.
         "pyyaml",
         "jsonschema"
     ],
