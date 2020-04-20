@@ -28,6 +28,10 @@ pytest-workflow
   :target: https://codecov.io/gh/LUMC/pytest-workflow
   :alt:
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3757728.svg
+  :target: https://doi.org/10.5281/zenodo.3757728
+  :alt:
+
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
 by using yaml files for the test configuration.
 
