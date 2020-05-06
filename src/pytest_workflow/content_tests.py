@@ -55,7 +55,7 @@ def check_content(strings: Iterable[str],
             break
 
         for string in strings_to_check:
-            if string not in found_strings and string in line:
+            if string in line:
                 found_strings.add(string)
         # Remove found strings for faster searching. This should be done
         # outside of the loop above.
