@@ -9,6 +9,7 @@ Changelog
 
 version 1.4.0-dev
 ---------------------------
++ Update minimum python requirement in the documentation.
 + Removed redundant check in string checking code.
 
 version 1.3.0
