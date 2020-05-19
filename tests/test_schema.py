@@ -52,6 +52,21 @@ def test_workflowtest():
         assert tests[0].tags == ["simple", "use_echo"]
 
 
+def test_workflowtest_regex():
+    with Path(VALID_YAML_DIR / Path("regex_file.yaml")).open() as yaml_fh:
+        test_yaml = yaml.safe_load(yaml_fh)
+        tests = [WorkflowTest.from_schema(x) for x in test_yaml]
+        assert tests[0].name == "simple echo"
+        assert tests[0].files[0].path == Path("log.file")
+        assert tests[0].files[0].contains_regex == ["bla"]
+        assert tests[0].files[0].must_not_contain_regex == ["stuff"]
+        assert len(tests[0].files) == 1
+        assert tests[0].stdout.contains_regex == ["bla"]
+        assert tests[0].stdout.must_not_contain_regex == ["stuff"]
+        assert tests[0].stderr.contains_regex == ["bla"]
+        assert tests[0].stderr.must_not_contain_regex == ["stuff"]
+
+
 def test_validate_schema_conflicting_keys():
     with pytest.raises(jsonschema.ValidationError) as error:
         validate_schema([
@@ -142,6 +157,8 @@ def test_workflow_test_defaults():
     assert workflow_test.files == []
     assert workflow_test.stdout.contains == []
     assert workflow_test.stdout.must_not_contain == []
+    assert workflow_test.stdout.contains_regex == []
+    assert workflow_test.stdout.must_not_contain_regex == []
     assert workflow_test.stderr.contains == []
     assert workflow_test.stderr.must_not_contain == []
     assert workflow_test.exit_code == 0
@@ -151,6 +168,8 @@ def test_filetest_defaults():
     file_test = FileTest(path="bla")
     assert file_test.contains == []
     assert file_test.must_not_contain == []
+    assert file_test.contains_regex == []
+    assert file_test.must_not_contain_regex == []
     assert file_test.md5sum is None
     assert file_test.should_exist
 

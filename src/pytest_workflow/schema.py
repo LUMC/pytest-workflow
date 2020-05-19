@@ -106,9 +106,10 @@ def validate_schema(instance):
 
 class ContentTest(object):
     """
-    A class that holds two lists of strings. Everything in `contains` should be
-    present in the file/text
-    Everything in `must_not_contain` should not be present.
+    A class that holds four lists of strings. Everything in `contains` and
+    `contains_regex` should be present in the file/text
+    Everything in `must_not_contain` and `must_not_contain_regex` should
+    not be present.
     """
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None,
