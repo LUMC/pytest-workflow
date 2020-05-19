@@ -72,7 +72,20 @@ ZIPPED_FILE = textwrap.dedent("""\
         - moo
 """)
 
-SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE
+REGEX_FILE = textwrap.dedent("""\
+- name: regex
+  command: bash -c 'echo Hello, world'
+  stdout:
+    contains_regex:
+      - "ello"
+      - '^H.*d$'
+    contains:
+      - "Hello"
+    must_not_contain_regex:
+      - "Hello.*world!"
+""")
+
+SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE + REGEX_FILE
 
 SUCCESS_MESSAGES = [
     ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],
@@ -90,7 +103,12 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],
     ["test_succeeding.yml::zipped file::moo.gz::content::contains 'moo' PASSED"],  # noqa: E501
     ["start 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
-    ["'moo file' done."]
+    ["'moo file' done."],
+    ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
+    ["test_succeeding.yml::regex::stdout::contains 'Hello' PASSED"],
+    ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
+    ["test_succeeding.yml::regex::stdout::contains '^H.*d$' PASSED"],
+    ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"]
 ]
 
 
