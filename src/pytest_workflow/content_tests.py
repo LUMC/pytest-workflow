@@ -21,6 +21,7 @@ The design philosophy here was that each piece of text should only be read
 once."""
 import functools
 import gzip
+import re
 import threading
 from pathlib import Path
 from typing import Iterable, Optional, Set
@@ -61,6 +62,43 @@ def check_content(strings: Iterable[str],
         # outside of the loop above.
         strings_to_check -= found_strings
     return found_strings
+
+
+def check_regex_content(patterns: Iterable[str],
+                  text_lines: Iterable[str]) -> Set[str]:
+    """
+    Checks whether any of the patterns is present in the text lines
+    It only reads the lines once and it stops reading when
+    everything is found. This makes searching for patterns in large bodies of
+    text more efficient.
+    :param patterns: A list of regexes which is matched
+    :param text_lines: The lines of text that need to be searched.
+    :return: A tuple with a set of found regexes, and a set of not found
+    regexes
+    """
+
+    # Create two sets. By default all strings are not found.
+    regex_to_match = {re.compile(pattern) for pattern in patterns}
+    found_pattern: Set[str] = set()
+
+    for line in text_lines:
+        # Break the loop if all regexes have been matched
+        if not regex_to_match:
+            break
+
+        # Regexes we don't have to check anymore
+        to_remove = list()
+        for regex in regex_to_match:
+            if re.search(regex, line):
+                found_pattern.add(regex.pattern)
+                to_remove.append(regex)
+
+        # Remove found patterns for faster searching. This should be done
+        # outside of the loop above.
+        for regex in to_remove:
+            regex_to_match.remove(regex)
+
+    return found_pattern
 
 
 class ContentTestCollector(pytest.Collector):

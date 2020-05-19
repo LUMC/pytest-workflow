@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.content_tests import check_content
+from pytest_workflow.content_tests import check_content, check_regex_content
 
 LICENSE = Path(__file__).parent / Path("content_files", "LICENSE")
 LICENSE_ZIPPED = LICENSE.parent / Path("LICENSE.gz")
@@ -37,6 +37,10 @@ SUCCEEDING_TESTS = [
     ([], ["All hail Google, Guardian of our privacy"])
 ]
 
+REGEX_TESTS = [
+    (["^  When we speak"], [".*Google.*"]),
+    (["When we speak"], ["^When we speak"])
+]
 
 @pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
                          SUCCEEDING_TESTS)
@@ -47,6 +51,18 @@ def test_check_content_succeeding(contains_strings, does_not_contain_strings):
                                       license_h)
     assert set(contains_strings) == found_strings
     assert set(does_not_contain_strings) == all_strings - found_strings
+
+
+@pytest.mark.parametrize(["contains_regex", "does_not_contain_regex"],
+                         REGEX_TESTS)
+def test_check_regex_content_succeeding(contains_regex,
+                                        does_not_contain_regex):
+    all_regex = set(contains_regex).union(set(does_not_contain_regex))
+    with LICENSE.open("rt") as license_h:
+        found_regex = check_regex_content(list(all_regex),
+                                      license_h)
+    assert set(contains_regex) == found_regex
+    assert set(does_not_contain_regex) == all_regex - found_regex
 
 
 def test_multiple_finds_one_line():
