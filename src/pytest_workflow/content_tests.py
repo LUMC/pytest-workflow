@@ -221,6 +221,7 @@ class ContentTestItem(pytest.Item):
         finished.
         :param string: The string that was searched for.
         :param should_contain: Whether the string should have been there
+        :param regex: Wether we are looking for a regex
         :param content_name: the name of the content which allows for easier
         debugging if the test fails
         """
