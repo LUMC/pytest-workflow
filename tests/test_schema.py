@@ -23,8 +23,8 @@ import jsonschema
 
 import pytest
 
-from pytest_workflow.schema import FileTest, WorkflowTest, validate_schema, \
-    workflow_tests_from_schema
+from pytest_workflow.schema import FileTest, ContentTest, WorkflowTest, \
+        validate_schema, workflow_tests_from_schema
 
 import yaml
 
@@ -153,3 +153,33 @@ def test_filetest_defaults():
     assert file_test.must_not_contain == []
     assert file_test.md5sum is None
     assert file_test.should_exist
+
+
+def test_contenttest_with_contains():
+    """ Test if we can make a ContentTest object without regex to match """
+    ctest = ContentTest(contains = ["Should contain"],
+                        must_not_contain=["Should not contain"])
+
+
+def test_contenttest_with_regex():
+    """ Test if we can make a ContentTest object without regex to match """
+    ctest = ContentTest(contains_regex = ["Should contain"],
+                        must_not_contain_regex =["Should not contain"])
+
+
+def test_filetest_with_contains():
+    """ Test if we can make a FileTest object without regex to match """
+    file_test = FileTest(path="bla", md5sum="checksum", should_exist=False,
+                         contains=["Should contain"],
+                         must_not_contain=["Should not contain"])
+    assert file_test.contains == ["Should contain"]
+    assert file_test.must_not_contain == ["Should not contain"]
+
+
+def test_filetest_with_regex():
+    """ Test if we can make a FileTest object with a regex to match """
+    file_test = FileTest(path="bla", md5sum="checksum", should_exist=False,
+                         contains_regex=["Should contain"],
+                         must_not_contain_regex=["Should not contain"])
+    assert file_test.contains_regex == ["Should contain"]
+    assert file_test.must_not_contain_regex == ["Should not contain"]
