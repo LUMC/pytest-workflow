@@ -79,7 +79,7 @@ def check_regex_content(patterns: Iterable[str],
 
     # Create two sets. By default all strings are not found.
     regex_to_match = {re.compile(pattern) for pattern in patterns}
-    found_pattern: Set[str] = set()
+    found_patterns: Set[str] = set()
 
     for line in text_lines:
         # Break the loop if all regexes have been matched
@@ -90,7 +90,7 @@ def check_regex_content(patterns: Iterable[str],
         to_remove = list()
         for regex in regex_to_match:
             if re.search(regex, line):
-                found_pattern.add(regex.pattern)
+                found_patterns.add(regex.pattern)
                 to_remove.append(regex)
 
         # Remove found patterns for faster searching. This should be done
@@ -98,7 +98,7 @@ def check_regex_content(patterns: Iterable[str],
         for regex in to_remove:
             regex_to_match.remove(regex)
 
-    return found_pattern
+    return found_patterns
 
 
 class ContentTestCollector(pytest.Collector):
@@ -122,6 +122,7 @@ class ContentTestCollector(pytest.Collector):
         self.content_test = content_test
         self.workflow = workflow
         self.found_strings = None
+        self.found_patterns = None
         self.thread = None
         # We check the contents of files. Sometimes files are not there. Then
         # content can not be checked. We save FileNotFoundErrors in this
@@ -137,6 +138,8 @@ class ContentTestCollector(pytest.Collector):
         self.workflow.wait()
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
+        patterns_to_check = (self.content_test.contains_regex +
+                             self.content_test.must_not_contain_regex)
         file_open = (functools.partial(gzip.open, str(self.filepath))
                      if self.filepath.suffix == ".gz" else
                      self.filepath.open)
@@ -145,6 +148,11 @@ class ContentTestCollector(pytest.Collector):
             with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
                 self.found_strings = check_content(
                     strings=strings_to_check,
+                    text_lines=file_handler)
+            # Read the file again for the regex
+            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
+                self.found_patterns = check_regex_content(
+                    patterns=patterns_to_check,
                     text_lines=file_handler)
         except FileNotFoundError:
             self.file_not_found = True
@@ -162,6 +170,7 @@ class ContentTestCollector(pytest.Collector):
                 parent=self,
                 string=string,
                 should_contain=True,
+                regex=False,
                 content_name=self.content_name
             )
             for string in self.content_test.contains]
@@ -171,9 +180,30 @@ class ContentTestCollector(pytest.Collector):
                 parent=self,
                 string=string,
                 should_contain=False,
+                regex=False,
                 content_name=self.content_name
             )
             for string in self.content_test.must_not_contain]
+
+        test_items += [
+            ContentTestItem.from_parent(
+                parent=self,
+                string=pattern,
+                should_contain=True,
+                regex=True,
+                content_name=self.content_name
+            )
+            for pattern in self.content_test.contains_regex]
+
+        test_items += [
+            ContentTestItem.from_parent(
+                parent=self,
+                string=pattern,
+                should_contain=False,
+                regex=True,
+                content_name=self.content_name
+            )
+            for pattern in self.content_test.must_not_contain_regex]
 
         return test_items
 
@@ -182,7 +212,7 @@ class ContentTestItem(pytest.Item):
     """Item that reports if a string has been found in content."""
 
     def __init__(self, parent: ContentTestCollector, string: str,
-                 should_contain: bool, content_name: str):
+                 should_contain: bool, regex: bool, content_name: str):
         """
         Create a ContentTestItem
         :param parent: A ContentTestCollector. We use a ContentTestCollector
@@ -201,6 +231,7 @@ class ContentTestItem(pytest.Item):
         self.should_contain = should_contain
         self.string = string
         self.content_name = content_name
+        self.regex = regex
 
     def runtest(self):
         """Only after a workflow is finished the contents of files and logs are
@@ -213,8 +244,12 @@ class ContentTestItem(pytest.Item):
         # Wait for thread to complete.
         self.parent.thread.join()
         assert not self.parent.file_not_found
-        assert ((self.string in self.parent.found_strings) ==
-                self.should_contain)
+        if self.regex:
+            assert ((self.string in self.parent.found_patterns) ==
+                    self.should_contain)
+        else:
+            assert ((self.string in self.parent.found_strings) ==
+                    self.should_contain)
 
     def repr_failure(self, excinfo, style=None):
         if self.parent.file_not_found:
