@@ -29,7 +29,7 @@ from pytest_workflow.schema import ContentTest, FileTest, WorkflowTest, \
 import yaml
 
 VALID_YAML_DIR = Path(__file__).parent / Path("yamls", "valid")
-VALID_YAMLS = [f for f in os.listdir(VALID_YAML_DIR) if not f.startswith('.')]
+VALID_YAMLS = os.listdir(VALID_YAML_DIR)
 
 
 @pytest.mark.parametrize("yaml_path", VALID_YAMLS)
