@@ -23,7 +23,7 @@ import jsonschema
 
 import pytest
 
-from pytest_workflow.schema import FileTest, ContentTest, WorkflowTest, \
+from pytest_workflow.schema import ContentTest, FileTest, WorkflowTest, \
         validate_schema, workflow_tests_from_schema
 
 import yaml

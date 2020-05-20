@@ -42,6 +42,7 @@ REGEX_TESTS = [
     (["When we speak"], ["^When we speak"])
 ]
 
+
 @pytest.mark.parametrize(["contains_strings", "does_not_contain_strings"],
                          SUCCEEDING_TESTS)
 def test_check_content_succeeding(contains_strings, does_not_contain_strings):
