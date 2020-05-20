@@ -123,7 +123,45 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
             - "miaow"
     """,
      "moo.txt' does not exist and cannot be searched for "
-     "not containing 'miaow'.")
+     "not containing 'miaow'."),
+    ("""\
+    - name: simple echo
+      command: "echo Hello, world"
+      stdout:
+        contains_regex:
+          - 'Hello .*'
+     """,
+     "'Hello .*' was not found in 'simple echo': stdout while it should be "
+     "there."),
+    ("""\
+    - name: simple echo
+      command: "echo Hello, world"
+      stdout:
+        must_not_contain_regex:
+          - "^He.*"
+     """,
+     "'^He.*' was found in 'simple echo': stdout while it should not be there."
+    ),
+    ("""\
+    - name: to file
+      command: bash -c 'echo Hello, world > file.txt'
+      files:
+        - path: file.txt
+          contains_regex:
+            - 'Hello .*'
+     """,
+     "to file::file.txt::content::contains 'Hello .*'"
+    ),
+    ("""\
+    - name: to file
+      command: bash -c 'echo Hello, world > file.txt'
+      files:
+        - path: file.txt
+          must_not_contain_regex:
+            - "^He.*"
+     """,
+     "to file::file.txt::content::does not contain '^He.*"
+    ),
 ]
 
 
