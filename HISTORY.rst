@@ -7,6 +7,15 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.4.0
+---------------------------
++ Usage of the ``name`` keyword argument in workflow marks is now deprecated.
+  Using this will crash the plugin with a DeprecationWarning.
++ Update minimum python requirement in the documentation.
++ Removed redundant check in string checking code.
++ Add new options ``contains_regex`` and ``must_not_contain_regex`` to check
+  for regexes in files and stdout/stderr.
+
 version 1.3.0
 ---------------------------
 Python 3.6 and pytest 5.4.0.0 are now minimum requirements for pytest-workflow.

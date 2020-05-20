@@ -106,14 +106,19 @@ def validate_schema(instance):
 
 class ContentTest(object):
     """
-    A class that holds two lists of strings. Everything in `contains` should be
-    present in the file/text
-    Everything in `must_not_contain` should not be present.
+    A class that holds four lists of strings. Everything in `contains` and
+    `contains_regex` should be present in the file/text
+    Everything in `must_not_contain` and `must_not_contain_regex` should
+    not be present.
     """
     def __init__(self, contains: Optional[List[str]] = None,
-                 must_not_contain: Optional[List[str]] = None):
+                 must_not_contain: Optional[List[str]] = None,
+                 contains_regex: Optional[List[str]] = None,
+                 must_not_contain_regex: Optional[List[str]] = None):
         self.contains: List[str] = contains or []
         self.must_not_contain: List[str] = must_not_contain or []
+        self.contains_regex: List[str] = contains_regex or []
+        self.must_not_contain_regex: List[str] = must_not_contain_regex or []
 
 
 class FileTest(ContentTest):
@@ -121,7 +126,9 @@ class FileTest(ContentTest):
     def __init__(self, path: str, md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
-                 must_not_contain: Optional[List[str]] = None):
+                 must_not_contain: Optional[List[str]] = None,
+                 contains_regex: Optional[List[str]] = None,
+                 must_not_contain_regex: Optional[List[str]] = None):
         """
         A container object
         :param path: the path to the file
@@ -130,8 +137,14 @@ class FileTest(ContentTest):
         :param contains: a list of strings that should be present in the file
         :param must_not_contain: a list of strings that should not be present
         in the file
+        :param contains_regex: a list of regular expression patterns that
+        should be present in the file
+        :param must_not_contain_regex: a list of regular expression pattersn
+        that should not be present in the file
         """
-        super().__init__(contains=contains, must_not_contain=must_not_contain)
+        super().__init__(contains=contains, must_not_contain=must_not_contain,
+                         contains_regex=contains_regex,
+                         must_not_contain_regex=must_not_contain_regex)
         self.path = Path(path)
         self.md5sum = md5sum
         self.should_exist = should_exist

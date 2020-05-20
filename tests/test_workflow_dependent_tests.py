@@ -39,7 +39,7 @@ def test_hook_impl():
 """)
 
 
-@pytest.mark.parametrize("test", [TEST_HOOK_ARGS, TEST_HOOK_KWARGS])
+@pytest.mark.parametrize("test", [TEST_HOOK_ARGS])
 def test_not_skipped(test, testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
     testdir.makefile(".py", test_hook=test)
@@ -47,7 +47,15 @@ def test_not_skipped(test, testdir):
     result.assert_outcomes(passed=5)
 
 
-@pytest.mark.parametrize("test", [TEST_HOOK_ARGS, TEST_HOOK_KWARGS])
+def test_name_use_is_deprecated(testdir):
+    testdir.makefile(".py", test_hook=TEST_HOOK_KWARGS)
+    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
+    result = testdir.runpytest().stdout.str()
+    assert "Use pytest.mark.workflow('workflow_name') instead." in result
+    assert "DeprecationWarning" in result
+
+
+@pytest.mark.parametrize("test", [TEST_HOOK_ARGS])
 def test_skipped(test, testdir):
     testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
     testdir.makefile(".py", test_hook=test)
@@ -57,15 +65,6 @@ def test_skipped(test, testdir):
     result.assert_outcomes(skipped=1)
     assert "'simple echo' has not run." in result.stdout.str()
 
-
-TEST_FIXTURE_KWARGS = textwrap.dedent("""\
-import pytest
-
-@pytest.mark.workflow(name="simple echo")
-def test_fixture_impl(workflow_dir):
-    assert workflow_dir.name == "simple_echo"
-    assert workflow_dir.exists()
-""")
 
 TEST_FIXTURE_ARGS = textwrap.dedent("""\
 import pytest
@@ -77,7 +76,7 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-@pytest.mark.parametrize("test", [TEST_FIXTURE_KWARGS, TEST_FIXTURE_ARGS])
+@pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
 def test_workflow_dir_arg(test, testdir):
     # Call the test, `test_asimple` because tests are run alphabetically.
     # This will detect if the workflow dir has been removed.
@@ -87,7 +86,7 @@ def test_workflow_dir_arg(test, testdir):
     result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
 
 
-@pytest.mark.parametrize("test", [TEST_FIXTURE_KWARGS, TEST_FIXTURE_ARGS])
+@pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
 def test_workflow_dir_arg_skipped(test, testdir):
     """Run this test to check if this does not run into fixture request
     errors"""
@@ -108,7 +107,7 @@ def test_mark_not_unknown(test, testdir):
 TEST_FIXTURE_WORKFLOW_NOT_EXIST = textwrap.dedent("""\
 import pytest
 
-@pytest.mark.workflow(name="shoobiedoewap")
+@pytest.mark.workflow("shoobiedoewap")
 def test_fixture_impl(workflow_dir):
     assert workflow_dir.name == "simple_echo"
 """)
@@ -180,7 +179,7 @@ def test_fixture_usable_for_file_tests(testdir):
     import pytest
     from pathlib import Path
 
-    @pytest.mark.workflow(name="number files")
+    @pytest.mark.workflow("number files")
     def test_div_by_three(workflow_dir):
         number_file = workflow_dir / Path("123.txt")
 

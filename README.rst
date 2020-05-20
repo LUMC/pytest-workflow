@@ -28,6 +28,10 @@ pytest-workflow
   :target: https://codecov.io/gh/LUMC/pytest-workflow
   :alt:
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3757727.svg
+  :target: https://doi.org/10.5281/zenodo.3757727
+  :alt: More information on how to cite pytest-workflow here.
+
 pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
 by using yaml files for the test configuration.
 
@@ -37,8 +41,8 @@ For our complete documentation checkout our
 
 Installation
 ============
-Pytest-workflow requires Python 3.5 or higher. It is tested on Python 3.5, 3.6,
-3.7 and 3.8. Python 2 is not supported.
+Pytest-workflow requires Python 3.6 or higher. It is tested on Python 3.6, 3.7
+and 3.8. Python 2 is not supported.
 
 - Make sure your virtual environment is activated.
 - Install using pip ``pip install pytest-workflow``
@@ -123,6 +127,20 @@ predefined tests as well as custom tests are possible.
         - "BSOD error, please contact the IT crowd"
       must_not_contain:                # A list of strings which should NOT be in stderr (optional)
         - "Mission accomplished!"
+
+  - name: regex tests
+    command: echo Hello, world
+    stdout:
+      contains_regex:                  # A list of regex patterns that should be in stdout (optional)
+        - 'Hello.*'                    # Note the single quotes, these are required for complex regexes
+        - 'Hello .*'                   # This will fail, since there is a comma after Hello, not a space
+
+      must_not_contain_regex:          # A list of regex patterns that should not be in stdout (optional)
+        - '^He.*'                      # This will fail, since the regex matches Hello, world
+        - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
+
+For more information on how Python parses regular expressions, see the `Python
+documentation <https://docs.python.org/3.6/library/re.html>`_.
 
 Documentation for more advanced use cases including the custom tests can be
 found on our `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
