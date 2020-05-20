@@ -16,3 +16,8 @@ Known issues
   quotes in the yaml file. This is due to the way the yaml file is parsed: with
   double quotes, special characters (like ``\t``) will be expanded, which can
   lead to crashes.
+
++ Special care should be taken when using the backslash character (``\``),
+  since this collides with Python's usage of the same character to escape
+  special characters in strings. Please see the `Python documentation on regular
+  expressions <https://docs.python.org/3.6/library/re.html>` for details.

@@ -82,6 +82,10 @@ Test options
 
 The above YAML file contains all the possible options for a workflow test.
 
+Please see the `Python documentation on regular expressions
+<https://docs.python.org/3.6/library/re.html>` to see how Python handles escape
+sequences.
+
 .. note::
     Workflow names must be unique. Pytest workflow will crash when multiple
     workflows have the same name, even if they are in different files.

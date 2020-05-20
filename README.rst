@@ -139,5 +139,8 @@ predefined tests as well as custom tests are possible.
         - '^He.*'                      # This will fail, since the regex matches Hello, world
         - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
 
+For more information on how Python parses regular expressions, see the `Python
+documentation <https://docs.python.org/3.6/library/re.html>`_.
+
 Documentation for more advanced use cases including the custom tests can be
 found on our `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
