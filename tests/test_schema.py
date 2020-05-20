@@ -181,7 +181,7 @@ def test_contenttest_with_contains():
 
 
 def test_contenttest_with_regex():
-    """ Test if we can make a ContentTest object without regex to match """
+    """ Test if we can make a ContentTest object with regex to match """
     ContentTest(contains_regex=["Should contain"],
                 must_not_contain_regex=["Should not contain"])
 
