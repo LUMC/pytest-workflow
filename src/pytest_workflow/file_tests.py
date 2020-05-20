@@ -59,7 +59,9 @@ class FileTestCollector(pytest.Collector):
             should_exist=self.filetest.should_exist,
             workflow=self.workflow)]
 
-        if self.filetest.contains or self.filetest.must_not_contain:
+        if any((self.filetest.contains, self.filetest.must_not_contain,
+                self.filetest.contains_regex,
+                self.filetest.must_not_contain_regex)):
             tests += [ContentTestCollector.from_parent(
                 name="content",
                 parent=self,
