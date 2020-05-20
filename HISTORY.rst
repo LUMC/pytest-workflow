@@ -11,6 +11,8 @@ version 1.4.0-dev
 ---------------------------
 + Update minimum python requirement in the documentation.
 + Removed redundant check in string checking code.
++ Add new options ``contains_regex`` and ``must_not_contain_regex`` to check
+  for regexes in files and stdout/stderr.
 
 version 1.3.0
 ---------------------------

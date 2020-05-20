@@ -128,5 +128,19 @@ predefined tests as well as custom tests are possible.
       must_not_contain:                # A list of strings which should NOT be in stderr (optional)
         - "Mission accomplished!"
 
+  - name: regex tests
+    command: echo Hello, world
+    stdout:
+      contains_regex:                  # A list of regex patterns that should be in stdout (optional)
+        - 'Hello.*'                    # Note the single quotes, these are required for complex regexes
+        - 'Hello .*'                   # This will fail, since there is a comma after Hello, not a space
+
+      must_not_contain_regex:          # A list of regex patterns that should not be in stdout (optional)
+        - '^He.*'                      # This will fail, since the regex matches Hello, world
+        - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
+
+For more information on how Python parses regular expressions, see the `Python
+documentation <https://docs.python.org/3.6/library/re.html>`_.
+
 Documentation for more advanced use cases including the custom tests can be
 found on our `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.

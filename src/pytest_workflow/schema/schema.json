@@ -50,7 +50,19 @@
               "type": "string"
             }
           },
+          "contains_regex": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "must_not_contain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "must_not_contain_regex": {
             "type": "array",
             "items": {
               "type": "string"
@@ -68,7 +80,19 @@
               "type": "string"
             }
           },
+          "contains_regex": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
           "must_not_contain": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "must_not_contain_regex": {
             "type": "array",
             "items": {
               "type": "string"
@@ -99,7 +123,19 @@
                 "type": "string"
               }
             },
+            "contains_regex": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
             "must_not_contain": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "must_not_contain_regex": {
               "type": "array",
               "items": {
                 "type": "string"
