@@ -83,7 +83,7 @@ Test options
 The above YAML file contains all the possible options for a workflow test.
 
 Please see the `Python documentation on regular expressions
-<https://docs.python.org/3.6/library/re.html>` to see how Python handles escape
+<https://docs.python.org/3.6/library/re.html>`_ to see how Python handles escape
 sequences.
 
 .. note::

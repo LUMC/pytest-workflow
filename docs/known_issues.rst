@@ -17,7 +17,8 @@ Known issues
   double quotes, special characters (like ``\t``) will be expanded, which can
   lead to crashes.
 
-+ Special care should be taken when using the backslash character (``\``),
-  since this collides with Python's usage of the same character to escape
-  special characters in strings. Please see the `Python documentation on regular
-  expressions <https://docs.python.org/3.6/library/re.html>` for details.
++ Special care should be taken when using the backslash character (``\``) in
+  ``contains_regex`` and ``must_not_contain_regex``, since this collides with
+  Python's usage of the same character to escape special characters in strings.
+  Please see the `Python documentation on regular expressions
+  <https://docs.python.org/3.6/library/re.html>`_ for details.
