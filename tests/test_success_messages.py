@@ -79,8 +79,6 @@ REGEX_FILE = textwrap.dedent("""\
     contains_regex:
       - "ello"
       - '^H.*d$'
-    contains:
-      - "Hello"
     must_not_contain_regex:
       - "Hello.*world!"
 """)
@@ -105,7 +103,6 @@ SUCCESS_MESSAGES = [
     ["start 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
     ["'moo file' done."],
     ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
-    ["test_succeeding.yml::regex::stdout::contains 'Hello' PASSED"],
     ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
     ["test_succeeding.yml::regex::stdout::contains '^H.*d$' PASSED"],
     ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"]
