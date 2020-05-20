@@ -65,7 +65,7 @@ def check_content(strings: Iterable[str],
 
 
 def check_regex_content(patterns: Iterable[str],
-                  text_lines: Iterable[str]) -> Set[str]:
+                        text_lines: Iterable[str]) -> Set[str]:
     """
     Checks whether any of the patterns is present in the text lines
     It only reads the lines once and it stops reading when

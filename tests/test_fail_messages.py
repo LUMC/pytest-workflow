@@ -140,8 +140,8 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
         must_not_contain_regex:
           - "^He.*"
      """,
-     "'^He.*' was found in 'simple echo': stdout while it should not be there."
-    ),
+     "'^He.*' was found in 'simple echo': stdout while it should not be "
+     "there."),
     ("""\
     - name: to file
       command: bash -c 'echo Hello, world > file.txt'
@@ -150,8 +150,7 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
           contains_regex:
             - 'Hello .*'
      """,
-     "to file::file.txt::content::contains 'Hello .*'"
-    ),
+     "to file::file.txt::content::contains 'Hello .*'"),
     ("""\
     - name: to file
       command: bash -c 'echo Hello, world > file.txt'
@@ -160,8 +159,7 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
           must_not_contain_regex:
             - "^He.*"
      """,
-     "to file::file.txt::content::does not contain '^He.*"
-    ),
+     "to file::file.txt::content::does not contain '^He.*"),
 ]
 
 

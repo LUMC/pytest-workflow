@@ -176,14 +176,14 @@ def test_filetest_defaults():
 
 def test_contenttest_with_contains():
     """ Test if we can make a ContentTest object without regex to match """
-    ctest = ContentTest(contains = ["Should contain"],
-                        must_not_contain=["Should not contain"])
+    ContentTest(contains=["Should contain"],
+                must_not_contain=["Should not contain"])
 
 
 def test_contenttest_with_regex():
     """ Test if we can make a ContentTest object without regex to match """
-    ctest = ContentTest(contains_regex = ["Should contain"],
-                        must_not_contain_regex =["Should not contain"])
+    ContentTest(contains_regex=["Should contain"],
+                must_not_contain_regex=["Should not contain"])
 
 
 def test_filetest_with_contains():

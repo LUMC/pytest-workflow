@@ -83,7 +83,8 @@ REGEX_FILE = textwrap.dedent("""\
       - "Hello.*world!"
 """)
 
-SUCCEEDING_TESTS_YAML = MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE + REGEX_FILE
+SUCCEEDING_TESTS_YAML = (MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE +
+                         REGEX_FILE)
 
 SUCCESS_MESSAGES = [
     ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],
@@ -105,7 +106,7 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
     ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
     ["test_succeeding.yml::regex::stdout::contains '^H.*d$' PASSED"],
-    ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"]
+    ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"]  # noqa: E501
 ]
 
 

@@ -60,7 +60,7 @@ def test_check_regex_content_succeeding(contains_regex,
     all_regex = set(contains_regex).union(set(does_not_contain_regex))
     with LICENSE.open("rt") as license_h:
         found_regex = check_regex_content(list(all_regex),
-                                      license_h)
+                                          license_h)
     assert set(contains_regex) == found_regex
     assert set(does_not_contain_regex) == all_regex - found_regex
 
