@@ -9,6 +9,8 @@ Changelog
 
 version 1.4.0-dev
 ---------------------------
++ Usage of the ``name`` keyword argument in workflow marks is now deprecated.
+  Using this will crash the plugin with a DeprecationWarning.
 + Update minimum python requirement in the documentation.
 + Removed redundant check in string checking code.
 + Add new options ``contains_regex`` and ``must_not_contain_regex`` to check
