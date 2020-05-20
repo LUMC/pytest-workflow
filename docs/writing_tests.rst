@@ -68,6 +68,17 @@ Test options
       must_not_contain:                # A list of strings which should NOT be in stderr (optional)
         - "Mission accomplished!"
 
+  - name: regex tests
+    command: echo Hello, world
+    stdout:
+      contains_regex:                  # A list of regex patterns that should be in stdout (optional)
+        - 'Hello.*'                    # Note the single quotes, these are required for complex regexes
+        - 'Hello .*'                   # This will fail, since there is a comma after Hello, not a space
+
+      must_not_contain_regex:          # A list of regex patterns that should not be in stdout (optional)
+        - '^He.*'                      # This will fail, since the regex matches Hello, world
+        - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
+
 
 The above YAML file contains all the possible options for a workflow test.
 
