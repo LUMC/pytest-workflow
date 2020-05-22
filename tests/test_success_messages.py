@@ -118,7 +118,7 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
     has to be run again.
     This fixture runs the succeeding tests once with pytest -v"""
     tempdir = str(tmpdir_factory.mktemp("succeeding_tests"))
-    test_file = Path(Path(tempdir) / Path("test_succeeding.yml"))
+    test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
     process_out = subprocess.run(args=["pytest", "-v"],  # nosec
