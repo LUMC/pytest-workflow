@@ -22,7 +22,7 @@ import pytest
 
 from pytest_workflow.file_tests import file_md5sum
 
-HASH_FILE_DIR = Path(__file__).parent / Path("hash_files")
+HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
 HASH_FILES_RELATIVE = os.listdir(str(HASH_FILE_DIR.absolute()))
 

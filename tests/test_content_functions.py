@@ -22,8 +22,8 @@ import pytest
 
 from pytest_workflow.content_tests import check_content, check_regex_content
 
-LICENSE = Path(__file__).parent / Path("content_files", "LICENSE")
-LICENSE_ZIPPED = LICENSE.parent / Path("LICENSE.gz")
+LICENSE = Path(__file__).parent / "content_files" / "LICENSE"
+LICENSE_ZIPPED = LICENSE.parent / "LICENSE.gz"
 
 # Yes we are checking the AGPLv3+. I am pretty sure some strings will not be
 # there

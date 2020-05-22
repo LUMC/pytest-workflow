@@ -28,7 +28,7 @@ from pytest_workflow.schema import ContentTest, FileTest, WorkflowTest, \
 
 import yaml
 
-VALID_YAML_DIR = Path(__file__).parent / Path("yamls", "valid")
+VALID_YAML_DIR = Path(__file__).parent / "yamls" / "valid"
 VALID_YAMLS = os.listdir(VALID_YAML_DIR)
 
 
@@ -145,7 +145,7 @@ def test_validate_schema_contains_conflict(instance):
 
 
 def test_workflow_tests_from_schema():
-    with Path(VALID_YAML_DIR / Path("dream_file.yaml")).open() as yaml_fh:
+    with Path(VALID_YAML_DIR, "dream_file.yaml").open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         workflow_tests = workflow_tests_from_schema(test_yaml)
         assert len(workflow_tests) == 2
