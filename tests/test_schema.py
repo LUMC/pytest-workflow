@@ -28,18 +28,18 @@ from pytest_workflow.schema import ContentTest, FileTest, WorkflowTest, \
 
 import yaml
 
-VALID_YAML_DIR = Path(__file__).parent / Path("yamls", "valid")
+VALID_YAML_DIR = Path(__file__).parent / "yamls" / "valid"
 VALID_YAMLS = os.listdir(VALID_YAML_DIR)
 
 
 @pytest.mark.parametrize("yaml_path", VALID_YAMLS)
 def test_validate_schema(yaml_path):
-    with Path(VALID_YAML_DIR / Path(yaml_path)).open() as yaml_fh:
+    with Path(VALID_YAML_DIR, yaml_path).open() as yaml_fh:
         validate_schema(yaml.safe_load(yaml_fh))
 
 
 def test_workflowtest():
-    with Path(VALID_YAML_DIR / Path("dream_file.yaml")).open() as yaml_fh:
+    with Path(VALID_YAML_DIR, "dream_file.yaml").open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         tests = [WorkflowTest.from_schema(x) for x in test_yaml]
         assert tests[0].name == "simple echo"
@@ -53,7 +53,7 @@ def test_workflowtest():
 
 
 def test_workflowtest_regex():
-    with Path(VALID_YAML_DIR / Path("regex_file.yaml")).open() as yaml_fh:
+    with Path(VALID_YAML_DIR, "regex_file.yaml").open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         tests = [WorkflowTest.from_schema(x) for x in test_yaml]
         assert tests[0].name == "simple echo"
@@ -145,7 +145,7 @@ def test_validate_schema_contains_conflict(instance):
 
 
 def test_workflow_tests_from_schema():
-    with Path(VALID_YAML_DIR / Path("dream_file.yaml")).open() as yaml_fh:
+    with Path(VALID_YAML_DIR, "dream_file.yaml").open() as yaml_fh:
         test_yaml = yaml.safe_load(yaml_fh)
         workflow_tests = workflow_tests_from_schema(test_yaml)
         assert len(workflow_tests) == 2

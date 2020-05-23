@@ -17,10 +17,9 @@ from pathlib import Path
 
 import pytest
 
-SIMPLE_WDL_YAML = Path(__file__).parent / Path("simple_wdl_test_cases.yml")
-SNAKEFILE_YAML = (Path(__file__).parent /
-                  Path("simple_snakefile_test_cases.yml"))
-PIPELINE_DIR = Path(__file__).parent.parent / Path("pipelines")
+SIMPLE_WDL_YAML = Path(__file__).parent / "simple_wdl_test_cases.yml"
+SNAKEFILE_YAML = Path(__file__).parent / "simple_snakefile_test_cases.yml"
+PIPELINE_DIR = Path(__file__).parent.parent / "pipelines"
 SIMPLE_WDL = Path(PIPELINE_DIR, "wdl", "simple.wdl")
 SIMPLE_WDL_JSON = Path(PIPELINE_DIR, "wdl", "simple.json")
 SIMPLE_WDL_OPTIONS_JSON = Path(PIPELINE_DIR, "wdl", "simple.options.json")

@@ -181,7 +181,7 @@ def test_fixture_usable_for_file_tests(testdir):
 
     @pytest.mark.workflow("number files")
     def test_div_by_three(workflow_dir):
-        number_file = workflow_dir / Path("123.txt")
+        number_file = workflow_dir / "123.txt"
 
         with number_file.open('rt') as file_h:
             number_file_content = file_h.read()
@@ -222,7 +222,7 @@ def test_same_custom_test_multiple_times(testdir):
     @pytest.mark.workflow("one_two_three", "two_three_four",
      "three_four_five")
     def test_div_by_three(workflow_dir):
-        number_file = workflow_dir / Path("numbers.txt")
+        number_file = workflow_dir / "numbers.txt"
         assert int(number_file.read_text()) % 3 == 0
     """)
 
@@ -258,7 +258,7 @@ from pathlib import Path
 
 @pytest.mark.workflow("one_two_three", "two_three_five", "three_four_five")
 def test_div_by_three(workflow_dir):
-    number_file = workflow_dir / Path("numbers.txt")
+    number_file = workflow_dir / "numbers.txt"
     assert int(number_file.read_text()) % 3 == 0
 """)
 

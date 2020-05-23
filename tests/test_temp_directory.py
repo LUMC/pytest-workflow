@@ -29,8 +29,8 @@ def test_directory_kept(testdir):
     working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
                             result.stdout.str()).group(1)
     assert Path(working_dir).exists()
-    assert Path(working_dir / Path("log.out")).exists()
-    assert Path(working_dir / Path("log.err")).exists()
+    assert Path(working_dir, "log.out").exists()
+    assert Path(working_dir, "log.err").exists()
     shutil.rmtree(str(testdir))
 
 
@@ -62,7 +62,7 @@ def test_basetemp_can_be_used_twice(testdir):
     # First run to fill up tempdir
     testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp", tempdir)
     # Make sure directory is there.
-    assert (Path(tempdir) / Path("simple_echo")).exists()
+    assert Path(tempdir, "simple_echo").exists()
     # Run again with same basetemp.
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
                                tempdir)
@@ -78,7 +78,7 @@ def test_basetemp_will_be_created(testdir):
     # This creates an empty dir
     tempdir_base = tempfile.mkdtemp()
     # This path should not exist
-    tempdir = Path(tempdir_base) / Path("non") / Path("existing")
+    tempdir = Path(tempdir_base, "non", "existing")
     # If pytest-workflow does not handle non-existing nested directories well
     # it should crash.
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
@@ -91,7 +91,7 @@ def test_basetemp_will_be_created(testdir):
 def test_basetemp_can_not_be_in_rootdir(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     testdir_path = Path(str(testdir.tmpdir))
-    tempdir = testdir_path / Path("tmp")
+    tempdir = testdir_path / "tmp"
     result = testdir.runpytest("-v", "--basetemp", str(tempdir))
     message = f"'{str(tempdir)}' is a subdirectory of '{str(testdir_path)}'"
     assert message in result.stderr.str()
@@ -115,8 +115,8 @@ def test_directory_kept_on_fail(testdir):
         r"with command 'bash -c 'exit 1'' in '([\w/_-]*)'",
         result.stdout.str()).group(1)
     assert Path(working_dir).exists()
-    assert Path(working_dir / Path("log.out")).exists()
-    assert Path(working_dir / Path("log.err")).exists()
+    assert Path(working_dir, "log.out").exists()
+    assert Path(working_dir, "log.err").exists()
     assert ("One or more tests failed. Keeping temporary directories and "
             "logs." in result.stdout.str())
     shutil.rmtree(working_dir)

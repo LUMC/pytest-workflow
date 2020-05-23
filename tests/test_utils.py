@@ -49,7 +49,7 @@ def test_is_in_dir(child: str, parent: str, in_dir: bool):
 
 
 def test_link_tree():
-    pipelines_dir = Path(__file__).parent / Path("pipelines")
+    pipelines_dir = Path(__file__).parent / "pipelines"
     tempdir = Path(tempfile.mkdtemp(), "test")
     link_tree(pipelines_dir, tempdir)
     snakemake = Path(tempdir, "snakemake")

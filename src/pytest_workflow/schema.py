@@ -24,12 +24,11 @@ import jsonschema
 
 from .util import replace_whitespace
 
-SCHEMA = Path(__file__).parent / Path("schema") / Path("schema.json")
+SCHEMA = Path(__file__).parent / "schema" / "schema.json"
 DEFAULT_EXIT_CODE = 0
 DEFAULT_FILE_SHOULD_EXIST = True
 
-with SCHEMA.open() as schema_fh:
-    JSON_SCHEMA = json.load(schema_fh)
+JSON_SCHEMA = json.loads(SCHEMA.read_text())
 
 
 def workflow_tests_from_schema(schema):
