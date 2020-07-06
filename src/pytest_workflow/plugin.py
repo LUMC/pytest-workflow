@@ -286,6 +286,7 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
     # No cleanup needed if we keep workflow directories
     # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
     # was not used.)
+    removal: bool = False
     if (session.config.getoption("keep_workflow_wd") or
             len(session.config.workflow_cleanup_dirs) == 0):
         pass
@@ -294,14 +295,21 @@ def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
         if exitstatus == 0:
             print("All tests succeeded. Removing temporary directories and "
                   "logs.")
-            rm_dirs(session.config.workflow_cleanup_dirs)
+            removal = True
         else:
             print("One or more tests failed. Keeping temporary directories "
                   "and logs.")
     else:  # When no flags are set. Remove temporary directories and logs.
         print("Removing temporary directories and logs. Use '--kwd' or "
               "'--keep-workflow-wd' to disable this behaviour.")
-        rm_dirs(session.config.workflow_cleanup_dirs)
+        removal = True
+    if removal:
+        directories: List[Path] = session.config.workflow_cleanup_dirs
+        _, not_removed = rm_dirs(directories)
+        if not_removed:
+            print(f"Unable to remove the following directories due to "
+                  f"permission errors: "
+                  f"{' ,'.join(str(path) for path in directories)}.")
 
 
 class YamlFile(pytest.File):
