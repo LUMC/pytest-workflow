@@ -34,7 +34,7 @@ import yaml
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .util import is_in_dir, link_tree, replace_whitespace, rm_dirs
+from .util import is_in_dir, link_tree, replace_whitespace
 from .workflow import Workflow, WorkflowQueue
 
 
@@ -283,25 +283,42 @@ def pytest_collectstart(collector: pytest.Collector):
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
-    # No cleanup needed if we keep workflow directories
-    # Or if there are no directories to cleanup. (I.e. pytest-workflow plugin
-    # was not used.)
-    if (session.config.getoption("keep_workflow_wd") or
-            len(session.config.workflow_cleanup_dirs) == 0):
-        pass
-    elif session.config.getoption("keep_workflow_wd_on_fail"):
-        # Ony cleanup if there are cleanup_dirs.
-        if exitstatus == 0:
-            print("All tests succeeded. Removing temporary directories and "
-                  "logs.")
-            rm_dirs(session.config.workflow_cleanup_dirs)
-        else:
-            print("One or more tests failed. Keeping temporary directories "
-                  "and logs.")
-    else:  # When no flags are set. Remove temporary directories and logs.
-        print("Removing temporary directories and logs. Use '--kwd' or "
-              "'--keep-workflow-wd' to disable this behaviour.")
-        rm_dirs(session.config.workflow_cleanup_dirs)
+    directories: List[Path] = session.config.workflow_cleanup_dirs
+    # No cleanup needed if there are no directories to cleanup. (I.e.
+    # pytest-workflow plugin was not used.)
+    if len(directories) == 0:
+        return
+
+    keep_workflow_wd: bool = session.config.getoption("keep_workflow_wd")
+    keep_workflow_wd_on_fail: bool = session.config.getoption(
+        "keep_workflow_wd_on_fail")
+    no_flags = not (keep_workflow_wd_on_fail and keep_workflow_wd)
+    success: bool = exitstatus == 0
+    removal: bool = not (keep_workflow_wd or (keep_workflow_wd_on_fail
+                                              and not success))
+
+    remove_msg = (f"{'Removing' if removal else 'Keeping'} "
+                  f"temporary directories and logs.")
+    # Only print success message if removal was dependent on success.
+    success_msg = (("All tests succeeded." if success else
+                   "One or more tests failed.")
+                   if keep_workflow_wd_on_fail else '')
+    # Only print message about flags if user did not use any flags.
+    no_flag_msg = ("Use '--kwd' or '--keep-workflow-wd' to disable this "
+                   "behaviour." if no_flags else "")
+    print(" ".join([success_msg, remove_msg, no_flag_msg]))
+
+    if removal:
+        unremovable_dirs: List[Path] = []
+        for directory in directories:
+            try:
+                shutil.rmtree(str(directory))
+            except PermissionError:
+                unremovable_dirs.append(directory)
+        if unremovable_dirs:
+            print(f"Unable to remove the following directories due to "
+                  f"permission errors: "
+                  f"{' ,'.join(str(path) for path in unremovable_dirs)}.")
 
 
 class YamlFile(pytest.File):

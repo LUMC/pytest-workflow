@@ -1,9 +1,7 @@
 import os
 import re
-import shutil
 import warnings
 from pathlib import Path
-from typing import List
 
 
 # This function was created to ensure the same conversion is used throughout
@@ -16,11 +14,6 @@ def replace_whitespace(string: str, replace_with: str = '_') -> str:
     :return: The string with whitespace converted.
     """
     return re.sub(r'\s+', replace_with, string)
-
-
-def rm_dirs(directories: List[Path]):
-    for directory in directories:
-        shutil.rmtree(str(directory))
 
 
 def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:

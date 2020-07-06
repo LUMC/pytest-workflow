@@ -18,6 +18,7 @@
 import re
 import shutil
 import tempfile
+import textwrap
 from pathlib import Path
 
 from .test_success_messages import SIMPLE_ECHO
@@ -145,3 +146,18 @@ def test_directory_of_symlinks(testdir):
     assert Path(working_dir, "subdir").is_dir()
     assert Path(working_dir, "subdir", "subfile.txt").is_symlink()
     shutil.rmtree(working_dir)
+
+
+def test_directory_unremovable_message(testdir):
+    # Following directory contains nested contents owned by root.
+    test = textwrap.dedent("""
+    - name: Create unremovable dir
+      command: >-
+        bash -c "docker run -v $(pwd):$(pwd) -w $(pwd) debian \
+        bash -c 'mkdir test && touch test/test'"
+    """)
+    testdir.makefile(".yaml", test=test)
+    result = testdir.runpytest()
+    assert ("Unable to remove the following directories due to permission "
+            "errors" in result.stdout.str())
+    assert result.ret == 0
