@@ -1,9 +1,7 @@
 import os
 import re
-import shutil
 import warnings
 from pathlib import Path
-from typing import List, Tuple
 
 
 # This function was created to ensure the same conversion is used throughout
@@ -16,23 +14,6 @@ def replace_whitespace(string: str, replace_with: str = '_') -> str:
     :return: The string with whitespace converted.
     """
     return re.sub(r'\s+', replace_with, string)
-
-
-def rm_dirs(directories: List[Path]) -> Tuple[List[Path], List[Path]]:
-    """
-    Remove directories using shutil. Catch permission errors.
-    :param directories: The directories to remove.
-    :return: A list of removed directories and unremovable directories.
-    """
-    removed_dirs: List[Path] = []
-    unremovable_dirs: List[Path] = []
-    for directory in directories:
-        try:
-            shutil.rmtree(str(directory))
-            removed_dirs.append(directory)
-        except PermissionError:
-            unremovable_dirs.append(directory)
-    return removed_dirs, unremovable_dirs
 
 
 def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
