@@ -14,10 +14,8 @@ matrix:
     # UNIT TESTS
     # On most recent versions of python.
     - env: TOX_ENV=py36
-      install:
-        - pip install codecov
-        - pip install tox
       after_success:
+        - pip install codecov
         - codecov -v  # -v to make sure coverage upload works.
     - python: 3.7
       env: TOX_ENV=py37
@@ -40,5 +38,5 @@ matrix:
         - conda config --add channels bioconda
         - conda config --add channels conda-forge
         # TODO: Upgrade cromwell once https://github.com/broadinstitute/cromwell/pull/5456 is fixed.
-        - conda create -n my_env cromwell=48 tox  # Install tox for good integration within the conda env.
+        - conda create -n my_env cromwell tox  # Install tox for good integration within the conda env.
         - source activate my_env
