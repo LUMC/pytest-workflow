@@ -1,3 +1,4 @@
+import hashlib
 import os
 import re
 import warnings
@@ -56,3 +57,18 @@ def link_tree(src: Path, dest: Path) -> None:
     else:  # Only copy files and symlinks, no devices etc.
         warnings.warn(f"Unsupported filetype. Skipping copying: '{str(src)}' "
                       f"to '{str(dest)}'.")
+
+
+# block_size 64k with python is a few percent faster than linux native md5sum.
+def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
+    """
+    Generates a md5sum for a file. Reads file in blocks to save memory.
+    :param filepath: a pathlib. Path to the file
+    :param block_size: Block size in bytes
+    :return: a md5sum as hexadecimal string.
+    """
+    hasher = hashlib.md5()  # nosec: only used for file integrity
+    with filepath.open('rb') as file_handler:  # Read the file in bytes
+        for block in iter(lambda: file_handler.read(block_size), b''):
+            hasher.update(block)
+    return hasher.hexdigest()
