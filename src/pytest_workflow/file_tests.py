@@ -21,8 +21,8 @@ from pathlib import Path
 import pytest
 
 from .content_tests import ContentTestCollector
-from .util import file_md5sum
 from .schema import FileTest
+from .util import file_md5sum
 from .workflow import Workflow
 
 
