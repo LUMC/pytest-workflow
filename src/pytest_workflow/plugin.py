@@ -20,11 +20,11 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.mark import MarkDecorator
+from _pytest.mark import Mark, MarkDecorator
 from _pytest.python import FunctionDefinition, Metafunc
 
 import pytest
@@ -189,8 +189,7 @@ def pytest_collection():
     print()
 
 
-def get_workflow_names_from_workflow_marker(marker: MarkDecorator
-                                            ) -> List[str]:
+def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
     if 'name' in marker.kwargs:
         raise DeprecationWarning(
             "Using pytest.mark.workflow(name='workflow name') is "
@@ -211,13 +210,12 @@ def pytest_generate_tests(metafunc: Metafunc):
         return
 
     definition: FunctionDefinition = metafunc.definition
-    marker: Optional[MarkDecorator] = definition.get_closest_marker(
-        name="workflow")
+    marker: Optional[Mark] = definition.get_closest_marker(name="workflow")
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
 
-    workflow_names: List[str] = get_workflow_names_from_workflow_marker(marker)
+    workflow_names = get_workflow_names_from_workflow_marker(marker)
     if not workflow_names:
         raise ValueError(f"A workflow name or names should be defined in "
                          f"the workflow marker of {definition.nodeid}")
@@ -234,14 +232,12 @@ def pytest_collection_modifyitems(config: PytestConfig,
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker: Optional[MarkDecorator] = item.get_closest_marker(
-            name="workflow")
+        marker = item.get_closest_marker(name="workflow")
 
         if marker is None:
             continue
 
-        workflow_names: List[str] = get_workflow_names_from_workflow_marker(
-            marker)
+        workflow_names = get_workflow_names_from_workflow_marker(marker)
         if len(workflow_names) == 1:
             workflow_name = workflow_names[0]
         elif "workflow_dir" in item.fixturenames:
