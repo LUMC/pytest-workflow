@@ -20,11 +20,11 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from _pytest.config import Config as PytestConfig
 from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.mark import MarkDecorator
+from _pytest.mark import Mark
 from _pytest.python import FunctionDefinition, Metafunc
 
 import pytest
@@ -189,8 +189,7 @@ def pytest_collection():
     print()
 
 
-def get_workflow_names_from_workflow_marker(marker: MarkDecorator
-                                            ) -> List[str]:
+def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
     if 'name' in marker.kwargs:
         raise DeprecationWarning(
             "Using pytest.mark.workflow(name='workflow name') is "
@@ -211,18 +210,17 @@ def pytest_generate_tests(metafunc: Metafunc):
         return
 
     definition: FunctionDefinition = metafunc.definition
-    marker: Optional[MarkDecorator] = definition.get_closest_marker(
-        name="workflow")
+    marker: Optional[Mark] = definition.get_closest_marker(name="workflow")
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
 
-    workflow_names: List[str] = get_workflow_names_from_workflow_marker(marker)
+    workflow_names = get_workflow_names_from_workflow_marker(marker)
     if not workflow_names:
         raise ValueError(f"A workflow name or names should be defined in "
                          f"the workflow marker of {definition.nodeid}")
 
-    workflow_temp_dir = metafunc.config.workflow_temp_dir
+    workflow_temp_dir = metafunc.config.workflow_temp_dir  # type: ignore
     workflow_dirs = [Path(workflow_temp_dir, replace_whitespace(name))
                      for name in workflow_names]
     metafunc.parametrize("workflow_dir", workflow_dirs,
@@ -234,14 +232,12 @@ def pytest_collection_modifyitems(config: PytestConfig,
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker: Optional[MarkDecorator] = item.get_closest_marker(
-            name="workflow")
+        marker = item.get_closest_marker(name="workflow")
 
         if marker is None:
             continue
 
-        workflow_names: List[str] = get_workflow_names_from_workflow_marker(
-            marker)
+        workflow_names = get_workflow_names_from_workflow_marker(marker)
         if len(workflow_names) == 1:
             workflow_name = workflow_names[0]
         elif "workflow_dir" in item.fixturenames:
@@ -252,7 +248,7 @@ def pytest_collection_modifyitems(config: PytestConfig,
             raise NotImplementedError(f"Cannot determine workflow name for "
                                       f"{item.nodeid}")
 
-        if workflow_name not in config.executed_workflows.keys():
+        if workflow_name not in config.executed_workflows.keys():  # type: ignore  # noqa: E501
             skip_marker = pytest.mark.skip(
                 reason=f"'{workflow_name}' has not run.")
             item.add_marker(skip_marker)
@@ -260,7 +256,7 @@ def pytest_collection_modifyitems(config: PytestConfig,
 
 def pytest_runtestloop(session: pytest.Session):
     """This runs after collection, but before the tests."""
-    session.config.workflow_queue.process(
+    session.config.workflow_queue.process(  # type: ignore
         session.config.getoption("workflow_threads")
     )
 
@@ -273,7 +269,7 @@ def pytest_collectstart(collector: pytest.Collector):
 
         # Executed workflows contains workflow name as key and nodeid as value.
         executed_workflows: Dict[str, str] = (
-            collector.config.executed_workflows)
+            collector.config.executed_workflows)  # type: ignore
 
         if name in executed_workflows.keys():
             raise ValueError(
@@ -283,7 +279,7 @@ def pytest_collectstart(collector: pytest.Collector):
 
 
 def pytest_sessionfinish(session: pytest.Session, exitstatus: int):
-    directories: List[Path] = session.config.workflow_cleanup_dirs
+    directories: List[Path] = session.config.workflow_cleanup_dirs  # type: ignore # noqa: E501
     # No cleanup needed if there are no directories to cleanup. (I.e.
     # pytest-workflow plugin was not used.)
     if len(directories) == 0:

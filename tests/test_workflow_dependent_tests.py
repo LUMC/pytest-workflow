@@ -83,7 +83,7 @@ def test_workflow_dir_arg(test, testdir):
     testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
     testdir.makefile(".py", test_fixture=test)
     result = testdir.runpytest()
-    result.assert_outcomes(passed=5, failed=0, error=0, skipped=0)
+    result.assert_outcomes(passed=5, failed=0, errors=0, skipped=0)
 
 
 @pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
@@ -161,7 +161,7 @@ def test_mark_wrong_key_with_fixture(testdir):
             "workflow marker of test_fixture.py::test_fixture_impl"
             ) in result.stdout.str()
     # Assert that no tests were run.
-    result.assert_outcomes(passed=0, failed=0, skipped=0, error=1)
+    result.assert_outcomes(passed=0, failed=0, skipped=0, errors=1)
 
 
 def test_fixture_usable_for_file_tests(testdir):
@@ -192,7 +192,7 @@ def test_fixture_usable_for_file_tests(testdir):
     testdir.makefile(".yml", test_aworkflow=test_workflow)
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
-    result.assert_outcomes(passed=4, failed=0, skipped=0, error=0)
+    result.assert_outcomes(passed=4, failed=0, skipped=0, errors=0)
 
 
 def test_same_custom_test_multiple_times(testdir):
@@ -229,7 +229,7 @@ def test_same_custom_test_multiple_times(testdir):
     testdir.makefile(".yml", test_aworkflow=test_workflow)
     testdir.makefile(".py", test_div=test_div_by_three)
     result = testdir.runpytest("-v")
-    result.assert_outcomes(passed=9, failed=0, skipped=0, error=0)
+    result.assert_outcomes(passed=9, failed=0, skipped=0, errors=0)
 
 
 TEST_WORKFLOWS = textwrap.dedent("""\
@@ -267,7 +267,7 @@ def test_same_custom_test_multiple_times_one_error(testdir):
     testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
     testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
     result = testdir.runpytest("-v")
-    result.assert_outcomes(passed=8, failed=1, skipped=0, error=0)
+    result.assert_outcomes(passed=8, failed=1, skipped=0, errors=0)
     assert ("test_div.py::test_div_by_three[two_three_five] FAILED "
             in result.stdout.str())
 
@@ -276,6 +276,6 @@ def test_custom_tests_properly_skipped(testdir):
     testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
     testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
     result = testdir.runpytest("-v", "--tag", "one_two_three")
-    result.assert_outcomes(passed=3, failed=0, skipped=2, error=0)
+    result.assert_outcomes(passed=3, failed=0, skipped=2, errors=0)
     assert ("test_div.py::test_div_by_three[two_three_five] SKIPPED "
             in result.stdout.str())
