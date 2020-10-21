@@ -210,10 +210,11 @@ class WorkflowQueue(queue.Queue):
                 break
             else:
                 print(
-                    f"start '{workflow.name}' with command "
-                    f"'{workflow.command}' in '{workflow.cwd}'. "
-                    f"stdout: '{workflow.stdout_file}'. "
-                    f"stderr: '{workflow.stderr_file}'.")
+                    f"\n{workflow.name}:\n"
+                    f"\tcommand:   {workflow.command}"
+                    f"\tdirectory: {workflow.cwd}\n"
+                    f"\tstdout:    {workflow.stdout_file}\n"
+                    f"\tstderr:    {workflow.stderr_file}")
                 workflow.run()
                 # Collect the workflow errors.
                 self._process_errors.extend(workflow.errors)
