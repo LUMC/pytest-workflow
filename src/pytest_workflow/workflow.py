@@ -211,7 +211,7 @@ class WorkflowQueue(queue.Queue):
             else:
                 print(
                     f"\n{workflow.name}:\n"
-                    f"\tcommand:   {workflow.command}"
+                    f"\tcommand:   {workflow.command}\n"
                     f"\tdirectory: {workflow.cwd}\n"
                     f"\tstdout:    {workflow.stdout_file}\n"
                     f"\tstderr:    {workflow.stderr_file}")
