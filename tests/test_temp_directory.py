@@ -27,7 +27,7 @@ from .test_success_messages import SIMPLE_ECHO
 def test_directory_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
-    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
+    working_dir = re.search(r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
                             result.stdout.str()).group(1)
     assert Path(working_dir).exists()
     assert Path(working_dir, "log.out").exists()
@@ -38,7 +38,7 @@ def test_directory_kept(testdir):
 def test_directory_not_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
-    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
+    working_dir = re.search(r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("Removing temporary directories and logs. Use '--kwd' or "
@@ -50,12 +50,11 @@ def test_basetemp_correct(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
-    message = (f"start 'simple echo' with command 'echo moo' in "
-               f"'{tempdir}/simple_echo'. "
-               f"stdout: '{tempdir}/simple_echo/log.out'. "
-               f"stderr: '{tempdir}/simple_echo/log.err'.")
+    message = (f"\tcommand:   echo moo\n"
+               f"\tdirectory: {tempdir}\n"
+               f"\tstdout:    {tempdir}/simple_echo/log.out\n"
+               f"\tstderr:    {tempdir}/simple_echo/log.err")
     assert message in result.stdout.str()
-
 
 def test_basetemp_can_be_used_twice(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
@@ -113,7 +112,7 @@ def test_directory_kept_on_fail(testdir):
     testdir.makefile(".yml", test=FAIL_TEST)
     result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
     working_dir = re.search(
-        r"with command 'bash -c 'exit 1'' in '([\w/_-]*)'",
+        r"command:   bash -c 'exit 1'\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert Path(working_dir).exists()
     assert Path(working_dir, "log.out").exists()
@@ -127,7 +126,7 @@ def test_directory_not_kept_on_succes(testdir):
     testdir.makefile(".yml", test=SUCCESS_TEST)
     result = testdir.runpytest("-v", "--kwdof")
     working_dir = re.search(
-        r"with command 'bash -c 'exit 0'' in '([\w/_-]*)'",
+        r"command:   bash -c 'exit 0'\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("All tests succeeded. Removing temporary directories and logs." in
@@ -140,7 +139,7 @@ def test_directory_of_symlinks(testdir):
     Path(str(subdir), "subfile.txt").write_text("test")
     result = testdir.runpytest("-v", "--symlink", "--kwd")
     working_dir = re.search(
-        r"with command 'echo moo' in '([\w/_-]*)'",
+        r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert Path(working_dir, "test.yml").is_symlink()
     assert Path(working_dir, "subdir").is_dir()

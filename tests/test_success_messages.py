@@ -101,7 +101,7 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
     ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],
     ["test_succeeding.yml::zipped file::moo.gz::content::contains 'moo' PASSED"],  # noqa: E501
-    ["start 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
+    ["moo file:\n\tcommand:   bash -c 'echo moo > moo.txt'\n\tdirectory"],
     ["'moo file' done."],
     ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
     ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
