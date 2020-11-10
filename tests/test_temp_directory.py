@@ -51,10 +51,11 @@ def test_basetemp_correct(testdir):
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
     message = (f"\tcommand:   echo moo\n"
-               f"\tdirectory: {tempdir}\n"
+               f"\tdirectory: {tempdir}/simple_echo\n"
                f"\tstdout:    {tempdir}/simple_echo/log.out\n"
                f"\tstderr:    {tempdir}/simple_echo/log.err")
     assert message in result.stdout.str()
+
 
 def test_basetemp_can_be_used_twice(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
