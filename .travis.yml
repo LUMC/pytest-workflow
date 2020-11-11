@@ -25,6 +25,7 @@ matrix:
     # FUNCTIONAL TESTS
     # Use default python here.
     - env: TOX_ENV=snakemake
+      python: 3.7  # Minimal requirement for snakemake
     - env: TOX_ENV=miniwdl
     - env: TOX_ENV=cromwell
       install:
