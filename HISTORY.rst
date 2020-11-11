@@ -9,6 +9,9 @@ Changelog
 
 version 1.5.0-dev
 ---------------------------
++ Update the print statement for starting jobs to be more structured. This will
+  make the output easier to to read and use, since different fields (stdout,
+  stderr, command, etc) are all on their own line.
 + Do not crash when directories can not be removed due to permission errors.
   Instead display a message to notify the users which directories could not be
   removed. These issues occurred sometimes when tests involving docker were
