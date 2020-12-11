@@ -65,19 +65,27 @@ jobs:
         test-program: [cromwell, snakemake, miniwdl]
     steps:
       - uses: actions/checkout@v2.3.4
+
+      # Setup python program requirements
       - name: Set up Python ${{ matrix.python-version }}
         if: ${{ matrix.test-program != 'cromwell' }}
         uses: actions/setup-python@v2
+      - name: Install tox
+        if: ${{ matrix.test-program != 'cromwell' }}
+        run: pip install tox
+
+      # Setup cromwell requirements
       - name: Install conda
         if: ${{ matrix.test-program == 'cromwell' }}
         uses: conda-incubator/setup-miniconda@v2.0.1 # https://github.com/conda-incubator/setup-miniconda.
         with:
           channels: conda-forge,defaults
-      - name: Install tox
-        if: ${{ matrix.test-program != 'cromwell' }}
-        run: pip install tox
       - name: Install cromwell and tox
+        shell: bash -l {0}  # Needed for conda
         if: ${{ matrix.test-program == 'cromwell' }}
         run: conda install cromwell tox
+
+      # Test
       - name: Test
+        shell: bash -l {0}  # Needed for conda
         run: tox -e ${{ matrix.test-program }}
