@@ -72,7 +72,7 @@ jobs:
         if: ${{ matrix.test-program == "cromwell" }}
         uses: conda-incubator/setup-miniconda@v2.0.1 # https://github.com/conda-incubator/setup-miniconda.
         with:
-          channels: defaults,bioconda,conda-forge
+          channels: conda-forge,defaults
       - name: Install tox
         if: ${{ matrix.test-program != "cromwell" }}
         run: pip install tox
