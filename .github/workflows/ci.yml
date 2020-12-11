@@ -1,0 +1,77 @@
+name: Continous integration
+
+on: [pull_request, push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 3.6
+    steps:
+      - uses: actions/checkout@v2.4.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+      - name: Install tox
+        run: pip install tox
+      - name: Lint
+        run: tox -e lint
+  docs:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.4.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+      - name: Install tox
+        run: pip install tox
+      - name: Lint
+        run: tox -e docs
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:
+          - 3.6
+          - 3.7
+          - 3.8
+          - 3.9
+    needs: lint
+    steps:
+      - uses: actions/checkout@v2.4.1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+      - name: Install tox
+        run: pip install tox
+      - name: Run tests
+        run: tox -e py3
+      - name: Upload coverage report
+        if: ${{ matrix.python-version }} == 3.6  # Only upload coverage once
+        uses: codecov/codecov-action@v1
+
+  test-functional:
+    runs-on: ubuntu-latest
+    needs: test
+    strategy:
+      matrix:
+        python-version: [3.7]
+        test-program: [cromwell, snakemake, miniwdl]
+    steps:
+      - uses: actions/checkout@v2.4.1
+      - name: Set up Python ${{ matrix.python-version }}
+        if: ${{ matrix.test-program }} != "cromwell"
+        uses: actions/setup-python@v2
+      - name: Install conda
+        if: ${{ matrix.test-program }} == "cromwell"
+        uses: conda-incubator/setup-miniconda@v2.0.1 # https://github.com/conda-incubator/setup-miniconda.
+        with:
+          channels: defaults,bioconda,conda-forge
+      - name: Install tox
+        if: ${{ matrix.test-program }} != "cromwell"
+        run: pip install tox
+      - name: Install cromwell and tox
+        if: ${{ matrix.test-program }} == "cromwell"
+        run: conda install cromwell tox
+      - name: Test
+        run: tox -e ${{ matrix.test-program }}
