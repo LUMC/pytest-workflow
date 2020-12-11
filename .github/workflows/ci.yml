@@ -1,6 +1,12 @@
 name: Continous integration
 
-on: [pull_request, push]
+on:
+  pull_request:
+  push:
+    branches:
+      - develop
+      - master
+
 
 jobs:
   lint:
