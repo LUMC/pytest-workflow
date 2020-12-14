@@ -9,6 +9,7 @@ Changelog
 
 version 1.5.0-dev
 ---------------------------
++ Add tests for python 3.9
 + Update the print statement for starting jobs to be more structured. This will
   make the output easier to to read and use, since different fields (stdout,
   stderr, command, etc) are all on their own line.
