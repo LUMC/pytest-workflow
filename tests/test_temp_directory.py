@@ -18,6 +18,7 @@
 import re
 import shutil
 import tempfile
+import textwrap
 from pathlib import Path
 
 from .test_success_messages import SIMPLE_ECHO
@@ -26,18 +27,18 @@ from .test_success_messages import SIMPLE_ECHO
 def test_directory_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v", "--keep-workflow-wd")
-    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
+    working_dir = re.search(r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
                             result.stdout.str()).group(1)
     assert Path(working_dir).exists()
-    assert Path(working_dir / Path("log.out")).exists()
-    assert Path(working_dir / Path("log.err")).exists()
+    assert Path(working_dir, "log.out").exists()
+    assert Path(working_dir, "log.err").exists()
     shutil.rmtree(str(testdir))
 
 
 def test_directory_not_kept(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     result = testdir.runpytest("-v")
-    working_dir = re.search(r"with command 'echo moo' in '([\w/_-]*)'",
+    working_dir = re.search(r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
                             result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("Removing temporary directories and logs. Use '--kwd' or "
@@ -49,10 +50,10 @@ def test_basetemp_correct(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     tempdir = tempfile.mkdtemp()
     result = testdir.runpytest("-v", "--basetemp", tempdir)
-    message = (f"start 'simple echo' with command 'echo moo' in "
-               f"'{tempdir}/simple_echo'. "
-               f"stdout: '{tempdir}/simple_echo/log.out'. "
-               f"stderr: '{tempdir}/simple_echo/log.err'.")
+    message = (f"\tcommand:   echo moo\n"
+               f"\tdirectory: {tempdir}/simple_echo\n"
+               f"\tstdout:    {tempdir}/simple_echo/log.out\n"
+               f"\tstderr:    {tempdir}/simple_echo/log.err")
     assert message in result.stdout.str()
 
 
@@ -62,7 +63,7 @@ def test_basetemp_can_be_used_twice(testdir):
     # First run to fill up tempdir
     testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp", tempdir)
     # Make sure directory is there.
-    assert (Path(tempdir) / Path("simple_echo")).exists()
+    assert Path(tempdir, "simple_echo").exists()
     # Run again with same basetemp.
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
                                tempdir)
@@ -78,7 +79,7 @@ def test_basetemp_will_be_created(testdir):
     # This creates an empty dir
     tempdir_base = tempfile.mkdtemp()
     # This path should not exist
-    tempdir = Path(tempdir_base) / Path("non") / Path("existing")
+    tempdir = Path(tempdir_base, "non", "existing")
     # If pytest-workflow does not handle non-existing nested directories well
     # it should crash.
     result = testdir.runpytest("-v", "--keep-workflow-wd", "--basetemp",
@@ -91,7 +92,7 @@ def test_basetemp_will_be_created(testdir):
 def test_basetemp_can_not_be_in_rootdir(testdir):
     testdir.makefile(".yml", test=SIMPLE_ECHO)
     testdir_path = Path(str(testdir.tmpdir))
-    tempdir = testdir_path / Path("tmp")
+    tempdir = testdir_path / "tmp"
     result = testdir.runpytest("-v", "--basetemp", str(tempdir))
     message = f"'{str(tempdir)}' is a subdirectory of '{str(testdir_path)}'"
     assert message in result.stderr.str()
@@ -112,11 +113,11 @@ def test_directory_kept_on_fail(testdir):
     testdir.makefile(".yml", test=FAIL_TEST)
     result = testdir.runpytest("-v", "--keep-workflow-wd-on-fail")
     working_dir = re.search(
-        r"with command 'bash -c 'exit 1'' in '([\w/_-]*)'",
+        r"command:   bash -c 'exit 1'\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert Path(working_dir).exists()
-    assert Path(working_dir / Path("log.out")).exists()
-    assert Path(working_dir / Path("log.err")).exists()
+    assert Path(working_dir, "log.out").exists()
+    assert Path(working_dir, "log.err").exists()
     assert ("One or more tests failed. Keeping temporary directories and "
             "logs." in result.stdout.str())
     shutil.rmtree(working_dir)
@@ -126,7 +127,7 @@ def test_directory_not_kept_on_succes(testdir):
     testdir.makefile(".yml", test=SUCCESS_TEST)
     result = testdir.runpytest("-v", "--kwdof")
     working_dir = re.search(
-        r"with command 'bash -c 'exit 0'' in '([\w/_-]*)'",
+        r"command:   bash -c 'exit 0'\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert not Path(working_dir).exists()
     assert ("All tests succeeded. Removing temporary directories and logs." in
@@ -139,9 +140,24 @@ def test_directory_of_symlinks(testdir):
     Path(str(subdir), "subfile.txt").write_text("test")
     result = testdir.runpytest("-v", "--symlink", "--kwd")
     working_dir = re.search(
-        r"with command 'echo moo' in '([\w/_-]*)'",
+        r"command:   echo moo\n\tdirectory: ([\w/_-]*)",
         result.stdout.str()).group(1)
     assert Path(working_dir, "test.yml").is_symlink()
     assert Path(working_dir, "subdir").is_dir()
     assert Path(working_dir, "subdir", "subfile.txt").is_symlink()
     shutil.rmtree(working_dir)
+
+
+def test_directory_unremovable_message(testdir):
+    # Following directory contains nested contents owned by root.
+    test = textwrap.dedent("""
+    - name: Create unremovable dir
+      command: >-
+        bash -c "docker run -v $(pwd):$(pwd) -w $(pwd) debian \
+        bash -c 'mkdir test && touch test/test'"
+    """)
+    testdir.makefile(".yaml", test=test)
+    result = testdir.runpytest()
+    assert ("Unable to remove the following directories due to permission "
+            "errors" in result.stdout.str())
+    assert result.ret == 0

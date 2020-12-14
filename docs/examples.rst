@@ -88,7 +88,7 @@ inside the test output directory. If you have a workflow with the output:
             Array[File] stats = moo_task.stats_files
         }
 
-Inside the ``output_links`` directory the directories ``moo_file`` and
+Inside the ``out`` directory the directories ``moo_file`` and
 ``stats`` will be created. Inside these directories will be the produced files.
 
 The following yaml file tests a WDL pipeline run with miniwdl.

@@ -7,6 +7,17 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.5.0
+---------------------------
++ Add support for python 3.9
++ Update the print statement for starting jobs to be more structured. This will
+  make the output easier to to read and use, since different fields (stdout,
+  stderr, command, etc) are all on their own line.
++ Do not crash when directories can not be removed due to permission errors.
+  Instead display a message to notify the users which directories could not be
+  removed. These issues occurred sometimes when tests involving docker were
+  run.
+
 version 1.4.0
 ---------------------------
 + Usage of the ``name`` keyword argument in workflow marks is now deprecated.

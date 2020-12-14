@@ -14,13 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
+import shutil
+import tempfile
+
 from .test_success_messages import MOO_FILE
 
 
 # Add a test to make sure no deprecation, or other warnings occur due to
 # changes in upstream libraries.
 def test_no_warnings(testdir):
+    basetemp = tempfile.mkdtemp()
     testdir.makefile(".yml", test_a=MOO_FILE)
-    result = testdir.runpytest()
+    result = testdir.runpytest("--basetemp", basetemp)
     outcomes = result.parseoutcomes()
     assert outcomes.get('warnings', 0) == 0
+    shutil.rmtree(basetemp)

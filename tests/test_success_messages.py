@@ -101,7 +101,7 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::failing grep::stdout::does not contain 'grep' PASSED"],  # noqa: E501
     ["test_succeeding.yml::failing grep::stderr::contains ''grep --help''"],
     ["test_succeeding.yml::zipped file::moo.gz::content::contains 'moo' PASSED"],  # noqa: E501
-    ["start 'moo file' with command 'bash -c 'echo moo > moo.txt'' in"],
+    ["moo file:\n\tcommand:   bash -c 'echo moo > moo.txt'\n\tdirectory"],
     ["'moo file' done."],
     ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
     ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
@@ -118,7 +118,7 @@ def succeeding_tests_output(tmpdir_factory: TempdirFactory):
     has to be run again.
     This fixture runs the succeeding tests once with pytest -v"""
     tempdir = str(tmpdir_factory.mktemp("succeeding_tests"))
-    test_file = Path(Path(tempdir) / Path("test_succeeding.yml"))
+    test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
     process_out = subprocess.run(args=["pytest", "-v"],  # nosec

@@ -14,19 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
-from setuptools import find_packages, setup
+from pathlib import Path
 
-with open("README.rst", "r") as readme_file:
-    LONG_DESCRIPTION = readme_file.read()
+from setuptools import find_packages, setup
 
 setup(
     name="pytest-workflow",
-    version="1.4.0",
+    version="1.5.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",
     author_email="sasc@lumc.nl",  # A placeholder for now
-    long_description=LONG_DESCRIPTION,
+    long_description=Path("README.rst").read_text(),
     long_description_content_type="text/x-rst",
     license="AGPL-3.0-or-later",
     keywords="pytest workflow pipeline yaml yml wdl cromwell snakemake",
@@ -43,6 +42,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",

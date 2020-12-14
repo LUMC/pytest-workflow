@@ -15,13 +15,14 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """All tests for workflow files"""
-import hashlib
+
 from pathlib import Path
 
 import pytest
 
 from .content_tests import ContentTestCollector
 from .schema import FileTest
+from .util import file_md5sum
 from .workflow import Workflow
 
 
@@ -141,18 +142,3 @@ class FileMd5(pytest.Item):
             f"Observed md5sum '{self.observed_md5sum}' not equal to expected "
             f"md5sum '{self.expected_md5sum}' for file '{self.filepath}'"
         )
-
-
-# block_size 64k with python is a few percent faster than linux native md5sum.
-def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
-    """
-    Generates a md5sum for a file. Reads file in blocks to save memory.
-    :param filepath: a pathlib. Path to the file
-    :param block_size: Block size in bytes
-    :return: a md5sum as hexadecimal string.
-    """
-    hasher = hashlib.md5()  # nosec: only used for file integrity
-    with filepath.open('rb') as file_handler:  # Read the file in bytes
-        for block in iter(lambda: file_handler.read(block_size), b''):
-            hasher.update(block)
-    return hasher.hexdigest()
