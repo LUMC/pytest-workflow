@@ -2,7 +2,7 @@
 Installation
 ============
 
-Pytest-workflow is tested on python 3.6, 3.7, 3.8 and 3.9. Python 2 is not
+Pytest-workflow is tested on python 3.6, 3.7, 3.8, 3.9 and 3.10. Python 2 is not
 supported.
 
 In a virtual environment
