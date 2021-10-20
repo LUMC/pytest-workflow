@@ -68,7 +68,7 @@ Cromwell so it can be used as a command, instead of having to use the jar.
         md5sum: 173fd8023240a8016033b33f42db14a2
     stdout:
       contains:
-        - "WorkflowSucceededState"
+        - "workflow finished with status 'Succeeded'"
 
 WDL with miniwdl example
 ------------------------

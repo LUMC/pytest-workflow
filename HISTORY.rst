@@ -7,6 +7,10 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 1.6.0-dev
+---------------------------
++ Add support and tests for Python 3.10
+
 version 1.5.0
 ---------------------------
 + Add support for python 3.9

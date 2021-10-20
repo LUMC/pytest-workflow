@@ -3,19 +3,19 @@
 - name: test-config-missing
   command: snakemake -n -r -p -s SimpleSnakefile
   exit_code: 1
-  stdout:
+  stderr:
     contains:
       - "You must set --config N_LINES_TO_READ=<a value>."
 - name: test-config-wrong-type
   command: snakemake -n -r -p -s SimpleSnakefile --config N_LINES_TO_READ=one
   exit_code: 1
-  stdout:
+  stderr:
     contains:
       - "N_LINES_TO_READ must be an integer."
 - name: test-config-invalid-value
   command: snakemake -n -r -p -s SimpleSnakefile --config N_LINES_TO_READ=-1
   exit_code: 1
-  stdout:
+  stderr:
     contains:
       - "N_LINES_TO_READ must at least be 1."
 - name: test-snakemake-run

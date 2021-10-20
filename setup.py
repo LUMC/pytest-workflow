@@ -43,6 +43,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
