@@ -37,7 +37,7 @@
     - path: test-output/all_data.gz
   stdout:
     contains:
-      - "WorkflowSucceededState"
+      - "workflow finished with status 'Succeeded'"
 
 
 - name: simple wdl miniwdl
