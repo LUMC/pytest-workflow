@@ -92,6 +92,7 @@ def test_link_tree_warning():
     shutil.rmtree(src_dir)
     shutil.rmtree(dest_dir.parent)
 
+
 HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
 

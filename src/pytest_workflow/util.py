@@ -1,8 +1,8 @@
 import hashlib
 import os
 import re
+import subprocess  # nosec
 import sys
-import subprocess
 import warnings
 from pathlib import Path
 from typing import Iterator, List, Set, Tuple, Union
@@ -48,7 +48,7 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
 
 def _run_command(*args):
     """Run an external command and return the output"""
-    result = subprocess.run(args,
+    result = subprocess.run(args,  # nosec
                             stdout=subprocess.PIPE,
                             # Encoding to output as a string.
                             encoding=sys.getdefaultencoding(),
@@ -68,7 +68,8 @@ def git_ls_files(path: Filepath) -> List[str]:
     return output.strip("\n").split("\n")
 
 
-def _duplicate_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, bool]]:
+def _duplicate_tree(src: Filepath, dest: Filepath
+                    ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src and for each file or directory yields a path to it,
     its destination, and whether it is a directory."""
     for entry in os.scandir(src):  # type: os.DirEntry
@@ -84,7 +85,8 @@ def _duplicate_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, b
                           f"Skipping {entry.path}")
 
 
-def _duplicate_git_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, bool]]:
+def _duplicate_git_tree(src: Filepath, dest: Filepath
+                        ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src, finds all files registered in git and for each file or
     directory yields a path to it, its destination and whether it is a
     directory"""
