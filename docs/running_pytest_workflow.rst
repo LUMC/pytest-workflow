@@ -63,9 +63,9 @@ lot less disk space and be faster as well.
 .. note::
 
     When your workflow is version controlled in git please use the
-    ``--git-aware`` option. This will omit the ``.git`` directory and all
-    files ignored by git. This reduces the number of copy operations
-    significantly.
+    ``--git-aware`` option. This omits the ``.git`` folder, all untracked
+    files and everything ignored by ``.gitignore``. This reduces the number of
+    copy operations significantly.
 
 
 Running multiple workflows simultaneously

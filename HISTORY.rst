@@ -10,8 +10,9 @@ Changelog
 version 1.6.0-dev
 ---------------------------
 + Add a ``--git-aware`` or ``--ga`` option to only copy copy files listed by
-  git ls-files. This omits the ``.git`` folder and all git ignored files
-  which reduces the number of copy operations drastically.
+  git ls-files. This omits the ``.git`` folder, all untracked files and
+  everything ignored by ``.gitignore``. This reduces the number of copy
+  operations drastically.
 
   Pytest-workflow will now emit a warning when copying of a git directory is
   detected without the ``--git-aware`` option.

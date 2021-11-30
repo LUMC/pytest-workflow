@@ -69,7 +69,8 @@ def pytest_addoption(parser: PytestParser):
     parser.addoption(
         "--ga", "--git-aware", action="store_true", dest="git_aware",
         help="Only copy files that are listed by the 'git ls-files' command. "
-             "This ignores the .git directory and any files in .gitignore. "
+             "This ignores the .git directory, any untracked files and any "
+             "files listed by .gitignore. "
              "Highly recommended when working in a git project.")
 
     # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
