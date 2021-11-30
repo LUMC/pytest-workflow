@@ -65,7 +65,9 @@ def git_root(path: Filepath) -> str:
 
 
 def git_ls_files(path: Filepath) -> List[str]:
-    output = _run_command("git", "-C", os.fspath(path), "ls-files")
+    output = _run_command("git", "-C", os.fspath(path), "ls-files",
+                          # Make sure submodules are included.
+                          "--recurse-submodules")
     # Remove trailing newlines and split to output all the paths
     return output.strip("\n").split("\n")
 
@@ -94,16 +96,28 @@ def _duplicate_git_tree(src: Filepath, dest: Filepath
     directory"""
     # A set of dirs we have already yielded. '' is the output of
     # os.path.dirname when the path is in the current directory.
-    dirs: Set[str] = {''}
+    yielded_dirs: Set[str] = {''}
     for path in git_ls_files(src):
-        # git ls-files does not list directories. So first check if parent is
-        # in dirs, so we can yield directories before files, to prevent
-        # creating files in non-existing directories.
+        # git ls-files does not list directories. Yield parent first to prevent
+        # creating files in non-existing directories. Also check if it is
+        # yielded before so each directory is only yielded once.
         parent = os.path.dirname(path)
-        if parent not in dirs:
-            src_parent = os.path.join(src, parent)
-            dest_parent = os.path.join(dest, parent)
-            yield src_parent, dest_parent, True
+        if parent not in yielded_dirs:
+            # This maybe a nested directory, with non-existing parents itself.
+            # Therefore:
+            # - List parents from deepest to least deep by using os.path.dirname  # noqa: E501
+            # - Reverse the list to yield directories from least deep to deepest  # noqa: E501
+            # This ensures parents are always yielded before children.
+            parents = []
+            while parent not in yielded_dirs:
+                yielded_dirs.add(parent)
+                parents.append(parent)
+                parent = os.path.dirname(parent)
+
+            for parent in reversed(parents):
+                src_parent = os.path.join(src, parent)
+                dest_parent = os.path.join(dest, parent)
+                yield src_parent, dest_parent, True
 
         # Yield the actual file if the directory has already been yielded.
         src_path = os.path.join(src, path)
