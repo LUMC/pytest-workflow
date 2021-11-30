@@ -3,6 +3,9 @@ import os
 import re
 import warnings
 from pathlib import Path
+from typing import Iterator, Tuple, Union
+
+Filepath = Union[str, os.PathLike]
 
 
 # This function was created to ensure the same conversion is used throughout
@@ -41,22 +44,38 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
     return False
 
 
-def link_tree(src: Path, dest: Path) -> None:
+def _duplicate_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, bool]]:
+    """Traverses src and for each file or directory yields a Path to it,
+    its destination, and whether it is a directory."""
+    for entry in os.scandir(src):  # type: os.DirEntry
+        if entry.is_dir():
+            dir_src = entry.path
+            dir_dest = os.path.join(dest, entry.name)
+            yield dir_src, dir_dest, True
+            yield from _duplicate_tree(dir_src, dir_dest)
+        elif entry.is_file() or entry.is_symlink():
+            yield entry.path, os.path.join(dest, entry.name), False
+        else:
+            warnings.warn(f"Unsupported filetype for copying. "
+                          f"Skipping {entry.path}")
+
+
+def link_tree(src: Filepath, dest: Filepath) -> None:
     """
     Copies a tree by mimicking the directory structure and soft-linking the
     files
     :param src: The source directory
     :param dest: The destination directory
     """
-    if src.is_dir():
-        dest.mkdir(parents=True)
-        for path in os.listdir(str(src)):
-            link_tree(Path(src, path), Path(dest, path))
-    elif src.is_file() or src.is_symlink():
-        dest.symlink_to(src, target_is_directory=False)
-    else:  # Only copy files and symlinks, no devices etc.
-        warnings.warn(f"Unsupported filetype. Skipping copying: '{str(src)}' "
-                      f"to '{str(dest)}'.")
+    if not os.path.isdir(src):
+        # shutil.copytree also throws a NotADirectoryError
+        raise NotADirectoryError(f"Not a directory: '{src}'")
+    os.makedirs(dest, exist_ok=False)
+    for src_path, dest_path, is_dir in _duplicate_tree(src, dest):
+        if is_dir:
+            os.mkdir(dest_path)
+        else:
+            os.symlink(src_path, dest_path, target_is_directory=False)
 
 
 # block_size 64k with python is a few percent faster than linux native md5sum.

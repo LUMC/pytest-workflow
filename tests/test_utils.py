@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 import hashlib
+import os
 import shutil
 import tempfile
 from pathlib import Path
@@ -77,15 +78,19 @@ def test_link_tree():
 
 
 def test_link_tree_warning():
-    urandom = Path("/dev/urandom")
-    dest = Path("notexist")
-    with pytest.warns(UserWarning,
-                      match="Unsupported filetype. Skipping copying: "
-                            "'/dev/urandom' to 'notexist'."):
-        link_tree(urandom, dest)
-    # Destination should not be created
-    assert not dest.exists()
+    src_dir = Path(tempfile.mkdtemp())
+    dest_dir = Path(tempfile.mkdtemp(), "test")
 
+    not_a_file = src_dir / "not_a_file"
+    os.mkfifo(not_a_file)
+    with pytest.warns(UserWarning,
+                      match=f"Unsupported filetype for copying. Skipping"
+                            f" {not_a_file}"):
+        link_tree(src_dir, dest_dir)
+    # Destination should not be created
+    assert not (dest_dir / "not_a_file").exists()
+    shutil.rmtree(src_dir)
+    shutil.rmtree(dest_dir.parent)
 
 HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
