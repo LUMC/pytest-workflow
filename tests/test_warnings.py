@@ -29,3 +29,13 @@ def test_no_warnings(testdir):
     outcomes = result.parseoutcomes()
     assert outcomes.get('warnings', 0) == 0
     shutil.rmtree(basetemp)
+
+
+def test_git_warning(testdir):
+    basetemp = tempfile.mkdtemp()
+    testdir.mkdir(".git")
+    testdir.makefile(".yml", test_a=MOO_FILE)
+    result = testdir.runpytest("--basetemp", basetemp)
+    outcomes = result.parseoutcomes()
+    assert outcomes.get('warnings') == 1
+    assert ".git dir detected" in result.stdout.str()
