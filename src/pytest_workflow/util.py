@@ -1,6 +1,8 @@
+import functools
 import hashlib
 import os
 import re
+import shutil
 import subprocess  # nosec
 import sys
 import warnings
@@ -104,6 +106,41 @@ def _duplicate_git_tree(src: Filepath, dest: Filepath
             yield src_path, dest_path, True
 
 
+def duplicate_tree(src: Filepath, dest: Filepath,
+                   symlink: bool = False,
+                   git_aware: bool = False):
+    """
+    Duplicates a filetree
+    :param src: The source directory
+    :param dest: The destination directory
+    :param symlink: Create symlinks nstead of copying the files.
+    :param git_aware: Only copy/symlink files registered by git.
+    """
+    if not symlink and not git_aware:
+        shutil.copytree(src, dest)
+        return
+
+    if not os.path.isdir(src):
+        # shutil.copytree also throws a NotADirectoryError
+        raise NotADirectoryError(f"Not a directory: '{src}'")
+
+    if git_aware:
+        path_iter = _duplicate_git_tree(src, dest)
+    else:
+        path_iter = _duplicate_tree(src, dest)
+    if symlink:
+        copy = functools.partial(os.symlink, target_is_directory=False)
+    else:
+        copy = shutil.copy2  # Preserves metadata, also used by shutil.copytree
+
+    os.makedirs(dest, exist_ok=False)
+    for src_path, dest_path, is_dir in path_iter:
+        if is_dir:
+            os.mkdir(dest_path)
+        else:
+            copy(src_path, dest_path)
+
+
 def link_tree(src: Filepath, dest: Filepath) -> None:
     """
     Copies a tree by mimicking the directory structure and soft-linking the
@@ -111,15 +148,8 @@ def link_tree(src: Filepath, dest: Filepath) -> None:
     :param src: The source directory
     :param dest: The destination directory
     """
-    if not os.path.isdir(src):
-        # shutil.copytree also throws a NotADirectoryError
-        raise NotADirectoryError(f"Not a directory: '{src}'")
-    os.makedirs(dest, exist_ok=False)
-    for src_path, dest_path, is_dir in _duplicate_tree(src, dest):
-        if is_dir:
-            os.mkdir(dest_path)
-        else:
-            os.symlink(src_path, dest_path, target_is_directory=False)
+    # THIS FUNCTION IS KEPT FOR BACKWARDS-COMPATIBILITY
+    duplicate_tree(src, dest, symlink=True)
 
 
 # block_size 64k with python is a few percent faster than linux native md5sum.
