@@ -1,9 +1,11 @@
 import hashlib
 import os
 import re
+import sys
+import subprocess
 import warnings
 from pathlib import Path
-from typing import Iterator, Tuple, Union
+from typing import Iterator, List, Set, Tuple, Union
 
 Filepath = Union[str, os.PathLike]
 
@@ -44,8 +46,30 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
     return False
 
 
+def _run_command(*args):
+    """Run an external command and return the output"""
+    result = subprocess.run(args,
+                            stdout=subprocess.PIPE,
+                            # Encoding to output as a string.
+                            encoding=sys.getdefaultencoding(),
+                            check=True)
+    return result.stdout
+
+
+def git_get_root(path: Filepath) -> str:
+    output = _run_command(
+        "git", "-C", os.fspath(path), "rev-parse", "--show-toplevel")
+    return output.strip()  # Remove trailing newline
+
+
+def git_ls_files(path: Filepath) -> List[str]:
+    output = _run_command("git", "-C", os.fspath(path), "ls-files")
+    # Remove trailing newlines and split to output all the paths
+    return output.strip("\n").split("\n")
+
+
 def _duplicate_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, bool]]:
-    """Traverses src and for each file or directory yields a Path to it,
+    """Traverses src and for each file or directory yields a path to it,
     its destination, and whether it is a directory."""
     for entry in os.scandir(src):  # type: os.DirEntry
         if entry.is_dir():
@@ -58,6 +82,24 @@ def _duplicate_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, b
         else:
             warnings.warn(f"Unsupported filetype for copying. "
                           f"Skipping {entry.path}")
+
+
+def _duplicate_git_tree(src: Filepath, dest: Filepath) -> Iterator[Tuple[str, str, bool]]:
+    """Traverses src, finds all files registered in git and for each file or
+    directory yields a path to it, its destination and whether it is a
+    directory"""
+    # A set of dirs we have already yielded. '' is the output of
+    # os.path.dirname when the path is in the current directory.
+    dirs: Set[str] = {''}
+    for path in git_ls_files(src):
+        src_path = os.path.join(src, path)
+        dest_path = os.path.join(dest, path)
+        yield src_path, dest_path, False
+        parent = os.path.dirname(src_path)
+        if parent not in dirs:
+            src_path = os.path.join(src, parent)
+            dest_path = os.path.join(dest, parent)
+            yield src_path, dest_path, True
 
 
 def link_tree(src: Filepath, dest: Filepath) -> None:
