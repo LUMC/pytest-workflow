@@ -96,14 +96,18 @@ def _duplicate_git_tree(src: Filepath, dest: Filepath
     # os.path.dirname when the path is in the current directory.
     dirs: Set[str] = {''}
     for path in git_ls_files(src):
-        src_path = os.path.join(src, path)
-        dest_path = os.path.join(dest, path)
-        yield src_path, dest_path, False
-        parent = os.path.dirname(src_path)
+        # First check if parent is dir, so we can yield directories before
+        # files, to prevent creating files in non-existing directories.
+        parent = os.path.dirname(path)
         if parent not in dirs:
             src_path = os.path.join(src, parent)
             dest_path = os.path.join(dest, parent)
             yield src_path, dest_path, True
+
+        # Yield the actual file if the directory has already been yielded.
+        src_path = os.path.join(src, path)
+        dest_path = os.path.join(dest, path)
+        yield src_path, dest_path, False
 
 
 def duplicate_tree(src: Filepath, dest: Filepath,
