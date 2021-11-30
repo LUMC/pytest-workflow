@@ -7,7 +7,7 @@ import subprocess  # nosec
 import sys
 import warnings
 from pathlib import Path
-from typing import Iterator, List, Set, Tuple, Union
+from typing import Callable, Iterator, List, Set, Tuple, Union
 
 Filepath = Union[str, os.PathLike]
 
@@ -133,7 +133,8 @@ def duplicate_tree(src: Filepath, dest: Filepath,
     else:
         path_iter = _duplicate_tree(src, dest)
     if symlink:
-        copy = functools.partial(os.symlink, target_is_directory=False)
+        copy: Callable[[Filepath, Filepath], None] = \
+            functools.partial(os.symlink, target_is_directory=False)
     else:
         copy = shutil.copy2  # Preserves metadata, also used by shutil.copytree
 
