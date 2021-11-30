@@ -58,7 +58,7 @@ def _run_command(*args):
     return result.stdout
 
 
-def git_get_root(path: Filepath) -> str:
+def git_root(path: Filepath) -> str:
     output = _run_command(
         "git", "-C", os.fspath(path), "rev-parse", "--show-toplevel")
     return output.strip()  # Remove trailing newline

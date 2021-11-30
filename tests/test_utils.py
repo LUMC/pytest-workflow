@@ -16,13 +16,14 @@
 import hashlib
 import os
 import shutil
+import subprocess  # nosec
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from pytest_workflow.util import file_md5sum, is_in_dir, link_tree, \
-    replace_whitespace
+from pytest_workflow.util import duplicate_tree, file_md5sum, git_root, \
+    is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
     ("bla\nbla", "bla_bla"),
@@ -91,6 +92,52 @@ def test_link_tree_warning():
     assert not (dest_dir / "not_a_file").exists()
     shutil.rmtree(src_dir)
     shutil.rmtree(dest_dir.parent)
+
+
+@pytest.fixture()
+def git_dir():
+    git_dir = Path(tempfile.mkdtemp())
+    (git_dir / "test").mkdir()
+    test_file = git_dir / "test" / "test.txt"
+    test_file.touch()
+    subprocess.run(["git", "-C", str(git_dir), "init"])  # nosec
+    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])  # nosec
+    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",  # nosec
+                    "initial commit"])
+    yield git_dir
+    shutil.rmtree(git_dir)
+
+
+def test_duplicate_git_tree(git_dir):
+    assert (git_dir / ".git").exists()
+    dest = Path(tempfile.mkdtemp()) / "test"
+    duplicate_tree(git_dir, dest, git_aware=True)
+    assert dest.exists()
+    assert not (dest / ".git").exists()
+    assert (dest / "test" / "test.txt").exists()
+
+
+def test_duplicate(git_dir):
+    assert (git_dir / ".git").exists()
+    dest = Path(tempfile.mkdtemp()) / "test"
+    duplicate_tree(git_dir, dest, git_aware=False)
+    assert dest.exists()
+    assert (dest / ".git").exists()
+    assert (dest / "test" / "test.txt").exists()
+
+
+def test_duplicate_notadirerror():
+    fd, file = tempfile.mkstemp()
+    dir = tempfile.mkdtemp()
+    with pytest.raises(NotADirectoryError):
+        duplicate_tree(file, Path(dir, "somedir"), symlink=True)
+    shutil.rmtree(dir)
+    os.close(fd)
+    os.remove(file)
+
+
+def test_git_root(git_dir):
+    assert git_root(git_dir / "test") == str(git_dir)
 
 
 HASH_FILE_DIR = Path(__file__).parent / "hash_files"
