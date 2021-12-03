@@ -32,8 +32,11 @@ pytest-workflow
   :target: https://doi.org/10.5281/zenodo.3757727
   :alt: More information on how to cite pytest-workflow here.
 
-pytest-workflow is a pytest plugin that aims to make pipeline/workflow testing easy
-by using yaml files for the test configuration.
+pytest-workflow is a workflow-system agnostic testing framework that aims 
+to make pipeline/workflow testing easy by using YAML files for the test 
+configuration. Whether you write your pipelines in WDL, snakemake, bash or
+any other workflow framework, pytest-workflow makes testing easy.
+pytest-workflow is build on top of the pytest test framework.
 
 For our complete documentation checkout our
 `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
@@ -42,7 +45,7 @@ For our complete documentation checkout our
 Installation
 ============
 Pytest-workflow requires Python 3.6 or higher. It is tested on Python 3.6, 3.7,
-3.8 and 3.9. Python 2 is not supported.
+3.8, 3.9 and 3.10. Python 2 is not supported.
 
 - Make sure your virtual environment is activated.
 - Install using pip ``pip install pytest-workflow``
