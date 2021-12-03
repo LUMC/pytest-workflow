@@ -7,7 +7,7 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.6.0-dev
+version 1.6.0
 ---------------------------
 + Add a ``--git-aware`` or ``--ga`` option to only copy copy files listed by
   git ls-files. This omits the ``.git`` folder, all untracked files and
