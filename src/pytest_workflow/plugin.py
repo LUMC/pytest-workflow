@@ -34,7 +34,7 @@ import yaml
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .util import is_in_dir, link_tree, replace_whitespace
+from .util import duplicate_tree, is_in_dir, replace_whitespace
 from .workflow import Workflow, WorkflowQueue
 
 
@@ -66,6 +66,12 @@ def pytest_addoption(parser: PytestParser):
              "symbolic links. This saves disk space, but should only be used "
              "for tests that do use these files read-only."
     )
+    parser.addoption(
+        "--ga", "--git-aware", action="store_true", dest="git_aware",
+        help="Only copy files that are listed by the 'git ls-files' command. "
+             "This ignores the .git directory, any untracked files and any "
+             "files listed by .gitignore. "
+             "Highly recommended when working in a git project.")
 
     # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
     # `-m` uses a "mark expression". So you have to type a piece of python
@@ -375,12 +381,22 @@ class WorkflowTestsCollector(pytest.Collector):
                 f"'{tempdir}' already exists. Deleting ...")
             shutil.rmtree(str(tempdir))
 
+        # Warn users of git that they should use the --git-aware option.
+        # The .git directory contains all files ever checked in, and all diffs
+        # in the entire history.
+        root_dir = Path(self.config.rootdir)
+        git_aware = self.config.getoption("git_aware")
+        git_dir = root_dir / ".git"
+        if git_dir.exists() and not git_aware:
+            warnings.warn(
+                f".git dir detected: {str(git_dir)}. pytest-workflow "
+                f"will copy the entire .git directory and all files ignored "
+                f"by git. It is recommended to use the --git-aware option.")
         # Copy the project directory to the temporary directory using pytest's
         # rootdir.
-        if self.config.getoption("symlink"):
-            link_tree(Path(str(self.config.rootdir)), tempdir)
-        else:
-            shutil.copytree(str(self.config.rootdir), str(tempdir))
+        duplicate_tree(root_dir, tempdir,
+                       symlink=self.config.getoption("symlink"),
+                       git_aware=git_aware)
 
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,

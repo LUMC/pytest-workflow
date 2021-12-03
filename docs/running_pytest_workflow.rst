@@ -55,11 +55,18 @@ The temporary directories created are copies of pytest's root directory, the
 directory from which it runs the tests. If you have lots of tests, and if you
 have a large repository, this may take a lot of disk space. To alleviate this
 you can use the ``--symlink`` flag which will create the same directory layout
-but instead symlinks the files instead of copying them. This is *slower* for
-lots of small files, and it carries with it the risk that the tests may alter
-files from your work directory. If there are a lot of large files and files are
-used read-only in tests, then it will use a lot less disk space and be faster
-as well.
+but instead symlinks the files instead of copying them. This carries with it
+the risk that the tests may alter files from your work directory. If there are
+a lot of large files and files are used read-only in tests, then it will use a
+lot less disk space and be faster as well.
+
+.. note::
+
+    When your workflow is version controlled in git please use the
+    ``--git-aware`` option. This omits the ``.git`` folder, all untracked
+    files and everything ignored by ``.gitignore``. This reduces the number of
+    copy operations significantly.
+
 
 Running multiple workflows simultaneously
 -----------------------------------------
