@@ -123,8 +123,8 @@ def test_duplicate_git_tree_file_removed_error(git_dir):
     dest = Path(tempfile.mkdtemp()) / "test"
     with pytest.raises(FileNotFoundError) as e:
         duplicate_tree(git_dir, dest, git_aware=True)
-    e.match("checked")
-    e.match("git rm")
+    e.match("checked in")
+    e.match(f"\"git -C '{git_dir}' rm '{str(Path('test', 'test.txt'))}'\"")
 
 
 def test_duplicate(git_dir):

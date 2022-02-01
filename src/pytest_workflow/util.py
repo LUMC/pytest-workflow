@@ -123,10 +123,12 @@ def _recurse_git_repository_tree(src: Filepath, dest: Filepath
         src_path = os.path.join(src, path)
         if not os.path.exists(src_path):
             raise FileNotFoundError(
-                f"{src_path} is checked in in git, but not present in the "
-                f"filesystem. If the file was removed, its removal can be "
-                f"recorded in git with 'git rm {src_path}'. Removal can be "
-                f"reversed with 'git checkout {src_path}.")
+                f"{path} from git repository {src} is checked in in git, "
+                f"but not present in the filesystem. If the file was removed, "
+                f"its removal can be recorded in git with "
+                f"\"git -C '{src}' rm '{path}'\". "
+                f"Removal can be reversed with "
+                f"\"git -C '{src}' checkout '{path}'\".")
         dest_path = os.path.join(dest, path)
         yield src_path, dest_path, False
 
