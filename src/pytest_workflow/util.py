@@ -72,16 +72,16 @@ def git_ls_files(path: Filepath) -> List[str]:
     return output.strip("\n").split("\n")
 
 
-def _duplicate_tree(src: Filepath, dest: Filepath
-                    ) -> Iterator[Tuple[str, str, bool]]:
+def _recurse_directory_tree(src: Filepath, dest: Filepath
+                            ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src and for each file or directory yields a path to it,
     its destination, and whether it is a directory."""
-    for entry in os.scandir(src):  # type: os.DirEntry
+    for entry in os.scandir(src):  # type: os.DirEntry  # type: ignore
         if entry.is_dir():
             dir_src = entry.path
             dir_dest = os.path.join(dest, entry.name)
             yield dir_src, dir_dest, True
-            yield from _duplicate_tree(dir_src, dir_dest)
+            yield from _recurse_directory_tree(dir_src, dir_dest)
         elif entry.is_file() or entry.is_symlink():
             yield entry.path, os.path.join(dest, entry.name), False
         else:
@@ -89,8 +89,8 @@ def _duplicate_tree(src: Filepath, dest: Filepath
                           f"Skipping {entry.path}")
 
 
-def _duplicate_git_tree(src: Filepath, dest: Filepath
-                        ) -> Iterator[Tuple[str, str, bool]]:
+def _recurse_git_repository_tree(src: Filepath, dest: Filepath
+                                 ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src, finds all files registered in git and for each file or
     directory yields a path to it, its destination and whether it is a
     directory"""
@@ -121,6 +121,14 @@ def _duplicate_git_tree(src: Filepath, dest: Filepath
 
         # Yield the actual file if the directory has already been yielded.
         src_path = os.path.join(src, path)
+        if not os.path.exists(src_path):
+            raise FileNotFoundError(
+                f"{path} from git repository {src} is checked in in git, "
+                f"but not present in the filesystem. If the file was removed, "
+                f"its removal can be recorded in git with "
+                f"\"git -C '{src}' rm '{path}'\". "
+                f"Removal can be reversed with "
+                f"\"git -C '{src}' checkout '{path}'\".")
         dest_path = os.path.join(dest, path)
         yield src_path, dest_path, False
 
@@ -144,9 +152,9 @@ def duplicate_tree(src: Filepath, dest: Filepath,
         raise NotADirectoryError(f"Not a directory: '{src}'")
 
     if git_aware:
-        path_iter = _duplicate_git_tree(src, dest)
+        path_iter = _recurse_git_repository_tree(src, dest)
     else:
-        path_iter = _duplicate_tree(src, dest)
+        path_iter = _recurse_directory_tree(src, dest)
     if symlink:
         copy: Callable[[Filepath, Filepath], None] = \
             functools.partial(os.symlink, target_is_directory=False)
