@@ -76,7 +76,7 @@ def _recurse_directory_tree(src: Filepath, dest: Filepath
                             ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src and for each file or directory yields a path to it,
     its destination, and whether it is a directory."""
-    for entry in os.scandir(src):  # type: os.DirEntry
+    for entry in os.scandir(src):  # type: os.DirEntry  # type: ignore
         if entry.is_dir():
             dir_src = entry.path
             dir_dest = os.path.join(dest, entry.name)
