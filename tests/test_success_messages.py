@@ -20,8 +20,6 @@ import subprocess  # nosec
 import textwrap
 from pathlib import Path
 
-from _pytest.tmpdir import TempdirFactory
-
 import pytest
 
 MOO_FILE = textwrap.dedent("""\
@@ -111,7 +109,7 @@ SUCCESS_MESSAGES = [
 
 
 @pytest.fixture(scope="session")
-def succeeding_tests_output(tmpdir_factory: TempdirFactory):
+def succeeding_tests_output(tmpdir_factory):
     """This fixture was written because the testdir function has a default
     scope of 'function'. This is very inefficient when testing multiple
     success messages in the output as the whole test yaml with all commands
