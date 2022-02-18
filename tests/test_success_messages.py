@@ -109,13 +109,13 @@ SUCCESS_MESSAGES = [
 
 
 @pytest.fixture(scope="session")
-def succeeding_tests_output(tmpdir_factory):
+def succeeding_tests_output(tmp_path_factory: pytest.TempPathFactory):
     """This fixture was written because the testdir function has a default
     scope of 'function'. This is very inefficient when testing multiple
     success messages in the output as the whole test yaml with all commands
     has to be run again.
     This fixture runs the succeeding tests once with pytest -v"""
-    tempdir = str(tmpdir_factory.mktemp("succeeding_tests"))
+    tempdir = tmp_path_factory.mktemp("succeeding_tests")
     test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
