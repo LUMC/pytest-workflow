@@ -173,13 +173,12 @@ def pytest_configure(config: PytestConfig):
         Path(basetemp) if basetemp is not None
         else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
 
-    rootdir = Path(str(config.rootdir))
-    # Raise an error if the workflow temporary directory of the rootdir
+    # Raise an error if the workflow temporary directory of the rootpath
     # (pytest's CWD). This will lead to infinite looping and copying.
-    if is_in_dir(workflow_temp_dir, rootdir):
+    if is_in_dir(workflow_temp_dir, config.rootpath):
         raise ValueError(f"'{workflow_temp_dir}' is a subdirectory of "
-                         f"'{rootdir}'. Please select a --basetemp that is "
-                         f"not in pytest's current working directory.")
+                         f"'{config.rootpath}'. Please select a --basetemp "
+                         f"that is not in pytest's current working directory.")
 
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
