@@ -39,35 +39,35 @@ TAG_TESTS = textwrap.dedent("""\
 """)
 
 
-def test_name_tag_with_space(testdir):
-    testdir.makefile(".yml", test_tags=TAG_TESTS)
-    result = testdir.runpytest("-v", "--tag", "three again").stdout.str()
+def test_name_tag_with_space(pytester):
+    pytester.makefile(".yml", test_tags=TAG_TESTS)
+    result = pytester.runpytest("-v", "--tag", "three again").stdout.str()
     assert "three again" in result
     assert "four" not in result
     assert "nine" not in result
 
 
-def test_name_tag(testdir):
-    testdir.makefile(".yml", test_tags=TAG_TESTS)
-    result = testdir.runpytest("-v", "--tag", "three").stdout.str()
+def test_name_tag(pytester):
+    pytester.makefile(".yml", test_tags=TAG_TESTS)
+    result = pytester.runpytest("-v", "--tag", "three").stdout.str()
     assert "three" in result
     assert "three again" not in result
     assert "four" not in result
     assert "nine" not in result
 
 
-def test_category_tag(testdir):
-    testdir.makefile(".yml", test_tags=TAG_TESTS)
-    result = testdir.runpytest("-v", "--tag", "odd").stdout.str()
+def test_category_tag(pytester):
+    pytester.makefile(".yml", test_tags=TAG_TESTS)
+    result = pytester.runpytest("-v", "--tag", "odd").stdout.str()
     assert "three" in result
     assert "three again" in result
     assert "nine" in result
     assert "four" not in result
 
 
-def test_category_tag2(testdir):
-    testdir.makefile(".yml", test_tags=TAG_TESTS)
-    result = testdir.runpytest("-v", "--tag", "even").stdout.str()
+def test_category_tag2(pytester):
+    pytester.makefile(".yml", test_tags=TAG_TESTS)
+    result = pytester.runpytest("-v", "--tag", "even").stdout.str()
     assert "three" not in result
     assert "three again" not in result
     assert "four" in result

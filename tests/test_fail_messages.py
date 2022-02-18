@@ -164,9 +164,9 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
 
 
 @pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)
-def test_messages(test: str, message: str, testdir):
-    testdir.makefile(".yml", textwrap.dedent(test))
+def test_messages(test: str, message: str, pytester):
+    pytester.makefile(".yml", textwrap.dedent(test))
     # Ideally this should be run in a LC_ALL=C environment. But this is not
     # possible due to multiple levels of process launching.
-    result = testdir.runpytest("-v")
+    result = pytester.runpytest("-v")
     assert message in result.stdout.str()

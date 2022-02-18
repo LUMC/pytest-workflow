@@ -17,10 +17,10 @@
 from .test_success_messages import SIMPLE_ECHO
 
 
-def test_same_name_different_files(testdir):
-    testdir.makefile(".yml", test_a=SIMPLE_ECHO)
-    testdir.makefile(".yml", test_b=SIMPLE_ECHO)
-    result = testdir.runpytest()
+def test_same_name_different_files(pytester):
+    pytester.makefile(".yml", test_a=SIMPLE_ECHO)
+    pytester.makefile(".yml", test_b=SIMPLE_ECHO)
+    result = pytester.runpytest()
     assert result.ret != 0
     assert ("Workflow name 'simple echo' used more than once"
             in result.stdout.str())

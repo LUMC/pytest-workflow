@@ -40,28 +40,28 @@ def test_hook_impl():
 
 
 @pytest.mark.parametrize("test", [TEST_HOOK_ARGS])
-def test_not_skipped(test, testdir):
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_hook=test)
-    result = testdir.runpytest()
+def test_not_skipped(test, pytester):
+    pytester.makefile(".yml", test_simple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_hook=test)
+    result = pytester.runpytest()
     result.assert_outcomes(passed=5)
 
 
-def test_name_use_is_deprecated(testdir):
-    testdir.makefile(".py", test_hook=TEST_HOOK_KWARGS)
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
-    result = testdir.runpytest().stdout.str()
+def test_name_use_is_deprecated(pytester):
+    pytester.makefile(".py", test_hook=TEST_HOOK_KWARGS)
+    pytester.makefile(".yml", test_simple=SIMPLE_ECHO)
+    result = pytester.runpytest().stdout.str()
     assert "Use pytest.mark.workflow('workflow_name') instead." in result
     assert "DeprecationWarning" in result
 
 
 @pytest.mark.parametrize("test", [TEST_HOOK_ARGS])
-def test_skipped(test, testdir):
-    testdir.makefile(".yml", test_simple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_hook=test)
+def test_skipped(test, pytester):
+    pytester.makefile(".yml", test_simple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_hook=test)
     # No workflow will run because the tag does not match
     # ``-r s`` gives the reason why a test was skipped.
-    result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
+    result = pytester.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
     result.assert_outcomes(skipped=1)
     assert "'simple echo' has not run." in result.stdout.str()
 
@@ -77,30 +77,30 @@ def test_fixture_impl(workflow_dir):
 
 
 @pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
-def test_workflow_dir_arg(test, testdir):
+def test_workflow_dir_arg(test, pytester):
     # Call the test, `test_asimple` because tests are run alphabetically.
     # This will detect if the workflow dir has been removed.
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=test)
-    result = testdir.runpytest()
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=test)
+    result = pytester.runpytest()
     result.assert_outcomes(passed=5, failed=0, errors=0, skipped=0)
 
 
 @pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
-def test_workflow_dir_arg_skipped(test, testdir):
+def test_workflow_dir_arg_skipped(test, pytester):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=test)
-    result = testdir.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=test)
+    result = pytester.runpytest("-v", "-r", "s", "--tag", "flaksdlkad")
     result.assert_outcomes(skipped=1)
 
 
 @pytest.mark.parametrize("test", [TEST_FIXTURE_ARGS])
-def test_mark_not_unknown(test, testdir):
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=test)
-    result = testdir.runpytest("-v")
+def test_mark_not_unknown(test, pytester):
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=test)
+    result = pytester.runpytest("-v")
     assert "PytestUnknownMarkWarning" not in result.stdout.str()
 
 
@@ -113,12 +113,12 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-def test_workflow_not_exist_dir_arg(testdir):
+def test_workflow_not_exist_dir_arg(pytester):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=TEST_FIXTURE_WORKFLOW_NOT_EXIST)
-    result = testdir.runpytest("-v", "-r", "s")
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=TEST_FIXTURE_WORKFLOW_NOT_EXIST)
+    result = pytester.runpytest("-v", "-r", "s")
     result.assert_outcomes(skipped=1, passed=4)
     assert "'shoobiedoewap' has not run." in result.stdout.str()
 
@@ -131,12 +131,12 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-def test_fixture_unmarked_test(testdir):
+def test_fixture_unmarked_test(pytester):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=TEST_FIXTURE_UNMARKED_TEST)
-    result = testdir.runpytest("-v", "-r", "s")
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=TEST_FIXTURE_UNMARKED_TEST)
+    result = pytester.runpytest("-v", "-r", "s")
     assert ("workflow_dir can only be requested in tests marked with "
             "the workflow mark.") in result.stdout.str()
 
@@ -151,12 +151,12 @@ def test_fixture_impl(workflow_dir):
 """)
 
 
-def test_mark_wrong_key_with_fixture(testdir):
+def test_mark_wrong_key_with_fixture(pytester):
     """Run this test to check if this does not run into fixture request
     errors"""
-    testdir.makefile(".yml", test_asimple=SIMPLE_ECHO)
-    testdir.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
-    result = testdir.runpytest("-v", "-r", "s")
+    pytester.makefile(".yml", test_asimple=SIMPLE_ECHO)
+    pytester.makefile(".py", test_fixture=TEST_MARK_WRONG_KEY)
+    result = pytester.runpytest("-v", "-r", "s")
     assert ("A workflow name or names should be defined in the "
             "workflow marker of test_fixture.py::test_fixture_impl"
             ) in result.stdout.str()
@@ -164,7 +164,7 @@ def test_mark_wrong_key_with_fixture(testdir):
     result.assert_outcomes(passed=0, failed=0, skipped=0, errors=1)
 
 
-def test_fixture_usable_for_file_tests(testdir):
+def test_fixture_usable_for_file_tests(pytester):
     test_workflow = textwrap.dedent("""\
     - name: number files
       command: >-
@@ -189,13 +189,13 @@ def test_fixture_usable_for_file_tests(testdir):
         assert int(number_file_content) % 3 == 0
     """)
 
-    testdir.makefile(".yml", test_aworkflow=test_workflow)
-    testdir.makefile(".py", test_div=test_div_by_three)
-    result = testdir.runpytest("-v")
+    pytester.makefile(".yml", test_aworkflow=test_workflow)
+    pytester.makefile(".py", test_div=test_div_by_three)
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=4, failed=0, skipped=0, errors=0)
 
 
-def test_same_custom_test_multiple_times(testdir):
+def test_same_custom_test_multiple_times(pytester):
     test_workflow = textwrap.dedent("""\
     - name: one_two_three
       command: >-
@@ -226,9 +226,9 @@ def test_same_custom_test_multiple_times(testdir):
         assert int(number_file.read_text()) % 3 == 0
     """)
 
-    testdir.makefile(".yml", test_aworkflow=test_workflow)
-    testdir.makefile(".py", test_div=test_div_by_three)
-    result = testdir.runpytest("-v")
+    pytester.makefile(".yml", test_aworkflow=test_workflow)
+    pytester.makefile(".py", test_div=test_div_by_three)
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=9, failed=0, skipped=0, errors=0)
 
 
@@ -263,19 +263,19 @@ def test_div_by_three(workflow_dir):
 """)
 
 
-def test_same_custom_test_multiple_times_one_error(testdir):
-    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
-    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
-    result = testdir.runpytest("-v")
+def test_same_custom_test_multiple_times_one_error(pytester):
+    pytester.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    pytester.makefile(".py", test_div=TEST_DIV_BY_THREE)
+    result = pytester.runpytest("-v")
     result.assert_outcomes(passed=8, failed=1, skipped=0, errors=0)
     assert ("test_div.py::test_div_by_three[two_three_five] FAILED "
             in result.stdout.str())
 
 
-def test_custom_tests_properly_skipped(testdir):
-    testdir.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
-    testdir.makefile(".py", test_div=TEST_DIV_BY_THREE)
-    result = testdir.runpytest("-v", "--tag", "one_two_three")
+def test_custom_tests_properly_skipped(pytester):
+    pytester.makefile(".yml", test_aworkflow=TEST_WORKFLOWS)
+    pytester.makefile(".py", test_div=TEST_DIV_BY_THREE)
+    result = pytester.runpytest("-v", "--tag", "one_two_three")
     result.assert_outcomes(passed=3, failed=0, skipped=2, errors=0)
     assert ("test_div.py::test_div_by_three[two_three_five] SKIPPED "
             in result.stdout.str())
