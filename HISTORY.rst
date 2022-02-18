@@ -9,6 +9,9 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
++ A minimum of pytest 7.0.0 is now a requirement for pytest-workflow.
+  This fixes the deprecation warnings that started on the release of pytest
+  7.0.0.
 + Throw a more descriptive error when a file copied with the --git-aware flag
   is not present on the filesystem anymore.
 
