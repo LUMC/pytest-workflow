@@ -52,7 +52,7 @@ setup(
     # Because we use the resolve(strict=False) feature from pathlib.
     python_requires=">=3.6",
     install_requires=[
-        "pytest>=5.4.0",  # To use from_parent node instantiation.
+        "pytest>=7.0.0",  # To use pathlib Path's in pytest
         "pyyaml",
         "jsonschema"
     ],

@@ -22,20 +22,20 @@ from .test_success_messages import MOO_FILE
 
 # Add a test to make sure no deprecation, or other warnings occur due to
 # changes in upstream libraries.
-def test_no_warnings(testdir):
+def test_no_warnings(pytester):
     basetemp = tempfile.mkdtemp()
-    testdir.makefile(".yml", test_a=MOO_FILE)
-    result = testdir.runpytest("--basetemp", basetemp)
+    pytester.makefile(".yml", test_a=MOO_FILE)
+    result = pytester.runpytest("--basetemp", basetemp)
     outcomes = result.parseoutcomes()
     assert outcomes.get('warnings', 0) == 0
     shutil.rmtree(basetemp)
 
 
-def test_git_warning(testdir):
+def test_git_warning(pytester):
     basetemp = tempfile.mkdtemp()
-    testdir.mkdir(".git")
-    testdir.makefile(".yml", test_a=MOO_FILE)
-    result = testdir.runpytest("--basetemp", basetemp)
+    pytester.mkdir(".git")
+    pytester.makefile(".yml", test_a=MOO_FILE)
+    result = pytester.runpytest("--basetemp", basetemp)
     outcomes = result.parseoutcomes()
     assert outcomes.get('warnings') == 1
     assert ".git dir detected" in result.stdout.str()

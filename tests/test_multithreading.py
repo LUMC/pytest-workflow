@@ -36,10 +36,10 @@ MULTHITHREADED_TEST = [
 
 
 @pytest.mark.parametrize(["threads"], [(1,), (2,), (4,)])
-def test_multithreaded(threads, testdir):
+def test_multithreaded(threads, pytester):
     test = MULTHITHREADED_TEST
     test_number = len(test)
-    testdir.makefile(".yml", test=yaml.safe_dump(test))
+    pytester.makefile(".yml", test=yaml.safe_dump(test))
 
     # Calculate how many iterations are needed to process all the tests
     # For example: 4 tests with 2 threads. 2 can be finished simultaneously
@@ -49,7 +49,7 @@ def test_multithreaded(threads, testdir):
                   else test_number // threads + 1)
 
     start_time = time.time()
-    testdir.runpytest("-v", "--wt", str(threads))
+    pytester.runpytest("-v", "--wt", str(threads))
     end_time = time.time()
     completion_time = end_time - start_time
     # If the completion time is shorter than (iterations * SLEEP_TIME), too
