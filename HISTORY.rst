@@ -14,6 +14,8 @@ version 1.7.0-dev
   7.0.0.
 + Throw a more descriptive error when a file copied with the --git-aware flag
   is not present on the filesystem anymore.
++ Allow passing environment variables from the host to the executing command
+  with ``pass_through_env_vars``.
 
 version 1.6.0
 ---------------------------
