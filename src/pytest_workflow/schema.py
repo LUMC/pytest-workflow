@@ -167,7 +167,8 @@ class WorkflowTest(object):
         :param stdout: a ContentTest object
         :param stderr: a ContentTest object
         :param files: a list of FileTest objects
-        :param pass_through_env_vars: a list of environment variables to pass through to the executing command
+        :param pass_through_env_vars: a list of environment variables
+        to pass through to the executing command
         """
         self.name = name
         self.command = command
