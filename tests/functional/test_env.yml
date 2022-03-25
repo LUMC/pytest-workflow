@@ -1,0 +1,7 @@
+- name: "Test env"
+  command: "env"
+  pass_through_env_vars:
+    - "PATH"
+  stdout:
+    contains:
+      - /bin

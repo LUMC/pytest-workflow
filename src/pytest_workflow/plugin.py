@@ -19,6 +19,7 @@ import argparse
 import shutil
 import tempfile
 import warnings
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -400,7 +401,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=tempdir,
-                            name=self.workflow_test.name)
+                            name=self.workflow_test.name,
+                            env={k: os.getenv(k) for k in self.workflow_test.pass_through_env_vars})
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)

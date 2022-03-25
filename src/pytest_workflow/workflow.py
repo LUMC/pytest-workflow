@@ -27,7 +27,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 class Workflow(object):
@@ -35,7 +35,8 @@ class Workflow(object):
     def __init__(self,
                  command: str,
                  cwd: Optional[Path] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 env: Optional[Dict[str, str]] = None):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
@@ -51,6 +52,7 @@ class Workflow(object):
         # for emptiness.
         self.name = name or command.split()[0]
         self.cwd = cwd or Path()
+        self.env = env
         # For long running workflows it is best to save the stdout and stderr
         # to a file which can be checked with ``tail -f``.
         # stdout and stderr will be written to a tempfile if no CWD is given
@@ -83,7 +85,7 @@ class Workflow(object):
                     sub_process_args = shlex.split(self.command)
                     self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
                         sub_process_args, stdout=stdout_h,
-                        stderr=stderr_h, cwd=str(self.cwd))
+                        stderr=stderr_h, cwd=str(self.cwd), env=self.env)
                 except Exception as error:
                     # Append the error so it can be raised in the main thread.
                     self.errors.append(error)

@@ -157,7 +157,8 @@ class WorkflowTest(object):
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
                  stderr: ContentTest = ContentTest(),
-                 files: Optional[List[FileTest]] = None):
+                 files: Optional[List[FileTest]] = None,
+                 pass_through_env_vars: Optional[List[str]] = None):
         """
         Create a WorkflowTest object.
         :param name: The name of the test
@@ -166,6 +167,7 @@ class WorkflowTest(object):
         :param stdout: a ContentTest object
         :param stderr: a ContentTest object
         :param files: a list of FileTest objects
+        :param pass_through_env_vars: a list of environment variables to pass through to the executing command
         """
         self.name = name
         self.command = command
@@ -174,6 +176,7 @@ class WorkflowTest(object):
         self.stderr = stderr
         self.files = files or []
         self.tags = tags or []
+        self.pass_through_env_vars = pass_through_env_vars or []
 
     @classmethod
     def from_schema(cls, schema: dict):
@@ -188,5 +191,6 @@ class WorkflowTest(object):
             exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
             stdout=ContentTest(**schema.get("stdout", {})),
             stderr=ContentTest(**schema.get("stderr", {})),
-            files=test_files
+            files=test_files,
+            pass_through_env_vars=schema.get("pass_through_env_vars", [])
         )

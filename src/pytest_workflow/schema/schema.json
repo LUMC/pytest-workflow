@@ -147,6 +147,13 @@
           ],
           "additionalProperties": false
         }
+      },
+      "pass_through_env_vars": {
+        "description": "Environment variables to pass to the running workflow",
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
       }
     },
     "required": [
