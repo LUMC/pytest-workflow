@@ -90,6 +90,30 @@ sequences.
     Workflow names must be unique. Pytest workflow will crash when multiple
     workflows have the same name, even if they are in different files.
 
+Environment variables
+----------------------
+Pytest-workflow runs tests in the same environment as in which the pytest
+executable was started. However, environment variables are quoted by pytest-workflow
+using `shlex.quote <https://docs.python.org/3/library/shlex.html#shlex.quote>`_.
+
+.. code-block:: YAML
+
+    - name: Try to use an environment variable
+      command: echo $MY_VAR
+      # Output will be literally "$MY_VAR"
+
+    - name: Circumenvent shlex quoting by explicitly starting the command in a shell.
+      command: bash -c 'echo $MY_VAR'
+      # Output will be the content of $MY_VAR
+
+    - name: Use a program that checks an environment variable
+      command: singularity run my_container.sif
+      # Correctly uses "SINGULARITY_" prefixed variables
+
+If you want to use shell scripting features such as environment
+variables inside ``command``, you need to explicitly set the shell as shown
+above.
+
 Writing custom tests
 --------------------
 
