@@ -9,6 +9,8 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
++ Document using ``pytest.ini`` as a way of setting specific per repository
+  settings for pytest-workflow.
 + Document the use of environment variables with pytest-workflow.
 + A minimum of pytest 7.0.0 is now a requirement for pytest-workflow.
   This fixes the deprecation warnings that started on the release of pytest
