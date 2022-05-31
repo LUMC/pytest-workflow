@@ -93,8 +93,11 @@ sequences.
 Environment variables
 ----------------------
 Pytest-workflow runs tests in the same environment as in which the pytest
-executable was started. However, environment variables are quoted by pytest-workflow
-using `shlex.quote <https://docs.python.org/3/library/shlex.html#shlex.quote>`_.
+executable was started. This means programs started in tests can use
+environnment variables. However, environment variables inside the command
+section itself are quoted by pytest-workflow using
+`shlex.quote <https://docs.python.org/3/library/shlex.html#shlex.quote>`_.
+See the examples below:
 
 .. code-block:: YAML
 
