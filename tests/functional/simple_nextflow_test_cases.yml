@@ -1,0 +1,35 @@
+- name: simple nextflow
+  command: >-
+    nextflow run nextflow_pipeline --N_LINES_TO_READ=10
+  files:
+    - path: results/rand/rand_0.txt
+    - path: results/rand/rand_1.txt
+    - path: results/rand/rand_2.txt
+    - path: results/rand/rand_3.txt
+    - path: results/rand/rand_4.txt
+    - path: results/rand/rand_5.txt
+    - path: results/rand/rand_6.txt
+    - path: results/rand/rand_7.txt
+    - path: results/rand/rand_8.txt
+    - path: results/rand/rand_9.txt
+    - path: results/b64/b64_0.txt
+    - path: results/b64/b64_1.txt
+    - path: results/b64/b64_2.txt
+    - path: results/b64/b64_3.txt
+    - path: results/b64/b64_4.txt
+    - path: results/b64/b64_5.txt
+    - path: results/b64/b64_6.txt
+    - path: results/b64/b64_7.txt
+    - path: results/b64/b64_8.txt
+    - path: results/b64/b64_9.txt
+    - path: results/randgz/randgz_0.txt
+    - path: results/randgz/randgz_1.txt
+    - path: results/randgz/randgz_2.txt
+    - path: results/randgz/randgz_3.txt
+    - path: results/randgz/randgz_4.txt
+    - path: results/randgz/randgz_5.txt
+    - path: results/randgz/randgz_6.txt
+    - path: results/randgz/randgz_7.txt
+    - path: results/randgz/randgz_8.txt
+    - path: results/randgz/randgz_9.txt
+    - path: results/all_data.gz
