@@ -22,14 +22,14 @@
     - path: results/b64/b64_7.txt
     - path: results/b64/b64_8.txt
     - path: results/b64/b64_9.txt
-    - path: results/randgz/randgz_0.txt
-    - path: results/randgz/randgz_1.txt
-    - path: results/randgz/randgz_2.txt
-    - path: results/randgz/randgz_3.txt
-    - path: results/randgz/randgz_4.txt
-    - path: results/randgz/randgz_5.txt
-    - path: results/randgz/randgz_6.txt
-    - path: results/randgz/randgz_7.txt
-    - path: results/randgz/randgz_8.txt
-    - path: results/randgz/randgz_9.txt
+    - path: results/randgz/randgz_0.txt.gz
+    - path: results/randgz/randgz_1.txt.gz
+    - path: results/randgz/randgz_2.txt.gz
+    - path: results/randgz/randgz_3.txt.gz
+    - path: results/randgz/randgz_4.txt.gz
+    - path: results/randgz/randgz_5.txt.gz
+    - path: results/randgz/randgz_6.txt.gz
+    - path: results/randgz/randgz_7.txt.gz
+    - path: results/randgz/randgz_8.txt.gz
+    - path: results/randgz/randgz_9.txt.gz
     - path: results/all_data.gz

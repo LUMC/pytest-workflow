@@ -60,10 +60,11 @@ def test_snakemake(pytester):
     exit_code = result.ret
     assert exit_code == 0
 
-    
+
 @pytest.mark.functional
 def test_nextflow(pytester):
-    pytester.makefile(ext=".nf", nextflow_testpipeline=NEXTFLOWFILE.read_text())
+    pytester.makefile(ext=".nf",
+                      nextflow_testpipeline=NEXTFLOWFILE.read_text())
     pytester.makefile(ext=".yml", test_nextflow=NEXTFLOW_YAML.read_text())
     result = pytester.runpytest("-v", "--keep-workflow-wd-on-fail")
     assert result.ret == 0
