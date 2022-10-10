@@ -114,9 +114,10 @@ Nextflow example
 -----------------
 
 With nextflow each process is run in a unique directory where the output files will
-also be stored. Nextflow can output a copy of the output files to a separate workflow-outputs directory. This can be achieved by defining a publishDir in the process.
+also be stored. Nextflow can output a copy of the output files to a separate workflow-outputs 
+directory. This can be achieved by defining a ``publishDir`` in the process.
 
-An example code defining a publishDir is listed below.
+An example code defining a ``publishDir`` is listed below.
 
 .. code-block::
 
@@ -135,7 +136,7 @@ An example code defining a publishDir is listed below.
         Hello
     }
 
-``publishDir`` will make it so that all the output files if the process are copied to the given directory. In this case HelloWorld.txt will be copied to the  directory called test-output.
+``publishDir`` will make it so that all the output files if the process are copied to the given directory. In this case ``HelloWorld.txt`` will be copied to the  directory called ``test-output``.
 
 An example yaml file that could be used to test a nextflow pipeline is listed
 below.
