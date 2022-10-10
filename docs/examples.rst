@@ -109,3 +109,16 @@ The following yaml file tests a WDL pipeline run with miniwdl.
 
 Please note that the trailing slash in ``-d test-output/`` is important. It
 will ensure the files end up in the ``test-output`` directory.
+
+Nextflow example
+-----------------
+
+An example yaml file that could be used to test a nextflow pipeline is listed
+below.
+
+.. code-block:: yaml
+
+    - name: My pipeline
+      command: nextflow run Nextflow_pipeline.nf
+      files:
+        - "my_output.txt"
