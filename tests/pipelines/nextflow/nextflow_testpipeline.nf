@@ -23,8 +23,10 @@
 params.N_LINES_TO_READ = 5
 
 process read_random {
-	publishDir 'results/rand'
-
+	publishDir = [
+                path: { "${params.outdir}/rand'}
+        ]
+		
 	input:
 	val iter
 	output: 
@@ -37,7 +39,9 @@ process read_random {
 }
 
 process base64_random {
-	publishDir 'results/b64'
+	publishDir = [
+                path: { "${params.outdir}/b64'}
+        ]
 
 	input:
 	val iter
@@ -52,7 +56,9 @@ process base64_random {
 }
 
 process gzip_b64 {
-	publishDir 'results/randgz'
+	publishDir = [
+                path: { "${params.outdir}/randgz'}
+        ]
 
 	input:
 	val iter
@@ -66,7 +72,9 @@ process gzip_b64 {
 }
 
 process concat_gzip {
-	publishDir 'results'
+	publishDir = [
+                path: { "${params.outdir}'}
+        ]
 
 	input:
 	path 'x'
