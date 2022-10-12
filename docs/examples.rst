@@ -149,12 +149,12 @@ To run the code listed above the following command can be used in which ``exampl
 ``--outdir`` is used to define the path the output files will go to. In this case ``HelloWorld.txt`` will 
 be copied to the  directory called ``test-output/hello``.
 
-An example yaml file that could be used to test a nextflow pipeline is listed
+An example yaml file that could be used to test the nextflow pipeline from ``examplecode.nf`` is listed
 below.
 
 .. code-block:: yaml
 
     - name: My pipeline
-      command: nextflow run Nextflow_pipeline.nf --outdir results
+      command: nextflow run examplecode.nf --outdir test-output
       files:
-        - path: "results/my_output.txt"
+        - path: "test-output/hello/HelloWorld.txt"
