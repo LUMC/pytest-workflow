@@ -1,6 +1,6 @@
 - name: simple nextflow
   command: >-
-    nextflow run nextflow_testpipeline.nf --N_LINES_TO_READ=10
+    nextflow run nextflow_testpipeline.nf --N_LINES_TO_READ=10 --outdir results
   files:
     - path: results/rand/rand_0.txt
     - path: results/rand/rand_1.txt
