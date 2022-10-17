@@ -19,6 +19,7 @@ import argparse
 import shutil
 import tempfile
 import warnings
+import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -481,7 +482,18 @@ class ExitCodeTest(pytest.Item):
         assert self.workflow.exit_code == self.desired_exit_code
 
     def repr_failure(self, excinfo, style=None):
-        message = (f"'{self.workflow.name}' exited with exit code " +
-                   f"'{self.workflow.exit_code}' instead of "
-                   f"'{self.desired_exit_code}'.")
+        standerr = self.workflow.stderr_file
+        standout = self.workflow.stdout_file
+        with open(standout, "rb") as standout_file, \
+             open(standerr, "rb") as standerr_file:
+            if os.path.getsize(standerr) >= 30:
+                standerr_file.seek(-30, 2)
+            if os.path.getsize(standout) >= 30:
+                standout_file.seek(-30, 2)
+            message = (f"'{self.workflow.name}' exited with exit code " +
+                       f"'{self.workflow.exit_code}' instead of "
+                       f"'{self.desired_exit_code}'.\nstderr: "
+                       f"{standerr_file.read().strip().decode('utf-8')}"
+                       f"\nstdout: "
+                       f"{standout_file.read().strip().decode('utf-8')}")
         return message
