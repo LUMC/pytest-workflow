@@ -109,3 +109,52 @@ The following yaml file tests a WDL pipeline run with miniwdl.
 
 Please note that the trailing slash in ``-d test-output/`` is important. It
 will ensure the files end up in the ``test-output`` directory.
+
+Nextflow example
+-----------------
+
+With nextflow each process is run in a unique directory where the output files will
+also be stored. Nextflow can output a copy of the output files to a separate workflow-outputs 
+directory. This can be achieved by defining a ``publishDir`` in the process. Through ``params.outdir``
+it is possible to define the output directory when running the code.
+
+An example code defining a ``publishDir`` is listed below.
+
+.. code-block::
+
+    process Hello {
+        publishDir = [
+            path: { "${params.outdir}/hello"}
+        ]
+        
+        output:
+        path "HelloWorld.txt"
+        script:
+        """
+        echo "Hello World!" > HelloWorld.txt
+        """
+    }
+    
+    workflow {
+        Hello
+    }
+
+To run the code listed above the following command can be used in which ``examplecode.nf`` is the code listed above:
+
+.. code-block::
+
+    nextflow run examplecode.nf --outdir test-output
+
+``publishDir`` will make it so that all the output files of the process are copied to the given directory. 
+``--outdir`` is used to define the path the output files will go to. In this case ``HelloWorld.txt`` will 
+be copied to the  directory called ``test-output/hello``.
+
+An example yaml file that could be used to test the nextflow pipeline from ``examplecode.nf`` is listed
+below.
+
+.. code-block:: yaml
+
+    - name: My pipeline
+      command: nextflow run examplecode.nf --outdir test-output
+      files:
+        - path: "test-output/hello/HelloWorld.txt"
