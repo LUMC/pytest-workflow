@@ -26,6 +26,20 @@ Specific pytest options for pytest workflow
     :func: __pytest_workflow_cli
     :prog: pytest
 
+Setting specific per-project settings using pytest.ini
+-----------------------------------------------------------------
+pytest can be configured `using a pytest.ini file
+<https://docs.pytest.org/en/7.1.x/reference/customize.html#pytest-ini>`_.
+This mechanic can be used to set specific settings in each repository
+where pytest workflow is used.
+
+For example a pytest.ini with the following contents::
+
+    [pytest]
+    addopts = --git-aware
+
+Can be used in a git repository with a workflow.
+
 Temporary directory cleanup and creation
 ----------------------------------------
 
