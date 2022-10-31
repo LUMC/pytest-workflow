@@ -13,6 +13,8 @@ version 1.7.0-dev
   number of bytes to display for the stderr and stdout on 
   command failure. 
 + Add stderr and stdout to be displayed on command failure
++ Document using ``pytest.ini`` as a way of setting specific per repository
+  settings for pytest-workflow.
 + Add tests for nextflow.
 + Document the use of environment variables with pytest-workflow.
 + A minimum of pytest 7.0.0 is now a requirement for pytest-workflow.
