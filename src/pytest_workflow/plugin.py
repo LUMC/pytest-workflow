@@ -16,10 +16,10 @@
 
 """core functionality of pytest-workflow plugin"""
 import argparse
+import os
 import shutil
 import tempfile
 import warnings
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
