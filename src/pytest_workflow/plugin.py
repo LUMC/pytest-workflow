@@ -74,12 +74,12 @@ def pytest_addoption(parser: PytestParser):
              "files listed by .gitignore. "
              "Highly recommended when working in a git project.")
     parser.addoption(
-        "--sb", "--standerderror-bytes",
-        dest="standerderror_bytes",
+        "--sb", "--stderr-bytes",
+        dest="stderr_bytes",
         default=1000,
         type=int,
-        help="The number o bytes to display from the standard error and "
-             "standerd out on exitcode.")
+        help="The number of bytes to display from the stderr and "
+             "stdout on exitcode.")
     # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
     # `-m` uses a "mark expression". So you have to type a piece of python
     # code instead of just supplying the tags you want. This is fine for the
@@ -456,7 +456,7 @@ class WorkflowTestsCollector(pytest.Collector):
             parent=self,
             desired_exit_code=self.workflow_test.exit_code,
             workflow=workflow,
-            standerderror_bytes=self.config.getoption("standerderror_bytes"))]
+            stderr_bytes=self.config.getoption("stderr_bytes"))]
 
         tests += [ContentTestCollector.from_parent(
             name="stdout", parent=self,
@@ -478,10 +478,10 @@ class WorkflowTestsCollector(pytest.Collector):
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
                  desired_exit_code: int,
-                 workflow: Workflow, standerderror_bytes: int):
+                 workflow: Workflow, stderr_bytes: int):
         name = f"exit code should be {desired_exit_code}"
         super().__init__(name, parent=parent)
-        self.standerderror_bytes = standerderror_bytes
+        self.stderr_bytes = stderr_bytes
         self.workflow = workflow
         self.desired_exit_code = desired_exit_code
 
@@ -494,10 +494,10 @@ class ExitCodeTest(pytest.Item):
         standout = self.workflow.stdout_file
         with open(standout, "rb") as standout_file, \
              open(standerr, "rb") as standerr_file:
-            if os.path.getsize(standerr) >= self.standerderror_bytes:
-                standerr_file.seek(-self.standerderror_bytes, 2)
-            if os.path.getsize(standout) >= self.standerderror_bytes:
-                standout_file.seek(-self.standerderror_bytes, 2)
+            if os.path.getsize(standerr) >= self.stderr_bytes:
+                standerr_file.seek(-self.stderr_bytes, os.SEEK_END)
+            if os.path.getsize(standout) >= self.stderr_bytes:
+                standout_file.seek(-self.stderr_bytes, os.SEEK_END)
             message = (f"'{self.workflow.name}' exited with exit code " +
                        f"'{self.workflow.exit_code}' instead of "
                        f"'{self.desired_exit_code}'.\nstderr: "
