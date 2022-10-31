@@ -30,7 +30,7 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "'fail_test' exited with exit code '2' instead of '0'"),
     ("""\
     - name: exitcode_test
-      command: bash -c 'printf "This code had an error" >&2 | exit 12'
+      command: bash -c 'printf "This code had an error" >&2 ; exit 12'
     """,
      "stderr: This code had an error"),
     ("""\
