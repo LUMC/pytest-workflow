@@ -9,10 +9,10 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
-+ Add ``--standerderror-bytes`` or ``--sb`` option to change the maximum 
-  number of bytes to display for the standerd error and standerd out on 
++ Add ``--stderr-bytes`` or ``--sb`` option to change the maximum 
+  number of bytes to display for the stderr and stdout on 
   command failure. 
-+ Add standerd error and standerd out to be displayed on command failure
++ Add stderr and stdout to be displayed on command failure
 + Add tests for nextflow.
 + Document the use of environment variables with pytest-workflow.
 + A minimum of pytest 7.0.0 is now a requirement for pytest-workflow.
