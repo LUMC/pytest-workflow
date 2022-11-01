@@ -9,6 +9,10 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
++ Add ``--stderr-bytes`` or ``--sb`` option to change the maximum 
+  number of bytes to display for the stderr and stdout on 
+  command failure. 
++ Add stderr and stdout to be displayed on command failure
 + Document using ``pytest.ini`` as a way of setting specific per repository
   settings for pytest-workflow.
 + Add tests for nextflow.
