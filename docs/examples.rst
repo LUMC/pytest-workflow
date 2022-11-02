@@ -185,7 +185,7 @@ The following is an example of a Bash file that can run directly as a script, or
 Save the bash file as ``script.sh``, and test it with the following pytest-workflow configuration:
 
 
-.. code-block:: yml
+.. code-block:: yaml
 
     - name: test bash script
       command: bash script.sh
