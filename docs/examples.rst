@@ -158,3 +158,49 @@ below.
       command: nextflow run examplecode.nf --outdir test-output
       files:
         - path: "test-output/hello/HelloWorld.txt"
+
+Bash example
+------------
+
+The following is an example of a Bash file that can run directly as a script, or sourced to test each function separately:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+
+    function say_hello() {
+        local name="$1"
+        echo "Hello, ${name}!"
+    }
+
+    function main() {
+        say_hello world
+    }
+
+    # Only execute main when this file is run as a script
+    if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+        main
+    fi
+
+Save the bash file as ``script.sh``, and test it with the following pytest-workflow configuration:
+
+
+.. code-block:: yml
+
+    - name: test bash script
+      command: bash script.sh
+      stdout:
+        contains:
+          - "Hello, world!"
+
+    - name: test bash function
+      command: >
+        bash -c "
+        source script.sh;
+        say_hello pytest-workflow
+        "
+      stdout:
+        contains:
+          - "Hello, pytest-workflow!"
+        must_not_contain:
+          - "Hello, world!"
