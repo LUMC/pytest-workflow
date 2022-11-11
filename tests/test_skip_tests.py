@@ -42,5 +42,5 @@ SKIP_TESTS = textwrap.dedent("""\
 
 def test_skips(pytester):
     pytester.makefile(".yml", test=SKIP_TESTS)
-    result = pytester.runpytest("-v").stdout.str()
-    assert "4 failed, 3 passed, 3 skipped" in result
+    result = pytester.runpytest("-v").parseoutcomes()
+    assert {"failed": 4, "passed": 3, "skipped": 3} == result
