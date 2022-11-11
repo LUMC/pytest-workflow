@@ -34,11 +34,11 @@ pytest-workflow
 
 pytest-workflow is a workflow-system agnostic testing framework that aims 
 to make pipeline/workflow testing easy by using YAML files for the test 
-configuration. Whether you write your pipelines in WDL, snakemake, bash or
-any other workflow framework, pytest-workflow makes testing easy.
+configuration. Whether you write your pipelines in WDL, snakemake, nextflow, 
+bash or any other workflow framework, pytest-workflow makes testing easy.
 pytest-workflow is build on top of the pytest test framework.
 
-For our complete documentation checkout our
+For our complete documentation and examples checkout our
 `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.
 
 

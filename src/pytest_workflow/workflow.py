@@ -22,7 +22,7 @@ later.
 """
 import queue
 import shlex
-import subprocess  # nosec: security implications have been considered
+import subprocess
 import tempfile
 import threading
 import time
@@ -81,7 +81,7 @@ class Workflow(object):
                     stdout_h = self.stdout_file.open('wb')
                     stderr_h = self.stderr_file.open('wb')
                     sub_process_args = shlex.split(self.command)
-                    self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
+                    self._popen = subprocess.Popen(
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
                 except Exception as error:

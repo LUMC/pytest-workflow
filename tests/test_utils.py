@@ -16,7 +16,7 @@
 import hashlib
 import os
 import shutil
-import subprocess  # nosec
+import subprocess
 import tempfile
 from pathlib import Path
 
@@ -100,9 +100,9 @@ def git_dir():
     (git_dir / "test").mkdir()
     test_file = git_dir / "test" / "test.txt"
     test_file.touch()
-    subprocess.run(["git", "-C", str(git_dir), "init"])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",  # nosec
+    subprocess.run(["git", "-C", str(git_dir), "init"])
+    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])
+    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",
                     "initial commit"])
     yield git_dir
     shutil.rmtree(git_dir)
@@ -155,7 +155,6 @@ HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
 @pytest.mark.parametrize("hash_file", HASH_FILE_DIR.iterdir())
 def test_file_md5sum(hash_file: Path):
-    # No sec added because this hash is only used for checking file integrity
-    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()  # nosec
+    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5

@@ -3,7 +3,7 @@ import hashlib
 import os
 import re
 import shutil
-import subprocess  # nosec
+import subprocess
 import sys
 import warnings
 from pathlib import Path
@@ -50,7 +50,7 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
 
 def _run_command(*args):
     """Run an external command and return the output"""
-    result = subprocess.run(args,  # nosec
+    result = subprocess.run(args,
                             stdout=subprocess.PIPE,
                             # Encoding to output as a string.
                             encoding=sys.getdefaultencoding(),
@@ -188,7 +188,7 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-    hasher = hashlib.md5()  # nosec: only used for file integrity
+    hasher = hashlib.md5()
     with filepath.open('rb') as file_handler:  # Read the file in bytes
         for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
