@@ -9,6 +9,7 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
++ Add skip for tests searching non existing file
 + Test and support for Python 3.11.
 + Add ``--stderr-bytes`` or ``--sb`` option to change the maximum 
   number of bytes to display for the stderr and stdout on 
