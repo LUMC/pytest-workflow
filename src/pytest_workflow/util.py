@@ -48,7 +48,7 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
     return False
 
 
-def _run_command(*args):
+def _run_command(*args) -> str:
     """Run an external command and return the output"""
     result = subprocess.run(args,
                             stdout=subprocess.PIPE,
@@ -62,6 +62,18 @@ def git_root(path: Filepath) -> str:
     output = _run_command(
         "git", "-C", os.fspath(path), "rev-parse", "--show-toplevel")
     return output.strip()  # Remove trailing newline
+
+
+def git_check_submodules_cloned(path: Filepath):
+    output = _run_command("git", "-C", os.fspath(path), "submodule", "status",
+                          "--recursive")
+    for line in output.splitlines():
+        commit, path, described_commit = line.strip().split()
+        if commit.startswith("-"):
+            raise RuntimeError(
+                f"Git submodule {path} was not cloned. Pytest-workflow cannot "
+                f"copy paths from non-existing submodules. Please clone all "
+                f"submodules using 'git submodule update --init --recursive'.")
 
 
 def git_ls_files(path: Filepath) -> List[str]:
@@ -97,6 +109,7 @@ def _recurse_git_repository_tree(src: Filepath, dest: Filepath
     # A set of dirs we have already yielded. '' is the output of
     # os.path.dirname when the path is in the current directory.
     yielded_dirs: Set[str] = {''}
+    git_check_submodules_cloned(src)
     for path in git_ls_files(src):
         # git ls-files does not list directories. Yield parent first to prevent
         # creating files in non-existing directories. Also check if it is
