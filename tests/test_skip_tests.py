@@ -36,7 +36,7 @@ SKIP_TESTS = textwrap.dedent("""\
       contains:
         - "kaas"
       must_not_contain:
-        - "testing" 
+        - "testing"
 """)
 
 
