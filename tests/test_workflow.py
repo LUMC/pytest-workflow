@@ -15,7 +15,7 @@
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
 """Tests the Workflow class"""
-import subprocess  # nosec. This is just for the Timeout exception.
+import subprocess
 
 import pytest
 

@@ -16,7 +16,7 @@
 """Tests the success messages"""
 
 import shutil
-import subprocess  # nosec
+import subprocess
 import textwrap
 from pathlib import Path
 
@@ -119,7 +119,7 @@ def succeeding_tests_output(tmp_path_factory: pytest.TempPathFactory):
     test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
-    process_out = subprocess.run(args=["pytest", "-v"],  # nosec
+    process_out = subprocess.run(args=["pytest", "-v"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  cwd=tempdir)
