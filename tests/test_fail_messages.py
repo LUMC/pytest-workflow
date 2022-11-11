@@ -111,25 +111,6 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "'grep --help' was found in 'fail_test': stderr while "
      "it should not be there"),
     ("""\
-    - name: file_not_exist
-      command: echo moo
-      files:
-        - path: moo.txt
-          contains:
-            - "moo"
-    """,
-     "moo.txt' does not exist and cannot be searched for containing 'moo'."),
-    ("""\
-    - name: file_not_exist
-      command: echo moo
-      files:
-        - path: moo.txt
-          must_not_contain:
-            - "miaow"
-    """,
-     "moo.txt' does not exist and cannot be searched for "
-     "not containing 'miaow'."),
-    ("""\
     - name: simple echo
       command: "echo Hello, world"
       stdout:
