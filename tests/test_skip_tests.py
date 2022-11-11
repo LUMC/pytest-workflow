@@ -36,8 +36,9 @@ SKIP_TESTS = textwrap.dedent("""\
       contains:
         - "kaas"
       must_not_contain:
-        - "testing"    
+        - "testing" 
 """)
+
 
 def test_skips(pytester):
     pytester.makefile(".yml", test=SKIP_TESTS)
