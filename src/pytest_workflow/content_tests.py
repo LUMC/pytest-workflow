@@ -244,7 +244,8 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         if self.parent.file_not_found:
-            pytest.skip(f"'{self.content_name}' not found so cannot be searched")
+            pytest.skip(f"'{self.content_name}' was not found so cannot be "
+                        f"searched")
         self.parent.thread.join()
         if self.regex:
             assert ((self.string in self.parent.found_patterns) ==
