@@ -22,7 +22,8 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.util import duplicate_tree, file_md5sum, git_root, \
+from pytest_workflow.util import duplicate_tree, file_md5sum, \
+    git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -158,3 +159,24 @@ def test_file_md5sum(hash_file: Path):
     whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5
+
+
+def test_git_submodule_check(tmp_path):
+    # Clone using biowdl/tasks as it is reasonably small and contains the
+    # scripts submodule.
+    subprocess.run(
+        # No recursive clone
+        ["git", "clone", "--depth=1",
+         "https://github.com/biowdl/tasks.git"],
+        cwd=tmp_path
+    )
+    git_repo = tmp_path / "tasks"
+    with pytest.raises(RuntimeError) as error:
+        git_check_submodules_cloned(git_repo)
+    # Error message should allow user to resolve the issue.
+    error.match("'git submodule update --init --recursive'")
+    subprocess.run(
+        ["git", "-C", str(git_repo), "submodule", "update", "--init",
+         "--recursive"])
+    # Check error does not occur when issue resolved.
+    git_check_submodules_cloned(git_repo)

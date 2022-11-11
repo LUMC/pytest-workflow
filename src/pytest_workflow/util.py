@@ -68,12 +68,13 @@ def git_check_submodules_cloned(path: Filepath):
     output = _run_command("git", "-C", os.fspath(path), "submodule", "status",
                           "--recursive")
     for line in output.splitlines():
-        commit, path, described_commit = line.strip().split()
+        commit, path = line.strip().split(maxsplit=1)
         if commit.startswith("-"):
             raise RuntimeError(
-                f"Git submodule {path} was not cloned. Pytest-workflow cannot "
-                f"copy paths from non-existing submodules. Please clone all "
-                f"submodules using 'git submodule update --init --recursive'.")
+                f"Git submodule '{path}' was not cloned. Pytest-workflow "
+                f"cannot copy paths from non-existing submodules. Please "
+                f"clone all submodules using 'git submodule update --init "
+                f"--recursive'.")
 
 
 def git_ls_files(path: Filepath) -> List[str]:
