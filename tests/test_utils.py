@@ -176,14 +176,17 @@ def test_git_submodule_check(tmp_path):
     nest_repo = tmp_path / "nest"
     create_git_repo(bird_repo)
     create_git_repo(nest_repo)
-    subprocess.run(["git", "submodule", "add", bird_repo.absolute()],
+    # https://bugs.launchpad.net/ubuntu/+source/git/+bug/1993586
+    subprocess.run(["git", "-c", "protocol.file.allow=always",
+                    "submodule", "add", bird_repo.absolute()],
                    cwd=nest_repo.absolute())
     subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
                    cwd=nest_repo.absolute())
     cloned_repo = tmp_path / "cloned"
     subprocess.run(
         # No recursive clone
-        ["git", "clone", nest_repo.absolute(), cloned_repo.absolute()],
+        ["git", "-c", "protocol.file.allow=always",
+         "clone", nest_repo.absolute(), cloned_repo.absolute()],
         cwd=tmp_path
     )
     with pytest.raises(RuntimeError) as error:
