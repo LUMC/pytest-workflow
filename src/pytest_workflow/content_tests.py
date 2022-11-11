@@ -243,10 +243,10 @@ class ContentTestItem(pytest.Item):
         this makes content checking much faster on big files (NGS > 1 GB files)
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
+        self.parent.thread.join()
         if self.parent.file_not_found:
             pytest.skip(f"'{self.content_name}' was not found so cannot be "
                         f"searched")
-        self.parent.thread.join()
         if self.regex:
             assert ((self.string in self.parent.found_patterns) ==
                     self.should_contain)
