@@ -161,22 +161,36 @@ def test_file_md5sum(hash_file: Path):
     assert whole_file_md5 == per_line_md5
 
 
+def create_git_repo(path):
+    dir = Path(path)
+    os.mkdir(dir)
+    file = dir / "README.md"
+    file.write_text("# My new project\n\nHello this project is awesome!\n")
+    subprocess.run(["git", "init"], cwd=dir)
+    subprocess.run(["git", "add", "README.md"], cwd=dir)
+    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=dir)
+
+
 def test_git_submodule_check(tmp_path):
-    # Clone using biowdl/tasks as it is reasonably small and contains the
-    # scripts submodule.
+    bird_repo = tmp_path / "bird"
+    nest_repo = tmp_path / "nest"
+    create_git_repo(bird_repo)
+    create_git_repo(nest_repo)
+    subprocess.run(["git", "submodule", "add", bird_repo.absolute()],
+                   cwd=nest_repo.absolute())
+    subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
+                   cwd=nest_repo.absolute())
+    cloned_repo = tmp_path / "cloned"
     subprocess.run(
         # No recursive clone
-        ["git", "clone", "--depth=1",
-         "https://github.com/biowdl/tasks.git"],
+        ["git", "clone", nest_repo.absolute(), cloned_repo.absolute()],
         cwd=tmp_path
     )
-    git_repo = tmp_path / "tasks"
     with pytest.raises(RuntimeError) as error:
-        git_check_submodules_cloned(git_repo)
+        git_check_submodules_cloned(cloned_repo)
     # Error message should allow user to resolve the issue.
     error.match("'git submodule update --init --recursive'")
-    subprocess.run(
-        ["git", "-C", str(git_repo), "submodule", "update", "--init",
-         "--recursive"])
+    subprocess.run(["git", "submodule", "update", "--init", "--recursive"],
+                   cwd=cloned_repo.absolute())
     # Check error does not occur when issue resolved.
-    git_check_submodules_cloned(git_repo)
+    git_check_submodules_cloned(cloned_repo)
