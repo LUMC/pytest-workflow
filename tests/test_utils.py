@@ -196,7 +196,8 @@ def test_git_submodule_check(tmp_path):
         git_check_submodules_cloned(cloned_repo)
     # Error message should allow user to resolve the issue.
     error.match("'git submodule update --init --recursive'")
-    subprocess.run(["git", "submodule", "update", "--init", "--recursive"],
+    subprocess.run(["git", "-c", "protocol.file.allow=always", "submodule",
+                    "update", "--init", "--recursive"],
                    cwd=cloned_repo.absolute())
     # Check error does not occur when issue resolved.
     git_check_submodules_cloned(cloned_repo)
