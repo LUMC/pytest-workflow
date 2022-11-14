@@ -9,7 +9,11 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
-+ Skip tests searching in non existing file
++ When the ``--git-aware`` flag is used a submodule check is performed in order
+  to assert that all submodules are properly checked out. This prevents
+  unclear copying errors.
++ Tests for checking file content are now skipped when the file does not exist
+  in order to reduce visual clutter when reporting failing tests.
 + Test and support for Python 3.11.
 + Add ``--stderr-bytes`` or ``--sb`` option to change the maximum 
   number of bytes to display for the stderr and stdout on 
