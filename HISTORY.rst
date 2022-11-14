@@ -9,7 +9,7 @@ Changelog
 
 version 1.7.0-dev
 ---------------------------
-+ When the ``--git-aware`` flag is used a submodule check is performed in other
++ When the ``--git-aware`` flag is used a submodule check is performed in order
   to assert that all submodules are properly checked out. This prevents
   unclear copying errors.
 + Test and support for Python 3.11.
