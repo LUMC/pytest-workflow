@@ -16,13 +16,14 @@
 import hashlib
 import os
 import shutil
-import subprocess  # nosec
+import subprocess
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from pytest_workflow.util import duplicate_tree, file_md5sum, git_root, \
+from pytest_workflow.util import duplicate_tree, file_md5sum, \
+    git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -100,9 +101,9 @@ def git_dir():
     (git_dir / "test").mkdir()
     test_file = git_dir / "test" / "test.txt"
     test_file.touch()
-    subprocess.run(["git", "-C", str(git_dir), "init"])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",  # nosec
+    subprocess.run(["git", "-C", str(git_dir), "init"])
+    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])
+    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",
                     "initial commit"])
     yield git_dir
     shutil.rmtree(git_dir)
@@ -155,7 +156,48 @@ HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
 @pytest.mark.parametrize("hash_file", HASH_FILE_DIR.iterdir())
 def test_file_md5sum(hash_file: Path):
-    # No sec added because this hash is only used for checking file integrity
-    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()  # nosec
+    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5
+
+
+def create_git_repo(path):
+    dir = Path(path)
+    os.mkdir(dir)
+    file = dir / "README.md"
+    file.write_text("# My new project\n\nHello this project is awesome!\n")
+    subprocess.run(["git", "init", "-b", "main"], cwd=dir)
+    subprocess.run(["git", "config", "user.name", "A U Thor"], cwd=dir)
+    subprocess.run(["git", "config", "user.email", "author@example.com"],
+                   cwd=dir)
+    subprocess.run(["git", "add", "README.md"], cwd=dir)
+    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=dir)
+
+
+def test_git_submodule_check(tmp_path):
+    bird_repo = tmp_path / "bird"
+    nest_repo = tmp_path / "nest"
+    create_git_repo(bird_repo)
+    create_git_repo(nest_repo)
+    # https://bugs.launchpad.net/ubuntu/+source/git/+bug/1993586
+    subprocess.run(["git", "-c", "protocol.file.allow=always",
+                    "submodule", "add", bird_repo.absolute()],
+                   cwd=nest_repo.absolute())
+    subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
+                   cwd=nest_repo.absolute())
+    cloned_repo = tmp_path / "cloned"
+    subprocess.run(
+        # No recursive clone
+        ["git", "-c", "protocol.file.allow=always",
+         "clone", nest_repo.absolute(), cloned_repo.absolute()],
+        cwd=tmp_path
+    )
+    with pytest.raises(RuntimeError) as error:
+        git_check_submodules_cloned(cloned_repo)
+    # Error message should allow user to resolve the issue.
+    error.match("'git submodule update --init --recursive'")
+    subprocess.run(["git", "-c", "protocol.file.allow=always", "submodule",
+                    "update", "--init", "--recursive"],
+                   cwd=cloned_repo.absolute())
+    # Check error does not occur when issue resolved.
+    git_check_submodules_cloned(cloned_repo)

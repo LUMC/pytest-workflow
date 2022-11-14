@@ -45,7 +45,7 @@ For our complete documentation and examples checkout our
 Installation
 ============
 Pytest-workflow requires Python 3.6 or higher. It is tested on Python 3.6, 3.7,
-3.8, 3.9 and 3.10. Python 2 is not supported.
+3.8, 3.9, 3.10 and 3.11.
 
 - Make sure your virtual environment is activated.
 - Install using pip ``pip install pytest-workflow``

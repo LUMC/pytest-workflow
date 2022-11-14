@@ -244,7 +244,9 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
-        assert not self.parent.file_not_found
+        if self.parent.file_not_found:
+            pytest.skip(f"'{self.content_name}' was not found so cannot be "
+                        f"searched")
         if self.regex:
             assert ((self.string in self.parent.found_patterns) ==
                     self.should_contain)
@@ -253,17 +255,9 @@ class ContentTestItem(pytest.Item):
                     self.should_contain)
 
     def repr_failure(self, excinfo, style=None):
-        if self.parent.file_not_found:
-            containing = ("containing" if self.should_contain else
-                          "not containing")
-            return (
-                f"'{self.content_name}' does not exist and cannot be searched "
-                f"for {containing} '{self.string}'."
-            )
-        else:
-            found = "not found" if self.should_contain else "found"
-            should = "should" if self.should_contain else "should not"
-            return (
-                f"'{self.string}' was {found} in {self.content_name} "
-                f"while it {should} be there."
-            )
+        found = "not found" if self.should_contain else "found"
+        should = "should" if self.should_contain else "should not"
+        return (
+            f"'{self.string}' was {found} in {self.content_name} "
+            f"while it {should} be there."
+        )
