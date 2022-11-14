@@ -168,7 +168,7 @@ def create_git_repo(path):
     file.write_text("# My new project\n\nHello this project is awesome!\n")
     subprocess.run(["git", "init"], cwd=dir)
     subprocess.run(["git", "add", "README.md"], cwd=dir)
-    subprocess.run(["git", "branch", "-M", "main"])
+    subprocess.run(["git", "branch", "-m", "main"])
     subprocess.run(["git", "commit",
                     "--author='A U Thor <author@example.com>'",
                     "-m", "initial commit"], cwd=dir)
