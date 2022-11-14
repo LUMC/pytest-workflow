@@ -166,12 +166,12 @@ def create_git_repo(path):
     os.mkdir(dir)
     file = dir / "README.md"
     file.write_text("# My new project\n\nHello this project is awesome!\n")
-    subprocess.run(["git", "init"], cwd=dir)
+    subprocess.run(["git", "init", "-b", "main"], cwd=dir)
+    subprocess.run(["git", "config", "user.name", "A U Thor"], cwd=dir)
+    subprocess.run(["git", "config", "user.email", "author@example.com"],
+                   cwd=dir)
     subprocess.run(["git", "add", "README.md"], cwd=dir)
-    subprocess.run(["git", "branch", "-m", "main"])
-    subprocess.run(["git", "commit",
-                    "--author='A U Thor <author@example.com>'",
-                    "-m", "initial commit"], cwd=dir)
+    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=dir)
 
 
 def test_git_submodule_check(tmp_path):
@@ -183,9 +183,7 @@ def test_git_submodule_check(tmp_path):
     subprocess.run(["git", "-c", "protocol.file.allow=always",
                     "submodule", "add", bird_repo.absolute()],
                    cwd=nest_repo.absolute())
-    subprocess.run(["git", "commit",
-                    "--author='A U Thor <author@example.com>'",
-                    "-m", "add bird repo as a submodule"],
+    subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
                    cwd=nest_repo.absolute())
     cloned_repo = tmp_path / "cloned"
     subprocess.run(
