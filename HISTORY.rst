@@ -12,6 +12,9 @@ version 1.7.0-dev
 + When the ``--git-aware`` flag is used a submodule check is performed in order
   to assert that all submodules are properly checked out. This prevents
   unclear copying errors.
++ Tests are now skipped if the workflow does not exit with the desired exit
+  code, except for the exit code tests, to reduce visual clutter when reporting
+  failing tests.
 + Tests for checking file content are now skipped when the file does not exist
   in order to reduce visual clutter when reporting failing tests.
 + Test and support for Python 3.11.
