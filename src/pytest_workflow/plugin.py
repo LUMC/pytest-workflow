@@ -444,19 +444,21 @@ class WorkflowTestsCollector(pytest.Collector):
         # collection phase.
         workflow = self.queue_workflow()
 
+        workflow.desired_exit_code = self.workflow_test.exit_code
+
         # Below structure makes it easy to append tests
         tests = []
-
-        tests += [
-            FileTestCollector.from_parent(
-                parent=self, filetest=filetest, workflow=workflow)
-            for filetest in self.workflow_test.files]
 
         tests += [ExitCodeTest.from_parent(
             parent=self,
             desired_exit_code=self.workflow_test.exit_code,
             workflow=workflow,
             stderr_bytes=self.config.getoption("stderr_bytes"))]
+
+        tests += [
+            FileTestCollector.from_parent(
+                parent=self, filetest=filetest, workflow=workflow)
+            for filetest in self.workflow_test.files]
 
         tests += [ContentTestCollector.from_parent(
             name="stdout", parent=self,

@@ -69,6 +69,7 @@ class Workflow(object):
         self._started = False
         self.errors: List[Exception] = []
         self.start_lock = threading.Lock()
+        self.desired_exit_code = 0
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -136,6 +137,9 @@ class Workflow(object):
             # If self._popen is none, something went wrong during starting the
             # workflow
             pass
+
+    def matching_exitcode(self) -> bool:
+        return self.exit_code == self.desired_exit_code
 
     @property
     def stdout(self) -> bytes:
