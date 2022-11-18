@@ -451,7 +451,6 @@ class WorkflowTestsCollector(pytest.Collector):
 
         tests += [ExitCodeTest.from_parent(
             parent=self,
-            desired_exit_code=self.workflow_test.exit_code,
             workflow=workflow,
             stderr_bytes=self.config.getoption("stderr_bytes"))]
 
@@ -479,17 +478,15 @@ class WorkflowTestsCollector(pytest.Collector):
 
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
-                 desired_exit_code: int,
                  workflow: Workflow, stderr_bytes: int):
-        name = f"exit code should be {desired_exit_code}"
+        name = f"exit code should be {workflow.desired_exit_code}"
         super().__init__(name, parent=parent)
         self.stderr_bytes = stderr_bytes
         self.workflow = workflow
-        self.desired_exit_code = desired_exit_code
 
     def runtest(self):
         # workflow.exit_code waits for workflow to finish.
-        assert self.workflow.exit_code == self.desired_exit_code
+        assert self.workflow.matching_exitcode()
 
     def repr_failure(self, excinfo, style=None):
         standerr = self.workflow.stderr_file
@@ -502,7 +499,7 @@ class ExitCodeTest(pytest.Item):
                 standout_file.seek(-self.stderr_bytes, os.SEEK_END)
             message = (f"'{self.workflow.name}' exited with exit code " +
                        f"'{self.workflow.exit_code}' instead of "
-                       f"'{self.desired_exit_code}'.\nstderr: "
+                       f"'{self.workflow.desired_exit_code}'.\nstderr: "
                        f"{standerr_file.read().strip().decode('utf-8')}"
                        f"\nstdout: "
                        f"{standout_file.read().strip().decode('utf-8')}")
