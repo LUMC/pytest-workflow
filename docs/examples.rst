@@ -81,7 +81,7 @@ the running of miniwdl from the environment.
 Miniwdl will localize all the output files to an ``output_links`` directory
 inside the test output directory. If you have a workflow with the output:
 
-.. code-block::
+.. code-block:: wdl
 
         output {
             File moo_file = moo_task.out
@@ -120,7 +120,7 @@ it is possible to define the output directory when running the code.
 
 An example code defining a ``publishDir`` is listed below.
 
-.. code-block::
+.. code-block:: nextflow
 
     process Hello {
         publishDir = [
@@ -141,7 +141,7 @@ An example code defining a ``publishDir`` is listed below.
 
 To run the code listed above the following command can be used in which ``examplecode.nf`` is the code listed above:
 
-.. code-block::
+.. code-block:: bash
 
     nextflow run examplecode.nf --outdir test-output
 

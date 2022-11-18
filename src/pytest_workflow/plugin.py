@@ -23,11 +23,6 @@ import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from _pytest.config import Config as PytestConfig
-from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.mark import Mark
-from _pytest.python import FunctionDefinition, Metafunc
-
 import pytest
 
 import yaml
@@ -39,7 +34,7 @@ from .util import duplicate_tree, is_in_dir, replace_whitespace
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser: PytestParser):
+def pytest_addoption(parser: pytest.Parser):
     parser.addoption(
         "--kwd", "--keep-workflow-wd",
         action="store_true",
@@ -130,7 +125,7 @@ def pytest_collect_file(file_path, path, parent):
     return None
 
 
-def pytest_configure(config: PytestConfig):
+def pytest_configure(config: pytest.Config):
     """This runs before tests start and adds values to the config."""
 
     #  Add marker to the config to prevent issues caused by:
@@ -201,7 +196,8 @@ def pytest_collection():
     print()
 
 
-def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
+def get_workflow_names_from_workflow_marker(marker: pytest.Mark
+                                            ) -> Tuple[Any, ...]:
     if 'name' in marker.kwargs:
         raise DeprecationWarning(
             "Using pytest.mark.workflow(name='workflow name') is "
@@ -210,7 +206,7 @@ def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
     return marker.args
 
 
-def pytest_generate_tests(metafunc: Metafunc):
+def pytest_generate_tests(metafunc: pytest.Metafunc):
     """
     This runs at the end of the collection phase. We use this hook to generate
     the workflow_dir fixtures for custom test functions.
@@ -221,8 +217,11 @@ def pytest_generate_tests(metafunc: Metafunc):
     if "workflow_dir" not in metafunc.fixturenames:
         return
 
-    definition: FunctionDefinition = metafunc.definition
-    marker: Optional[Mark] = definition.get_closest_marker(name="workflow")
+    # Technically definition is of type FunctionDefinition, but that is a
+    # subclass of Function and FunctionDefinition cannot be accessed through
+    # the API.
+    definition: pytest.Function = metafunc.definition
+    marker: Optional[pytest.Mark] = definition.get_closest_marker("workflow")
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
@@ -239,12 +238,12 @@ def pytest_generate_tests(metafunc: Metafunc):
                          ids=workflow_names)
 
 
-def pytest_collection_modifyitems(config: PytestConfig,
+def pytest_collection_modifyitems(config: pytest.Config,
                                   items: List[pytest.Function]):
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker = item.get_closest_marker(name="workflow")
+        marker: Optional[pytest.Mark] = item.get_closest_marker("workflow")
 
         if marker is None:
             continue
