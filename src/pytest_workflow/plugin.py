@@ -406,7 +406,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=tempdir,
-                            name=self.workflow_test.name)
+                            name=self.workflow_test.name,
+                            desired_exit_code=self.workflow_test.exit_code)
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
@@ -442,8 +443,6 @@ class WorkflowTestsCollector(pytest.Collector):
         # This creates a workflow that is queued for processing after the
         # collection phase.
         workflow = self.queue_workflow()
-
-        workflow.desired_exit_code = self.workflow_test.exit_code
 
         # Below structure makes it easy to append tests
         tests = []

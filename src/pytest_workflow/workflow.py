@@ -35,7 +35,8 @@ class Workflow(object):
     def __init__(self,
                  command: str,
                  cwd: Optional[Path] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 desired_exit_code: int = 0):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
@@ -69,7 +70,7 @@ class Workflow(object):
         self._started = False
         self.errors: List[Exception] = []
         self.start_lock = threading.Lock()
-        self.desired_exit_code = 0
+        self.desired_exit_code = desired_exit_code
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -139,6 +140,9 @@ class Workflow(object):
             pass
 
     def matching_exitcode(self) -> bool:
+        """Checks if the workflow exited with the desired exit code"""
+        # This is done in the workflow object to reduce redundancy in the rest
+        # of the code.
         return self.exit_code == self.desired_exit_code
 
     @property
