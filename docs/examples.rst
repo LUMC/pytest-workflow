@@ -79,14 +79,12 @@ information on the localization of output files as well as options to modify
 the running of miniwdl from the environment.
 
 Miniwdl will localize all the output files to an ``output_links`` directory
-inside the test output directory. If you have a workflow with the output:
+inside the test output directory. If you have a workflow with the output::
 
-.. code-block:: wdl
-
-        output {
-            File moo_file = moo_task.out
-            Array[File] stats = moo_task.stats_files
-        }
+    output {
+        File moo_file = moo_task.out
+        Array[File] stats = moo_task.stats_files
+    }
 
 Inside the ``out`` directory the directories ``moo_file`` and
 ``stats`` will be created. Inside these directories will be the produced files.
@@ -118,15 +116,13 @@ also be stored. Nextflow can output a copy of the output files to a separate wor
 directory. This can be achieved by defining a ``publishDir`` in the process. Through ``params.outdir``
 it is possible to define the output directory when running the code.
 
-An example code defining a ``publishDir`` is listed below.
-
-.. code-block:: nextflow
+An example code defining a ``publishDir`` is listed below. ::
 
     process Hello {
         publishDir = [
             path: { "${params.outdir}/hello"}
         ]
-        
+
         output:
         path "HelloWorld.txt"
         script:
@@ -134,7 +130,7 @@ An example code defining a ``publishDir`` is listed below.
         echo "Hello World!" > HelloWorld.txt
         """
     }
-    
+
     workflow {
         Hello
     }
