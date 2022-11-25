@@ -93,6 +93,24 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "moo' was found in 'echo does not contain moo': stdout while "
      "it should not be there"),
     ("""\
+    - name: fail_test
+      command: bash -c 'echo "" >&2'
+      stderr:
+        contains:
+          - "No arguments?"
+    """,
+     "'No arguments?' was not found in 'fail_test': stderr "
+     "while it should be there"),
+    ("""\
+   - name: fail_test
+     command: bash -c 'echo "grep --help" >&2'
+     stderr:
+        must_not_contain:
+          - "grep --help"
+    """,
+     "'grep --help' was found in 'fail_test': stderr while "
+     "it should not be there"),
+    ("""\
     - name: simple echo
       command: "echo Hello, world"
       stdout:
