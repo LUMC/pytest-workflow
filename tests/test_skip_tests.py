@@ -28,8 +28,9 @@ SKIP_TESTS = textwrap.dedent("""\
         - "halloumi"
       must_not_contain:
         - "gorgonzola"
-
-- name: wall3_test
+""")
+SKIP_TESTS2 = textwrap.dedent("""
+- name: wall2_test
   command: bash -c "echo 'testing' > test3.txt"
   files:
     - path: test3.txt
@@ -38,9 +39,32 @@ SKIP_TESTS = textwrap.dedent("""\
       must_not_contain:
         - "testing"
 """)
+SKIP_TESTS3 = textwrap.dedent("""
+- name: wall3_test
+  command: bash -c "exit 12"
+  files:
+    - path: test4.txt
+      contains:
+        - "content"
+      must_not_contain:
+        - "no_content"
+      md5sum: e583af1f8b00b53cda87ae9ead880224
+""")
 
 
 def test_skips(pytester):
     pytester.makefile(".yml", test=SKIP_TESTS)
     result = pytester.runpytest("-v").parseoutcomes()
-    assert {"failed": 4, "passed": 3, "skipped": 3} == result
+    assert {"failed": 2, "passed": 1, "skipped": 3} == result
+
+
+def test_skips2(pytester):
+    pytester.makefile(".yml", test=SKIP_TESTS2)
+    result = pytester.runpytest("-v").parseoutcomes()
+    assert {"failed": 2, "passed": 2} == result
+
+
+def test_skips3(pytester):
+    pytester.makefile(".yml", test=SKIP_TESTS3)
+    result = pytester.runpytest("-v").parseoutcomes()
+    assert {"failed": 1, "skipped": 4} == result

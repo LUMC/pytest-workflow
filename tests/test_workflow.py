@@ -96,3 +96,12 @@ def test_workflow_name():
 def test_workflow_name_inferred():
     workflow = Workflow("echo moo")
     assert workflow.name == "echo"
+
+
+def test_workflow_matching_exit_code():
+    workflow = Workflow("echo moo")
+    workflow.run()
+    assert workflow.matching_exitcode()
+    workflow2 = Workflow("grep", desired_exit_code=2)
+    workflow2.run()
+    assert workflow2.matching_exitcode()

@@ -102,6 +102,9 @@ class FileExists(pytest.Item):
         # Wait for the workflow process to finish before checking if the file
         # exists.
         self.workflow.wait()
+        if not self.workflow.matching_exitcode():
+            pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
+                        f"desired exit code.")
         assert self.file.exists() == self.should_exist
 
     def repr_failure(self, excinfo, style=None):
@@ -134,6 +137,9 @@ class FileMd5(pytest.Item):
     def runtest(self):
         # Wait for the workflow to finish before we check the md5sum of a file.
         self.workflow.wait()
+        if not self.workflow.matching_exitcode():
+            pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
+                        f"desired exit code.")
         self.observed_md5sum = file_md5sum(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
 

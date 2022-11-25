@@ -94,7 +94,7 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "it should not be there"),
     ("""\
     - name: fail_test
-      command: grep
+      command: bash -c 'echo "" >&2'
       stderr:
         contains:
           - "No arguments?"
@@ -102,9 +102,9 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "'No arguments?' was not found in 'fail_test': stderr "
      "while it should be there"),
     ("""\
-    - name: fail_test
-      command: grep
-      stderr:
+   - name: fail_test
+     command: bash -c 'echo "grep --help" >&2'
+     stderr:
         must_not_contain:
           - "grep --help"
     """,

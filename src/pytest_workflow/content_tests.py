@@ -244,6 +244,9 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
+        if not self.parent.workflow.matching_exitcode():
+            pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
+                        f"desired exit code.")
         if self.parent.file_not_found:
             pytest.skip(f"'{self.content_name}' was not found so cannot be "
                         f"searched")
