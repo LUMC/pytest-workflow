@@ -39,7 +39,6 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -50,8 +49,8 @@ setup(
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",
     ],
-    # Because we use the resolve(strict=False) feature from pathlib.
-    python_requires=">=3.6",
+    # Because we cannot test anymore on Python 3.6.
+    python_requires=">=3.7",
     install_requires=[
         "pytest>=7.0.0",  # To use pathlib Path's in pytest
         "pyyaml",

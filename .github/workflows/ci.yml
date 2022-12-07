@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.6"
+          - "3.7"
     steps:
       - uses: actions/checkout@v2.3.4
       - name: Set up Python ${{ matrix.python-version }}
@@ -26,7 +26,6 @@ jobs:
       - name: Lint
         run: tox -e lint
   docs:
-    needs: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
@@ -43,7 +42,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.6"
           - "3.7"
           - "3.8"
           - "3.9"
@@ -60,7 +58,6 @@ jobs:
       - name: Run tests
         run: tox -e py3
       - name: Upload coverage report
-        if: ${{ matrix.python-version == 3.6 }} # Only upload coverage once
         uses: codecov/codecov-action@v1
 
   test-functional:
