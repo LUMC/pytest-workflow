@@ -21,4 +21,4 @@ Known issues
   ``contains_regex`` and ``must_not_contain_regex``, since this collides with
   Python's usage of the same character to escape special characters in strings.
   Please see the `Python documentation on regular expressions
-  <https://docs.python.org/3.6/library/re.html>`_ for details.
+  <https://docs.python.org/3/library/re.html>`_ for details.
