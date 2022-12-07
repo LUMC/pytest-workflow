@@ -44,7 +44,7 @@ For our complete documentation and examples checkout our
 
 Installation
 ============
-Pytest-workflow requires Python 3.6 or higher. It is tested on Python 3.6, 3.7,
+Pytest-workflow requires Python 3.7 or higher. It is tested on Python 3.7,
 3.8, 3.9, 3.10 and 3.11.
 
 - Make sure your virtual environment is activated.
@@ -143,7 +143,7 @@ predefined tests as well as custom tests are possible.
         - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
 
 For more information on how Python parses regular expressions, see the `Python
-documentation <https://docs.python.org/3.6/library/re.html>`_.
+documentation <https://docs.python.org/3/library/re.html>`_.
 
 Documentation for more advanced use cases including the custom tests can be
 found on our `readthedocs page <https://pytest-workflow.readthedocs.io/>`_.

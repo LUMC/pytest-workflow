@@ -7,8 +7,11 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 1.7.0-dev
+version 2.0.0-dev
 ---------------------------
++ Python 3.6 is no longer supported. It has been removed from github actions,
+  as such we can no longer guarantee that pytest-workflow works properly
+  with python 3.6.
 + When the ``--git-aware`` flag is used a submodule check is performed in order
   to assert that all submodules are properly checked out. This prevents
   unclear copying errors.
