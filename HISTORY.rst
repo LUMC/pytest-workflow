@@ -34,6 +34,7 @@ version 2.0.0-dev
   7.0.0.
 + Throw a more descriptive error when a file copied with the --git-aware flag
   is not present on the filesystem anymore.
++ Document pytest flags ``-k`` and ``-m`` are not supported.
 
 version 1.6.0
 ---------------------------

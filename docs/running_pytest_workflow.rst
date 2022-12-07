@@ -129,3 +129,9 @@ Internally names and tags are handled the same so if the following tests:
       - hello
 
 are run with ``pytest --tag hello`` then both ``hello`` and ``hello2`` are run.
+
+.. note::
+
+    The pytest flags ``-k`` and ``-m`` are not supported by pytest-workflow.
+    Rational for this design decision can be `found within GitHub issue #155
+    <https://github.com/LUMC/pytest-workflow/issues/155#issuecomment-1334911457>`_.
