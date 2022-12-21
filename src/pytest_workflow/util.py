@@ -173,7 +173,9 @@ def duplicate_tree(src: Filepath, dest: Filepath,
         copy: Callable[[Filepath, Filepath], None] = \
             functools.partial(os.symlink, target_is_directory=False)
     else:
-        copy = shutil.copy2  # Preserves metadata, also used by shutil.copytree
+        # shutil.copy2 preserves metadata, also used by shutil.copytree
+        # follow_symlinks False to directly copy links
+        copy = functools.partial(shutil.copy2, follow_symlinks=False)
 
     os.makedirs(dest, exist_ok=False)
     for src_path, dest_path, is_dir in path_iter:

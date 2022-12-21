@@ -171,7 +171,7 @@ def create_git_repo(path):
     another_file = subdir / "subtext.md"
     another_file.write_text("# Subtext\n\nSome other example text.\n")
     subdir_link = dir / "gosub"
-    subdir_link.symlink_to(subdir, target_is_directory=True)
+    subdir_link.symlink_to(subdir.relative_to(dir), target_is_directory=True)
     subprocess.run(["git", "init", "-b", "main"], cwd=dir)
     subprocess.run(["git", "config", "user.name", "A U Thor"], cwd=dir)
     subprocess.run(["git", "config", "user.email", "author@example.com"],
@@ -223,4 +223,7 @@ def test_duplicate_git_tree_submodule_symlinks(git_repo_with_submodules):
     duplicate_tree(git_repo_with_submodules, dest, git_aware=True)
     assert dest.exists()
     assert not (dest / ".git").exists()
-    assert (dest / "bird" / "gosub" / "subtext.md").exists()
+    link = dest / "bird" / "gosub"
+    assert link.exists()
+    assert link.is_symlink()
+    assert link.resolve() == dest / "bird" / "sub"
