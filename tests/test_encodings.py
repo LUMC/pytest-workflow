@@ -31,12 +31,13 @@ def test_encoding(pytester):
     - name: test_encoding
       command: "bash -c 'true'"
       files:
-        - path: test.txt
+        - path: diakritische_tekens.txt
+          encoding: UTF32
           contains:
             - überhaupt
             - crème fraîche
     """))
-    test_txt = pytester.path / "test.txt"
+    test_txt = pytester.path / "diakritische_tekens.txt"
     # UTF32 is not the default on windows and linux I believe
     test_txt.write_text(TEST_TEXT, encoding="UTF32")
     result = pytester.runpytest("-v")

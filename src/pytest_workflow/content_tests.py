@@ -115,7 +115,8 @@ class ContentTestCollector(pytest.Collector):
                      self.filepath.open)
         try:
             # Use 'rt' here explicitly as opposed to 'rb'
-            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
+            with file_open(mode='rt', encoding=self.content_test.encoding) \
+                    as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
                 self.found_strings, self.found_patterns = check_content(
                     strings=strings_to_check,
                     patterns=patterns_to_check,
