@@ -11,16 +11,19 @@
         - "blabla"
       must_not_contain:
         - "stuff"
+      encoding: UTF8
   stdout:
     contains:
       - "bla"
     must_not_contain:
       - "not_bla"
+    encoding: ASCII
   stderr:
     contains:
       - "bla"
     must_not_contain:
       - "not_bla"
+    encoding: UTF8
   exit_code: 127
   command: "the one string"
 - name: other test

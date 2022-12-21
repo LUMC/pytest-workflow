@@ -40,6 +40,7 @@ Test options
         must_not_contain:              # A list of strings that should NOT be in the file (optional)
           - "Cock a doodle doo"
         md5sum: e583af1f8b00b53cda87ae9ead880224   # Md5sum of the file (optional)
+        encoding: UTF-8                # Encoding for the text file (optional). Defaults to system locale.
 
   - name: simple echo                  # A second workflow. Notice the starting `-` which means
     command: "echo moo"                # that workflow items are in a list. You can add as much workflows as you want
@@ -51,6 +52,7 @@ Test options
         - "moo"
       must_not_contain:                # List of strings that should NOT be in stout (optional)
         - "Cock a doodle doo"
+      encoding: ASCII                  # Encoding for stdout (optional). Defaults to system locale.
 
   - name: mission impossible           # Also failing workflows can be tested
     tags:                              # A list of tags that can be used to select which test
@@ -60,13 +62,14 @@ Test options
     files:
       - path: "fail.log"               # Multiple files can be tested for each workflow
       - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
-        contains: 
+        contains:
           - "starring"
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
       must_not_contain:                # A list of strings which should NOT be in stderr (optional)
         - "Mission accomplished!"
+      encoding: UTF-16                 # Encoding for stderr (optional). Defaults to system locale.
 
   - name: regex tests
     command: echo Hello, world
