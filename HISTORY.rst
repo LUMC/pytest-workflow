@@ -12,6 +12,10 @@ version 2.0.0-dev
 + Python 3.6 is no longer supported. It has been removed from github actions,
   as such we can no longer guarantee that pytest-workflow works properly
   with python 3.6.
++ Added an optional encoding key for files, stdout and stderr so the file can
+  be opened with the proper encoding.
++ Make content tests more efficient by reading each file only once instead of
+  twice when there are both strings and regexes to check for.
 + When the ``--git-aware`` flag is used a submodule check is performed in order
   to assert that all submodules are properly checked out. This prevents
   unclear copying errors.

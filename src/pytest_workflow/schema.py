@@ -113,11 +113,13 @@ class ContentTest(object):
     def __init__(self, contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None,
                  contains_regex: Optional[List[str]] = None,
-                 must_not_contain_regex: Optional[List[str]] = None):
+                 must_not_contain_regex: Optional[List[str]] = None,
+                 encoding: Optional[str] = None):
         self.contains: List[str] = contains or []
         self.must_not_contain: List[str] = must_not_contain or []
         self.contains_regex: List[str] = contains_regex or []
         self.must_not_contain_regex: List[str] = must_not_contain_regex or []
+        self.encoding: Optional[str] = encoding
 
 
 class FileTest(ContentTest):
@@ -127,7 +129,8 @@ class FileTest(ContentTest):
                  contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None,
                  contains_regex: Optional[List[str]] = None,
-                 must_not_contain_regex: Optional[List[str]] = None):
+                 must_not_contain_regex: Optional[List[str]] = None,
+                 encoding: Optional[str] = None):
         """
         A container object
         :param path: the path to the file
@@ -143,7 +146,8 @@ class FileTest(ContentTest):
         """
         super().__init__(contains=contains, must_not_contain=must_not_contain,
                          contains_regex=contains_regex,
-                         must_not_contain_regex=must_not_contain_regex)
+                         must_not_contain_regex=must_not_contain_regex,
+                         encoding=encoding)
         self.path = Path(path)
         self.md5sum = md5sum
         self.should_exist = should_exist

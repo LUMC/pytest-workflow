@@ -20,7 +20,7 @@ from pathlib import Path
 
 import pytest
 
-from pytest_workflow.content_tests import check_content, check_regex_content
+from pytest_workflow.content_tests import check_content
 
 LICENSE = Path(__file__).parent / "content_files" / "LICENSE"
 LICENSE_ZIPPED = LICENSE.parent / "LICENSE.gz"
@@ -48,8 +48,8 @@ REGEX_TESTS = [
 def test_check_content_succeeding(contains_strings, does_not_contain_strings):
     all_strings = set(contains_strings).union(set(does_not_contain_strings))
     with LICENSE.open("rt") as license_h:
-        found_strings = check_content(list(all_strings),
-                                      license_h)
+        found_strings, _ = check_content(
+            list(all_strings), [], license_h)
     assert set(contains_strings) == found_strings
     assert set(does_not_contain_strings) == all_strings - found_strings
 
@@ -60,8 +60,8 @@ def test_check_regex_content_succeeding(contains_regex,
                                         does_not_contain_regex):
     all_regex = set(contains_regex).union(set(does_not_contain_regex))
     with LICENSE.open("rt") as license_h:
-        found_regex = check_regex_content(list(all_regex),
-                                          license_h)
+        _, found_regex = check_content(
+            [], list(all_regex), license_h)
     assert set(contains_regex) == found_regex
     assert set(does_not_contain_regex) == all_regex - found_regex
 
@@ -72,5 +72,5 @@ def test_multiple_finds_one_line():
         "the true meaning of its creed: \"We hold these truths to be",
         "self-evident: that all men are created equal.\""]
     contains = ["dream", "day", "nation", "creed", "truths"]
-    found_strings = check_content(contains, content)
+    found_strings, _ = check_content(contains, [], content)
     assert set(contains) == found_strings
