@@ -166,17 +166,25 @@ def create_git_repo(path):
     os.mkdir(dir)
     file = dir / "README.md"
     file.write_text("# My new project\n\nHello this project is awesome!\n")
+    subdir = dir / "sub"
+    subdir.mkdir()
+    another_file = subdir / "subtext.md"
+    another_file.write_text("# Subtext\n\nSome other example text.\n")
+    subdir_link = dir / "gosub"
+    subdir_link.symlink_to(subdir.relative_to(dir), target_is_directory=True)
     subprocess.run(["git", "init", "-b", "main"], cwd=dir)
     subprocess.run(["git", "config", "user.name", "A U Thor"], cwd=dir)
     subprocess.run(["git", "config", "user.email", "author@example.com"],
                    cwd=dir)
-    subprocess.run(["git", "add", "README.md"], cwd=dir)
+    subprocess.run(["git", "add", "."], cwd=dir)
     subprocess.run(["git", "commit", "-m", "initial commit"], cwd=dir)
 
 
-def test_git_submodule_check(tmp_path):
-    bird_repo = tmp_path / "bird"
-    nest_repo = tmp_path / "nest"
+@pytest.fixture()
+def git_repo_with_submodules():
+    repo_dir = Path(tempfile.mkdtemp())
+    bird_repo = repo_dir / "bird"
+    nest_repo = repo_dir / "nest"
     create_git_repo(bird_repo)
     create_git_repo(nest_repo)
     # https://bugs.launchpad.net/ubuntu/+source/git/+bug/1993586
@@ -185,11 +193,16 @@ def test_git_submodule_check(tmp_path):
                    cwd=nest_repo.absolute())
     subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
                    cwd=nest_repo.absolute())
+    yield nest_repo
+    shutil.rmtree(repo_dir)
+
+
+def test_git_submodule_check(git_repo_with_submodules, tmp_path):
     cloned_repo = tmp_path / "cloned"
     subprocess.run(
         # No recursive clone
         ["git", "-c", "protocol.file.allow=always",
-         "clone", nest_repo.absolute(), cloned_repo.absolute()],
+         "clone", git_repo_with_submodules.absolute(), cloned_repo.absolute()],
         cwd=tmp_path
     )
     with pytest.raises(RuntimeError) as error:
@@ -201,3 +214,16 @@ def test_git_submodule_check(tmp_path):
                    cwd=cloned_repo.absolute())
     # Check error does not occur when issue resolved.
     git_check_submodules_cloned(cloned_repo)
+
+
+# https://github.com/LUMC/pytest-workflow/issues/162
+def test_duplicate_git_tree_submodule_symlinks(git_repo_with_submodules):
+    assert (git_repo_with_submodules / ".git").exists()
+    dest = Path(tempfile.mkdtemp()) / "test"
+    duplicate_tree(git_repo_with_submodules, dest, git_aware=True)
+    assert dest.exists()
+    assert not (dest / ".git").exists()
+    link = dest / "bird" / "gosub"
+    assert link.exists()
+    assert link.is_symlink()
+    assert link.resolve() == dest / "bird" / "sub"
