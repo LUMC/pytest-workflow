@@ -53,7 +53,6 @@ def check_content(strings: Iterable[str],
 
     for line in text_lines:
         # Break the loop if all strings are found
-        # Python implements fast set equality checking by checking length first
         if not strings_to_check and not regex_to_match:
             break
 
