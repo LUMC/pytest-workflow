@@ -67,6 +67,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "encoding": {
+              "type": "string"
           }
         },
         "additionalProperties": false
@@ -97,6 +100,9 @@
             "items": {
               "type": "string"
             }
+          },
+          "encoding": {
+              "type": "string"
           }
         },
         "additionalProperties": false
@@ -140,6 +146,9 @@
               "items": {
                 "type": "string"
               }
+            },
+            "encoding": {
+              "type": "string"
             }
           },
           "required": [

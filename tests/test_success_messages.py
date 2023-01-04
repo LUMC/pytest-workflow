@@ -16,11 +16,9 @@
 """Tests the success messages"""
 
 import shutil
-import subprocess  # nosec
+import subprocess
 import textwrap
 from pathlib import Path
-
-from _pytest.tmpdir import TempdirFactory
 
 import pytest
 
@@ -111,17 +109,17 @@ SUCCESS_MESSAGES = [
 
 
 @pytest.fixture(scope="session")
-def succeeding_tests_output(tmpdir_factory: TempdirFactory):
-    """This fixture was written because the testdir function has a default
+def succeeding_tests_output(tmp_path_factory: pytest.TempPathFactory):
+    """This fixture was written because the pytester function has a default
     scope of 'function'. This is very inefficient when testing multiple
     success messages in the output as the whole test yaml with all commands
     has to be run again.
     This fixture runs the succeeding tests once with pytest -v"""
-    tempdir = str(tmpdir_factory.mktemp("succeeding_tests"))
+    tempdir = tmp_path_factory.mktemp("succeeding_tests")
     test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
-    process_out = subprocess.run(args=["pytest", "-v"],  # nosec
+    process_out = subprocess.run(args=["pytest", "-v"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
                                  cwd=tempdir)
@@ -139,8 +137,8 @@ def test_message_success_no_errors_or_fails(succeeding_tests_output):
     assert "FAIL" not in succeeding_tests_output
 
 
-def test_message_directory_kept_no_errors_or_fails(testdir):
-    testdir.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
-    result = testdir.runpytest("-v", "--keep-workflow-wd")
+def test_message_directory_kept_no_errors_or_fails(pytester):
+    pytester.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    result = pytester.runpytest("-v", "--keep-workflow-wd")
     assert "ERROR" not in result.stdout.str()
     assert "FAIL" not in result.stdout.str()

@@ -29,6 +29,11 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
     """,
      "'fail_test' exited with exit code '2' instead of '0'"),
     ("""\
+    - name: exitcode_test
+      command: bash -c 'printf "This code had an error" >&2 ; exit 12'
+    """,
+     "stderr: This code had an error"),
+    ("""\
     - name: create file
       command: echo moo
       files:
@@ -89,7 +94,7 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "it should not be there"),
     ("""\
     - name: fail_test
-      command: grep
+      command: bash -c 'echo "" >&2'
       stderr:
         contains:
           - "No arguments?"
@@ -97,33 +102,14 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
      "'No arguments?' was not found in 'fail_test': stderr "
      "while it should be there"),
     ("""\
-    - name: fail_test
-      command: grep
-      stderr:
+   - name: fail_test
+     command: bash -c 'echo "grep --help" >&2'
+     stderr:
         must_not_contain:
           - "grep --help"
     """,
      "'grep --help' was found in 'fail_test': stderr while "
      "it should not be there"),
-    ("""\
-    - name: file_not_exist
-      command: echo moo
-      files:
-        - path: moo.txt
-          contains:
-            - "moo"
-    """,
-     "moo.txt' does not exist and cannot be searched for containing 'moo'."),
-    ("""\
-    - name: file_not_exist
-      command: echo moo
-      files:
-        - path: moo.txt
-          must_not_contain:
-            - "miaow"
-    """,
-     "moo.txt' does not exist and cannot be searched for "
-     "not containing 'miaow'."),
     ("""\
     - name: simple echo
       command: "echo Hello, world"
@@ -164,9 +150,32 @@ FAILURE_MESSAGE_TESTS: List[Tuple[str, str]] = [
 
 
 @pytest.mark.parametrize(["test", "message"], FAILURE_MESSAGE_TESTS)
-def test_messages(test: str, message: str, testdir):
-    testdir.makefile(".yml", textwrap.dedent(test))
+def test_messages(test: str, message: str, pytester):
+    pytester.makefile(".yml", textwrap.dedent(test))
     # Ideally this should be run in a LC_ALL=C environment. But this is not
     # possible due to multiple levels of process launching.
-    result = testdir.runpytest("-v")
+    result = pytester.runpytest("-v")
+    assert message in result.stdout.str()
+
+
+EXITCODE_MESSAGE_TESTS: List[Tuple[str, str]] = [
+    ("""\
+    - name: stderr_bytes_stderr_test
+      command: bash -c 'printf "This code had an error" ; exit 12'
+    """,
+     "stdout: error"),
+    ("""\
+    - name: stderr_bytes_stdout_test
+      command: bash -c 'printf "This code had an error" >&2 ; exit 12'
+    """,
+     "stderr: error")
+]
+
+
+@pytest.mark.parametrize(["test", "message"], EXITCODE_MESSAGE_TESTS)
+def test_messages_exitcode(test: str, message: str, pytester):
+    pytester.makefile(".yml", textwrap.dedent(test))
+    # Ideally this should be run in a LC_ALL=C environment. But this is not
+    # possible due to multiple levels of process launching.
+    result = pytester.runpytest("-v", "--sb", "5")
     assert message in result.stdout.str()

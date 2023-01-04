@@ -16,16 +16,12 @@
 
 """core functionality of pytest-workflow plugin"""
 import argparse
+import os
 import shutil
 import tempfile
 import warnings
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
-
-from _pytest.config import Config as PytestConfig
-from _pytest.config.argparsing import Parser as PytestParser
-from _pytest.mark import Mark
-from _pytest.python import FunctionDefinition, Metafunc
 
 import pytest
 
@@ -38,7 +34,7 @@ from .util import duplicate_tree, is_in_dir, replace_whitespace
 from .workflow import Workflow, WorkflowQueue
 
 
-def pytest_addoption(parser: PytestParser):
+def pytest_addoption(parser: pytest.Parser):
     parser.addoption(
         "--kwd", "--keep-workflow-wd",
         action="store_true",
@@ -72,7 +68,13 @@ def pytest_addoption(parser: PytestParser):
              "This ignores the .git directory, any untracked files and any "
              "files listed by .gitignore. "
              "Highly recommended when working in a git project.")
-
+    parser.addoption(
+        "--sb", "--stderr-bytes",
+        dest="stderr_bytes",
+        default=1000,
+        type=int,
+        help="The number of bytes to display from the stderr and "
+             "stdout on exitcode.")
     # Why `--tag <tag>` and not simply use `pytest -m <tag>`?
     # `-m` uses a "mark expression". So you have to type a piece of python
     # code instead of just supplying the tags you want. This is fine for the
@@ -114,16 +116,16 @@ def __pytest_workflow_cli():  # pragma: no cover
     return parser
 
 
-def pytest_collect_file(path, parent):
+def pytest_collect_file(file_path, path, parent):
     """Collection hook
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
     if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
-        return YamlFile.from_parent(parent, fspath=path)
+        return YamlFile.from_parent(parent, path=file_path)
     return None
 
 
-def pytest_configure(config: PytestConfig):
+def pytest_configure(config: pytest.Config):
     """This runs before tests start and adds values to the config."""
 
     #  Add marker to the config to prevent issues caused by:
@@ -173,13 +175,12 @@ def pytest_configure(config: PytestConfig):
         Path(basetemp) if basetemp is not None
         else Path(tempfile.mkdtemp(prefix="pytest_workflow_")))
 
-    rootdir = Path(str(config.rootdir))
-    # Raise an error if the workflow temporary directory of the rootdir
+    # Raise an error if the workflow temporary directory of the rootpath
     # (pytest's CWD). This will lead to infinite looping and copying.
-    if is_in_dir(workflow_temp_dir, rootdir):
+    if is_in_dir(workflow_temp_dir, config.rootpath):
         raise ValueError(f"'{workflow_temp_dir}' is a subdirectory of "
-                         f"'{rootdir}'. Please select a --basetemp that is "
-                         f"not in pytest's current working directory.")
+                         f"'{config.rootpath}'. Please select a --basetemp "
+                         f"that is not in pytest's current working directory.")
 
     setattr(config, "workflow_temp_dir", workflow_temp_dir)
 
@@ -195,7 +196,8 @@ def pytest_collection():
     print()
 
 
-def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
+def get_workflow_names_from_workflow_marker(marker: pytest.Mark
+                                            ) -> Tuple[Any, ...]:
     if 'name' in marker.kwargs:
         raise DeprecationWarning(
             "Using pytest.mark.workflow(name='workflow name') is "
@@ -204,7 +206,7 @@ def get_workflow_names_from_workflow_marker(marker: Mark) -> Tuple[Any, ...]:
     return marker.args
 
 
-def pytest_generate_tests(metafunc: Metafunc):
+def pytest_generate_tests(metafunc: pytest.Metafunc):
     """
     This runs at the end of the collection phase. We use this hook to generate
     the workflow_dir fixtures for custom test functions.
@@ -215,8 +217,11 @@ def pytest_generate_tests(metafunc: Metafunc):
     if "workflow_dir" not in metafunc.fixturenames:
         return
 
-    definition: FunctionDefinition = metafunc.definition
-    marker: Optional[Mark] = definition.get_closest_marker(name="workflow")
+    # Technically definition is of type FunctionDefinition, but that is a
+    # subclass of Function and FunctionDefinition cannot be accessed through
+    # the API.
+    definition: pytest.Function = metafunc.definition
+    marker: Optional[pytest.Mark] = definition.get_closest_marker("workflow")
     if marker is None:
         raise ValueError("workflow_dir can only be requested in tests marked"
                          " with the workflow mark.")
@@ -233,12 +238,12 @@ def pytest_generate_tests(metafunc: Metafunc):
                          ids=workflow_names)
 
 
-def pytest_collection_modifyitems(config: PytestConfig,
+def pytest_collection_modifyitems(config: pytest.Config,
                                   items: List[pytest.Function]):
     """Here we skip all tests related to workflows that are not executed"""
 
     for item in items:
-        marker = item.get_closest_marker(name="workflow")
+        marker: Optional[pytest.Mark] = item.get_closest_marker("workflow")
 
         if marker is None:
             continue
@@ -401,7 +406,8 @@ class WorkflowTestsCollector(pytest.Collector):
         # Create a workflow and make sure it runs in the tempdir
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=tempdir,
-                            name=self.workflow_test.name)
+                            name=self.workflow_test.name,
+                            desired_exit_code=self.workflow_test.exit_code)
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
@@ -441,15 +447,15 @@ class WorkflowTestsCollector(pytest.Collector):
         # Below structure makes it easy to append tests
         tests = []
 
+        tests += [ExitCodeTest.from_parent(
+            parent=self,
+            workflow=workflow,
+            stderr_bytes=self.config.getoption("stderr_bytes"))]
+
         tests += [
             FileTestCollector.from_parent(
                 parent=self, filetest=filetest, workflow=workflow)
             for filetest in self.workflow_test.files]
-
-        tests += [ExitCodeTest.from_parent(
-            parent=self,
-            desired_exit_code=self.workflow_test.exit_code,
-            workflow=workflow)]
 
         tests += [ContentTestCollector.from_parent(
             name="stdout", parent=self,
@@ -470,19 +476,29 @@ class WorkflowTestsCollector(pytest.Collector):
 
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
-                 desired_exit_code: int,
-                 workflow: Workflow):
-        name = f"exit code should be {desired_exit_code}"
+                 workflow: Workflow, stderr_bytes: int):
+        name = f"exit code should be {workflow.desired_exit_code}"
         super().__init__(name, parent=parent)
+        self.stderr_bytes = stderr_bytes
         self.workflow = workflow
-        self.desired_exit_code = desired_exit_code
 
     def runtest(self):
         # workflow.exit_code waits for workflow to finish.
-        assert self.workflow.exit_code == self.desired_exit_code
+        assert self.workflow.matching_exitcode()
 
     def repr_failure(self, excinfo, style=None):
-        message = (f"'{self.workflow.name}' exited with exit code " +
-                   f"'{self.workflow.exit_code}' instead of "
-                   f"'{self.desired_exit_code}'.")
+        standerr = self.workflow.stderr_file
+        standout = self.workflow.stdout_file
+        with open(standout, "rb") as standout_file, \
+             open(standerr, "rb") as standerr_file:
+            if os.path.getsize(standerr) >= self.stderr_bytes:
+                standerr_file.seek(-self.stderr_bytes, os.SEEK_END)
+            if os.path.getsize(standout) >= self.stderr_bytes:
+                standout_file.seek(-self.stderr_bytes, os.SEEK_END)
+            message = (f"'{self.workflow.name}' exited with exit code " +
+                       f"'{self.workflow.exit_code}' instead of "
+                       f"'{self.workflow.desired_exit_code}'.\nstderr: "
+                       f"{standerr_file.read().strip().decode('utf-8')}"
+                       f"\nstdout: "
+                       f"{standout_file.read().strip().decode('utf-8')}")
         return message

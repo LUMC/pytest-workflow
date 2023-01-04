@@ -22,7 +22,7 @@ later.
 """
 import queue
 import shlex
-import subprocess  # nosec: security implications have been considered
+import subprocess
 import tempfile
 import threading
 import time
@@ -35,7 +35,8 @@ class Workflow(object):
     def __init__(self,
                  command: str,
                  cwd: Optional[Path] = None,
-                 name: Optional[str] = None):
+                 name: Optional[str] = None,
+                 desired_exit_code: int = 0):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
@@ -69,6 +70,7 @@ class Workflow(object):
         self._started = False
         self.errors: List[Exception] = []
         self.start_lock = threading.Lock()
+        self.desired_exit_code = desired_exit_code
 
     def start(self):
         """Runs the workflow in a subprocess in the background.
@@ -81,7 +83,7 @@ class Workflow(object):
                     stdout_h = self.stdout_file.open('wb')
                     stderr_h = self.stderr_file.open('wb')
                     sub_process_args = shlex.split(self.command)
-                    self._popen = subprocess.Popen(  # nosec: Shell is not enabled. # noqa
+                    self._popen = subprocess.Popen(
                         sub_process_args, stdout=stdout_h,
                         stderr=stderr_h, cwd=str(self.cwd))
                 except Exception as error:
@@ -136,6 +138,12 @@ class Workflow(object):
             # If self._popen is none, something went wrong during starting the
             # workflow
             pass
+
+    def matching_exitcode(self) -> bool:
+        """Checks if the workflow exited with the desired exit code"""
+        # This is done in the workflow object to reduce redundancy in the rest
+        # of the code.
+        return self.exit_code == self.desired_exit_code
 
     @property
     def stdout(self) -> bytes:

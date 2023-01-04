@@ -16,13 +16,14 @@
 import hashlib
 import os
 import shutil
-import subprocess  # nosec
+import subprocess
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from pytest_workflow.util import duplicate_tree, file_md5sum, git_root, \
+from pytest_workflow.util import duplicate_tree, file_md5sum, \
+    git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -100,9 +101,9 @@ def git_dir():
     (git_dir / "test").mkdir()
     test_file = git_dir / "test" / "test.txt"
     test_file.touch()
-    subprocess.run(["git", "-C", str(git_dir), "init"])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])  # nosec
-    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",  # nosec
+    subprocess.run(["git", "-C", str(git_dir), "init"])
+    subprocess.run(["git", "-C", str(git_dir), "add", str(test_file)])
+    subprocess.run(["git", "-C", str(git_dir), "commit", "-m",
                     "initial commit"])
     yield git_dir
     shutil.rmtree(git_dir)
@@ -115,6 +116,16 @@ def test_duplicate_git_tree(git_dir):
     assert dest.exists()
     assert not (dest / ".git").exists()
     assert (dest / "test" / "test.txt").exists()
+
+
+def test_duplicate_git_tree_file_removed_error(git_dir):
+    assert (git_dir / ".git").exists()
+    os.remove(git_dir / "test" / "test.txt")
+    dest = Path(tempfile.mkdtemp()) / "test"
+    with pytest.raises(FileNotFoundError) as e:
+        duplicate_tree(git_dir, dest, git_aware=True)
+    e.match("checked in")
+    e.match(f"\"git -C '{git_dir}' rm '{str(Path('test', 'test.txt'))}'\"")
 
 
 def test_duplicate(git_dir):
@@ -145,7 +156,74 @@ HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 
 @pytest.mark.parametrize("hash_file", HASH_FILE_DIR.iterdir())
 def test_file_md5sum(hash_file: Path):
-    # No sec added because this hash is only used for checking file integrity
-    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()  # nosec
+    whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5
+
+
+def create_git_repo(path):
+    dir = Path(path)
+    os.mkdir(dir)
+    file = dir / "README.md"
+    file.write_text("# My new project\n\nHello this project is awesome!\n")
+    subdir = dir / "sub"
+    subdir.mkdir()
+    another_file = subdir / "subtext.md"
+    another_file.write_text("# Subtext\n\nSome other example text.\n")
+    subdir_link = dir / "gosub"
+    subdir_link.symlink_to(subdir.relative_to(dir), target_is_directory=True)
+    subprocess.run(["git", "init", "-b", "main"], cwd=dir)
+    subprocess.run(["git", "config", "user.name", "A U Thor"], cwd=dir)
+    subprocess.run(["git", "config", "user.email", "author@example.com"],
+                   cwd=dir)
+    subprocess.run(["git", "add", "."], cwd=dir)
+    subprocess.run(["git", "commit", "-m", "initial commit"], cwd=dir)
+
+
+@pytest.fixture()
+def git_repo_with_submodules():
+    repo_dir = Path(tempfile.mkdtemp())
+    bird_repo = repo_dir / "bird"
+    nest_repo = repo_dir / "nest"
+    create_git_repo(bird_repo)
+    create_git_repo(nest_repo)
+    # https://bugs.launchpad.net/ubuntu/+source/git/+bug/1993586
+    subprocess.run(["git", "-c", "protocol.file.allow=always",
+                    "submodule", "add", bird_repo.absolute()],
+                   cwd=nest_repo.absolute())
+    subprocess.run(["git", "commit", "-m", "add bird repo as a submodule"],
+                   cwd=nest_repo.absolute())
+    yield nest_repo
+    shutil.rmtree(repo_dir)
+
+
+def test_git_submodule_check(git_repo_with_submodules, tmp_path):
+    cloned_repo = tmp_path / "cloned"
+    subprocess.run(
+        # No recursive clone
+        ["git", "-c", "protocol.file.allow=always",
+         "clone", git_repo_with_submodules.absolute(), cloned_repo.absolute()],
+        cwd=tmp_path
+    )
+    with pytest.raises(RuntimeError) as error:
+        git_check_submodules_cloned(cloned_repo)
+    # Error message should allow user to resolve the issue.
+    error.match("'git submodule update --init --recursive'")
+    subprocess.run(["git", "-c", "protocol.file.allow=always", "submodule",
+                    "update", "--init", "--recursive"],
+                   cwd=cloned_repo.absolute())
+    # Check error does not occur when issue resolved.
+    git_check_submodules_cloned(cloned_repo)
+
+
+# https://github.com/LUMC/pytest-workflow/issues/162
+def test_duplicate_git_tree_submodule_symlinks(git_repo_with_submodules):
+    assert (git_repo_with_submodules / ".git").exists()
+    dest = Path(tempfile.mkdtemp()) / "test"
+    duplicate_tree(git_repo_with_submodules, dest, git_aware=True)
+    assert dest.exists()
+    assert not (dest / ".git").exists()
+    link = dest / "bird" / "gosub"
+    assert link.exists()
+    assert link.is_symlink()
+    assert link.resolve() == dest / "bird" / "sub"

@@ -33,72 +33,41 @@ from .workflow import Workflow
 
 
 def check_content(strings: Iterable[str],
-                  text_lines: Iterable[str]) -> Set[str]:
+                  patterns: Iterable[str],
+                  text_lines: Iterable[str]):
     """
-    Checks whether any of the strings is present in the text lines
+    Checks whether any of the strings or patterns is present in the text lines
     It only reads the lines once and it stops reading when
-    everything is found. This makes searching for strings in large bodies of
-    text more efficient.
-    :param strings: A list of strings for which the present is checked
+    everything is found. This makes searching for strings  and patterns in
+    large bodies of text more efficient.
+    :param strings: A list of strings to check for
+    :param patterns: A list of regex patterns to check for
     :param text_lines: The lines of text that need to be searched.
-    :return: A tuple with a set of found strings, and a set of not found
-    strings
+    :return: A tuple with a set of found strings, and a set of found patterns.
     """
-
-    # Create two sets. By default all strings are not found.
     strings_to_check = set(strings)
     found_strings: Set[str] = set()
+    regex_to_match: Set[re.Pattern] = {re.compile(pattern)
+                                       for pattern in patterns}
+    found_regexes: Set[re.Pattern] = set()
 
     for line in text_lines:
         # Break the loop if all strings are found
-        # Python implements fast set equality checking by checking length first
-        if found_strings == strings_to_check:
+        if not strings_to_check and not regex_to_match:
             break
 
         for string in strings_to_check:
             if string in line:
                 found_strings.add(string)
+        for regex in regex_to_match:
+            if re.search(regex, line):
+                found_regexes.add(regex)
+
         # Remove found strings for faster searching. This should be done
         # outside of the loop above.
         strings_to_check -= found_strings
-    return found_strings
-
-
-def check_regex_content(patterns: Iterable[str],
-                        text_lines: Iterable[str]) -> Set[str]:
-    """
-    Checks whether any of the patterns is present in the text lines
-    It only reads the lines once and it stops reading when
-    everything is found. This makes searching for patterns in large bodies of
-    text more efficient.
-    :param patterns: A list of regexes which is matched
-    :param text_lines: The lines of text that need to be searched.
-    :return: A tuple with a set of found regexes, and a set of not found
-    regexes
-    """
-
-    # Create two sets. By default all strings are not found.
-    regex_to_match = {re.compile(pattern) for pattern in patterns}
-    found_patterns: Set[str] = set()
-
-    for line in text_lines:
-        # Break the loop if all regexes have been matched
-        if not regex_to_match:
-            break
-
-        # Regexes we don't have to check anymore
-        to_remove = list()
-        for regex in regex_to_match:
-            if re.search(regex, line):
-                found_patterns.add(regex.pattern)
-                to_remove.append(regex)
-
-        # Remove found patterns for faster searching. This should be done
-        # outside of the loop above.
-        for regex in to_remove:
-            regex_to_match.remove(regex)
-
-    return found_patterns
+        regex_to_match -= found_regexes
+    return found_strings, {x.pattern for x in found_regexes}
 
 
 class ContentTestCollector(pytest.Collector):
@@ -145,13 +114,10 @@ class ContentTestCollector(pytest.Collector):
                      self.filepath.open)
         try:
             # Use 'rt' here explicitly as opposed to 'rb'
-            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
-                self.found_strings = check_content(
+            with file_open(mode='rt', encoding=self.content_test.encoding) \
+                    as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
+                self.found_strings, self.found_patterns = check_content(
                     strings=strings_to_check,
-                    text_lines=file_handler)
-            # Read the file again for the regex
-            with file_open(mode='rt') as file_handler:  # type: ignore  # mypy goes crazy here otherwise  # noqa: E501
-                self.found_patterns = check_regex_content(
                     patterns=patterns_to_check,
                     text_lines=file_handler)
         except FileNotFoundError:
@@ -244,7 +210,12 @@ class ContentTestItem(pytest.Item):
         were we are looking for multiple words (variants / sequences). """
         # Wait for thread to complete.
         self.parent.thread.join()
-        assert not self.parent.file_not_found
+        if not self.parent.workflow.matching_exitcode():
+            pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
+                        f"desired exit code.")
+        if self.parent.file_not_found:
+            pytest.skip(f"'{self.content_name}' was not found so cannot be "
+                        f"searched")
         if self.regex:
             assert ((self.string in self.parent.found_patterns) ==
                     self.should_contain)
@@ -253,17 +224,9 @@ class ContentTestItem(pytest.Item):
                     self.should_contain)
 
     def repr_failure(self, excinfo, style=None):
-        if self.parent.file_not_found:
-            containing = ("containing" if self.should_contain else
-                          "not containing")
-            return (
-                f"'{self.content_name}' does not exist and cannot be searched "
-                f"for {containing} '{self.string}'."
-            )
-        else:
-            found = "not found" if self.should_contain else "found"
-            should = "should" if self.should_contain else "should not"
-            return (
-                f"'{self.string}' was {found} in {self.content_name} "
-                f"while it {should} be there."
-            )
+        found = "not found" if self.should_contain else "found"
+        should = "should" if self.should_contain else "should not"
+        return (
+            f"'{self.string}' was {found} in {self.content_name} "
+            f"while it {should} be there."
+        )

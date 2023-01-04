@@ -40,6 +40,7 @@ Test options
         must_not_contain:              # A list of strings that should NOT be in the file (optional)
           - "Cock a doodle doo"
         md5sum: e583af1f8b00b53cda87ae9ead880224   # Md5sum of the file (optional)
+        encoding: UTF-8                # Encoding for the text file (optional). Defaults to system locale.
 
   - name: simple echo                  # A second workflow. Notice the starting `-` which means
     command: "echo moo"                # that workflow items are in a list. You can add as much workflows as you want
@@ -51,6 +52,7 @@ Test options
         - "moo"
       must_not_contain:                # List of strings that should NOT be in stout (optional)
         - "Cock a doodle doo"
+      encoding: ASCII                  # Encoding for stdout (optional). Defaults to system locale.
 
   - name: mission impossible           # Also failing workflows can be tested
     tags:                              # A list of tags that can be used to select which test
@@ -60,13 +62,14 @@ Test options
     files:
       - path: "fail.log"               # Multiple files can be tested for each workflow
       - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
-        contains: 
+        contains:
           - "starring"
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
       must_not_contain:                # A list of strings which should NOT be in stderr (optional)
         - "Mission accomplished!"
+      encoding: UTF-16                 # Encoding for stderr (optional). Defaults to system locale.
 
   - name: regex tests
     command: echo Hello, world
@@ -83,12 +86,39 @@ Test options
 The above YAML file contains all the possible options for a workflow test.
 
 Please see the `Python documentation on regular expressions
-<https://docs.python.org/3.6/library/re.html>`_ to see how Python handles escape
+<https://docs.python.org/3/library/re.html>`_ to see how Python handles escape
 sequences.
 
 .. note::
     Workflow names must be unique. Pytest workflow will crash when multiple
     workflows have the same name, even if they are in different files.
+
+Environment variables
+----------------------
+Pytest-workflow runs tests in the same environment as in which the pytest
+executable was started. This means programs started in tests can use
+environnment variables. However, environment variables inside the command
+section itself are quoted by pytest-workflow using
+`shlex.quote <https://docs.python.org/3/library/shlex.html#shlex.quote>`_.
+See the examples below:
+
+.. code-block:: YAML
+
+    - name: Try to use an environment variable
+      command: echo $MY_VAR
+      # Output will be literally "$MY_VAR"
+
+    - name: Circumenvent shlex quoting by explicitly starting the command in a shell.
+      command: bash -c 'echo $MY_VAR'
+      # Output will be the content of $MY_VAR
+
+    - name: Use a program that checks an environment variable
+      command: singularity run my_container.sif
+      # Correctly uses "SINGULARITY_" prefixed variables
+
+If you want to use shell scripting features such as environment
+variables inside ``command``, you need to explicitly set the shell as shown
+above.
 
 Writing custom tests
 --------------------

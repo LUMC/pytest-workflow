@@ -79,14 +79,12 @@ information on the localization of output files as well as options to modify
 the running of miniwdl from the environment.
 
 Miniwdl will localize all the output files to an ``output_links`` directory
-inside the test output directory. If you have a workflow with the output:
+inside the test output directory. If you have a workflow with the output::
 
-.. code-block::
-
-        output {
-            File moo_file = moo_task.out
-            Array[File] stats = moo_task.stats_files
-        }
+    output {
+        File moo_file = moo_task.out
+        Array[File] stats = moo_task.stats_files
+    }
 
 Inside the ``out`` directory the directories ``moo_file`` and
 ``stats`` will be created. Inside these directories will be the produced files.
@@ -109,3 +107,96 @@ The following yaml file tests a WDL pipeline run with miniwdl.
 
 Please note that the trailing slash in ``-d test-output/`` is important. It
 will ensure the files end up in the ``test-output`` directory.
+
+Nextflow example
+-----------------
+
+With nextflow each process is run in a unique directory where the output files will
+also be stored. Nextflow can output a copy of the output files to a separate workflow-outputs 
+directory. This can be achieved by defining a ``publishDir`` in the process. Through ``params.outdir``
+it is possible to define the output directory when running the code.
+
+An example code defining a ``publishDir`` is listed below. ::
+
+    process Hello {
+        publishDir = [
+            path: { "${params.outdir}/hello"}
+        ]
+
+        output:
+        path "HelloWorld.txt"
+        script:
+        """
+        echo "Hello World!" > HelloWorld.txt
+        """
+    }
+
+    workflow {
+        Hello
+    }
+
+To run the code listed above the following command can be used in which ``examplecode.nf`` is the code listed above:
+
+.. code-block:: bash
+
+    nextflow run examplecode.nf --outdir test-output
+
+``publishDir`` will make it so that all the output files of the process are copied to the given directory. 
+``--outdir`` is used to define the path the output files will go to. In this case ``HelloWorld.txt`` will 
+be copied to the  directory called ``test-output/hello``.
+
+An example yaml file that could be used to test the nextflow pipeline from ``examplecode.nf`` is listed
+below.
+
+.. code-block:: yaml
+
+    - name: My pipeline
+      command: nextflow run examplecode.nf --outdir test-output
+      files:
+        - path: "test-output/hello/HelloWorld.txt"
+
+Bash example
+------------
+
+The following is an example of a Bash file that can run directly as a script, or sourced to test each function separately:
+
+.. code-block:: bash
+
+    #!/usr/bin/env bash
+
+    function say_hello() {
+        local name="$1"
+        echo "Hello, ${name}!"
+    }
+
+    function main() {
+        say_hello world
+    }
+
+    # Only execute main when this file is run as a script
+    if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+        main
+    fi
+
+Save the bash file as ``script.sh``, and test it with the following pytest-workflow configuration:
+
+
+.. code-block:: yaml
+
+    - name: test bash script
+      command: bash script.sh
+      stdout:
+        contains:
+          - "Hello, world!"
+
+    - name: test bash function
+      command: >
+        bash -c "
+        source script.sh;
+        say_hello pytest-workflow
+        "
+      stdout:
+        contains:
+          - "Hello, pytest-workflow!"
+        must_not_contain:
+          - "Hello, world!"

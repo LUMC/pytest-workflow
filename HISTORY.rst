@@ -7,6 +7,45 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 2.0.0
+---------------------------
+This major release greatly cleans up the output of pytest-workflow in case of
+an error as well as providing the stderr and stdout last bytes for debugging
+purposes. When the exit code test fails all other tests from the workflow
+are skipped.
+
++ Python 3.6 is no longer supported. It has been removed from github actions,
+  as such we can no longer guarantee that pytest-workflow works properly
+  with python 3.6.
++ Fix an issue where symlinks in git repositories could not be properly copied.
++ Added an optional encoding key for files, stdout and stderr so the file can
+  be opened with the proper encoding.
++ Make content tests more efficient by reading each file only once instead of
+  twice when there are both strings and regexes to check for.
++ When the ``--git-aware`` flag is used a submodule check is performed in order
+  to assert that all submodules are properly checked out. This prevents
+  unclear copying errors.
++ Tests are now skipped if the workflow does not exit with the desired exit
+  code, except for the exit code tests, to reduce visual clutter when reporting
+  failing tests.
++ Tests for checking file content are now skipped when the file does not exist
+  in order to reduce visual clutter when reporting failing tests.
++ Test and support for Python 3.11.
++ Add ``--stderr-bytes`` or ``--sb`` option to change the maximum 
+  number of bytes to display for the stderr and stdout on 
+  command failure. 
++ Add stderr and stdout to be displayed on command failure
++ Document using ``pytest.ini`` as a way of setting specific per repository
+  settings for pytest-workflow.
++ Add tests for nextflow.
++ Document the use of environment variables with pytest-workflow.
++ A minimum of pytest 7.0.0 is now a requirement for pytest-workflow.
+  This fixes the deprecation warnings that started on the release of pytest
+  7.0.0.
++ Throw a more descriptive error when a file copied with the --git-aware flag
+  is not present on the filesystem anymore.
++ Document pytest flags ``-k`` and ``-m`` are not supported.
+
 version 1.6.0
 ---------------------------
 + Add a ``--git-aware`` or ``--ga`` option to only copy copy files listed by

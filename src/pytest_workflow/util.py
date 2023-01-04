@@ -3,7 +3,7 @@ import hashlib
 import os
 import re
 import shutil
-import subprocess  # nosec
+import subprocess
 import sys
 import warnings
 from pathlib import Path
@@ -48,9 +48,9 @@ def is_in_dir(child: Path, parent: Path, strict: bool = False) -> bool:
     return False
 
 
-def _run_command(*args):
+def _run_command(*args) -> str:
     """Run an external command and return the output"""
-    result = subprocess.run(args,  # nosec
+    result = subprocess.run(args,
                             stdout=subprocess.PIPE,
                             # Encoding to output as a string.
                             encoding=sys.getdefaultencoding(),
@@ -64,6 +64,19 @@ def git_root(path: Filepath) -> str:
     return output.strip()  # Remove trailing newline
 
 
+def git_check_submodules_cloned(path: Filepath):
+    output = _run_command("git", "-C", os.fspath(path), "submodule", "status",
+                          "--recursive")
+    for line in output.splitlines():
+        commit, path = line.strip().split(maxsplit=1)
+        if commit.startswith("-"):
+            raise RuntimeError(
+                f"Git submodule '{path}' was not cloned. Pytest-workflow "
+                f"cannot copy paths from non-existing submodules. Please "
+                f"clone all submodules using 'git submodule update --init "
+                f"--recursive'.")
+
+
 def git_ls_files(path: Filepath) -> List[str]:
     output = _run_command("git", "-C", os.fspath(path), "ls-files",
                           # Make sure submodules are included.
@@ -72,16 +85,16 @@ def git_ls_files(path: Filepath) -> List[str]:
     return output.strip("\n").split("\n")
 
 
-def _duplicate_tree(src: Filepath, dest: Filepath
-                    ) -> Iterator[Tuple[str, str, bool]]:
+def _recurse_directory_tree(src: Filepath, dest: Filepath
+                            ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src and for each file or directory yields a path to it,
     its destination, and whether it is a directory."""
-    for entry in os.scandir(src):  # type: os.DirEntry
+    for entry in os.scandir(src):  # type: os.DirEntry  # type: ignore
         if entry.is_dir():
             dir_src = entry.path
             dir_dest = os.path.join(dest, entry.name)
             yield dir_src, dir_dest, True
-            yield from _duplicate_tree(dir_src, dir_dest)
+            yield from _recurse_directory_tree(dir_src, dir_dest)
         elif entry.is_file() or entry.is_symlink():
             yield entry.path, os.path.join(dest, entry.name), False
         else:
@@ -89,14 +102,15 @@ def _duplicate_tree(src: Filepath, dest: Filepath
                           f"Skipping {entry.path}")
 
 
-def _duplicate_git_tree(src: Filepath, dest: Filepath
-                        ) -> Iterator[Tuple[str, str, bool]]:
+def _recurse_git_repository_tree(src: Filepath, dest: Filepath
+                                 ) -> Iterator[Tuple[str, str, bool]]:
     """Traverses src, finds all files registered in git and for each file or
     directory yields a path to it, its destination and whether it is a
     directory"""
     # A set of dirs we have already yielded. '' is the output of
     # os.path.dirname when the path is in the current directory.
     yielded_dirs: Set[str] = {''}
+    git_check_submodules_cloned(src)
     for path in git_ls_files(src):
         # git ls-files does not list directories. Yield parent first to prevent
         # creating files in non-existing directories. Also check if it is
@@ -121,6 +135,14 @@ def _duplicate_git_tree(src: Filepath, dest: Filepath
 
         # Yield the actual file if the directory has already been yielded.
         src_path = os.path.join(src, path)
+        if not os.path.exists(src_path):
+            raise FileNotFoundError(
+                f"{path} from git repository {src} is checked in in git, "
+                f"but not present in the filesystem. If the file was removed, "
+                f"its removal can be recorded in git with "
+                f"\"git -C '{src}' rm '{path}'\". "
+                f"Removal can be reversed with "
+                f"\"git -C '{src}' checkout '{path}'\".")
         dest_path = os.path.join(dest, path)
         yield src_path, dest_path, False
 
@@ -144,14 +166,16 @@ def duplicate_tree(src: Filepath, dest: Filepath,
         raise NotADirectoryError(f"Not a directory: '{src}'")
 
     if git_aware:
-        path_iter = _duplicate_git_tree(src, dest)
+        path_iter = _recurse_git_repository_tree(src, dest)
     else:
-        path_iter = _duplicate_tree(src, dest)
+        path_iter = _recurse_directory_tree(src, dest)
     if symlink:
         copy: Callable[[Filepath, Filepath], None] = \
             functools.partial(os.symlink, target_is_directory=False)
     else:
-        copy = shutil.copy2  # Preserves metadata, also used by shutil.copytree
+        # shutil.copy2 preserves metadata, also used by shutil.copytree
+        # follow_symlinks False to directly copy links
+        copy = functools.partial(shutil.copy2, follow_symlinks=False)
 
     os.makedirs(dest, exist_ok=False)
     for src_path, dest_path, is_dir in path_iter:
@@ -180,7 +204,7 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-    hasher = hashlib.md5()  # nosec: only used for file integrity
+    hasher = hashlib.md5()
     with filepath.open('rb') as file_handler:  # Read the file in bytes
         for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
