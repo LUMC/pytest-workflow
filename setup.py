@@ -20,7 +20,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="pytest-workflow",
-    version="1.7.0-dev",
+    version="2.0.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",

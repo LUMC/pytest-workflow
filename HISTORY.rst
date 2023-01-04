@@ -7,8 +7,13 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 2.0.0-dev
+version 2.0.0
 ---------------------------
+This major release greatly cleans up the output of pytest-workflow in case of
+an error as well as providing the stderr and stdout last bytes for debugging
+purposes. When the exit code test fails all other tests from the workflow
+are skipped.
+
 + Python 3.6 is no longer supported. It has been removed from github actions,
   as such we can no longer guarantee that pytest-workflow works properly
   with python 3.6.
