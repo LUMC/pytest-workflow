@@ -91,7 +91,7 @@ jobs:
       - name: Install conda
         uses: conda-incubator/setup-miniconda@v2.0.1 # https://github.com/conda-incubator/setup-miniconda.
         with:
-          channels: conda-forge,defaults
+          channels: conda-forge,bioconda,defaults
           installer-url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
           channel-priority: true
 
