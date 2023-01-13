@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 
+import textwrap
+
+from pytest import ExitCode
+
 from .test_success_messages import SIMPLE_ECHO
 
 
@@ -27,3 +31,13 @@ def test_same_name_different_files(pytester):
     conflicting_message = (
         "Conflicting tests: test_b.yml::simple echo, test_a.yml::simple echo.")
     assert conflicting_message in result.stdout.str()
+
+
+def test_non_ascii_logs_stderr_bytes(pytester):
+    test = textwrap.dedent("""
+    - name: print non-ascii
+      command: bash -c 'printf èèèèèèèèè && exit 1'
+    """)
+    pytester.makefile(".yml", test_non_ascii=test)
+    result = pytester.runpytest("--stderr-bytes", "7")
+    assert result.ret == ExitCode.TESTS_FAILED

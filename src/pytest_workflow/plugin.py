@@ -30,7 +30,8 @@ import yaml
 from .content_tests import ContentTestCollector
 from .file_tests import FileTestCollector
 from .schema import WorkflowTest, workflow_tests_from_schema
-from .util import duplicate_tree, is_in_dir, replace_whitespace
+from .util import (decode_unaligned, duplicate_tree, is_in_dir,
+                   replace_whitespace)
 from .workflow import Workflow, WorkflowQueue
 
 
@@ -450,7 +451,10 @@ class WorkflowTestsCollector(pytest.Collector):
         tests += [ExitCodeTest.from_parent(
             parent=self,
             workflow=workflow,
-            stderr_bytes=self.config.getoption("stderr_bytes"))]
+            stderr_bytes=self.config.getoption("stderr_bytes"),
+            stdout_encoding=self.workflow_test.stdout.encoding,
+            stderr_encoding=self.workflow_test.stderr.encoding,
+        )]
 
         tests += [
             FileTestCollector.from_parent(
@@ -476,11 +480,16 @@ class WorkflowTestsCollector(pytest.Collector):
 
 class ExitCodeTest(pytest.Item):
     def __init__(self, parent: pytest.Collector,
-                 workflow: Workflow, stderr_bytes: int):
+                 workflow: Workflow,
+                 stderr_bytes: int,
+                 stdout_encoding: Optional[str] = None,
+                 stderr_encoding: Optional[str] = None):
         name = f"exit code should be {workflow.desired_exit_code}"
         super().__init__(name, parent=parent)
         self.stderr_bytes = stderr_bytes
         self.workflow = workflow
+        self.stdout_encoding = stdout_encoding
+        self.stderr_encoding = stderr_encoding
 
     def runtest(self):
         # workflow.exit_code waits for workflow to finish.
@@ -489,16 +498,21 @@ class ExitCodeTest(pytest.Item):
     def repr_failure(self, excinfo, style=None):
         standerr = self.workflow.stderr_file
         standout = self.workflow.stdout_file
-        with open(standout, "rb") as standout_file, \
-             open(standerr, "rb") as standerr_file:
-            if os.path.getsize(standerr) >= self.stderr_bytes:
-                standerr_file.seek(-self.stderr_bytes, os.SEEK_END)
+
+        with open(standout, "rb") as standout_file:
             if os.path.getsize(standout) >= self.stderr_bytes:
                 standout_file.seek(-self.stderr_bytes, os.SEEK_END)
-            message = (f"'{self.workflow.name}' exited with exit code " +
-                       f"'{self.workflow.exit_code}' instead of "
-                       f"'{self.workflow.desired_exit_code}'.\nstderr: "
-                       f"{standerr_file.read().strip().decode('utf-8')}"
-                       f"\nstdout: "
-                       f"{standout_file.read().strip().decode('utf-8')}")
-        return message
+            stdout_text = decode_unaligned(standout_file.read().strip(),
+                                           encoding=self.stdout_encoding)
+        with open(standerr, "rb") as standerr_file:
+            if os.path.getsize(standerr) >= self.stderr_bytes:
+                standerr_file.seek(-self.stderr_bytes, os.SEEK_END)
+            stderr_text = decode_unaligned(standerr_file.read().strip(),
+                                           encoding=self.stderr_encoding)
+
+        return (
+            f"'{self.workflow.name}' exited with exit code " +
+            f"'{self.workflow.exit_code}' instead of "
+            f"'{self.workflow.desired_exit_code}'.\n"
+            f"stderr: {stderr_text}\n"
+            f"stdout: {stdout_text}")

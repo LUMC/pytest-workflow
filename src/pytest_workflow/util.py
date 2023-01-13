@@ -7,7 +7,7 @@ import subprocess
 import sys
 import warnings
 from pathlib import Path
-from typing import Callable, Iterator, List, Set, Tuple, Union
+from typing import Callable, Iterator, List, Optional, Set, Tuple, Union
 
 Filepath = Union[str, os.PathLike]
 
@@ -209,3 +209,17 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
         for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
     return hasher.hexdigest()
+
+
+def decode_unaligned(data: bytes, encoding: Optional[str] = None):
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+    for offset in range(4):
+        try:
+            decoded = data[offset:].decode(encoding=encoding, errors="strict")
+            return decoded
+        except UnicodeDecodeError:
+            continue
+    # When no return happens in the loop, decode again. This will throw an
+    # error that is not caught and shown to the user.
+    return data.decode(encoding=encoding)

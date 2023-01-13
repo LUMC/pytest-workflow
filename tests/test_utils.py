@@ -14,16 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
 import hashlib
+import itertools
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
 import pytest
 
-from pytest_workflow.util import duplicate_tree, file_md5sum, \
-    git_check_submodules_cloned, git_root, \
+from pytest_workflow.util import decode_unaligned, duplicate_tree, \
+    file_md5sum, git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -227,3 +229,20 @@ def test_duplicate_git_tree_submodule_symlinks(git_repo_with_submodules):
     assert link.exists()
     assert link.is_symlink()
     assert link.resolve() == dest / "bird" / "sub"
+
+
+@pytest.mark.parametrize(["offset", "encoding"],
+                         list(itertools.product(
+                             range(4), (None, "utf-8", "utf-16", "utf-32"))
+                         ))
+def test_decode_unaligned(offset, encoding):
+    string = "èèèèèèèèèèè"
+    data = string.encode(encoding or sys.getdefaultencoding())
+    decoded = decode_unaligned(data[offset:], encoding)
+    assert string.endswith(decoded)
+
+
+def test_decode_unaligned_wrong_encoding_throws_error():
+    data = "hello".encode("utf-8")
+    with pytest.raises(UnicodeDecodeError):
+        decode_unaligned(data, "utf-32-le")
