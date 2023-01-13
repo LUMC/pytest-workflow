@@ -1,30 +1,31 @@
 #!/usr/bin/env nextflow
 
-# Copyright (C) 2018 Leiden University Medical Center
-# This file is part of pytest-workflow
-#
-# pytest-workflow is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Affero General Public License as
-# published by the Free Software Foundation, either version 3 of the
-# License, or (at your option) any later version.
-#
-# pytest-workflow is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Affero General Public License for more details.
-#
-# You should have received a copy of the GNU Affero General Public License
-# along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+/* Copyright (C) 2018 Leiden University Medical Center
+   This file is part of pytest-workflow
 
-# Nextflow using the Snakemake test file as example.
-# Just a simple dummy pipeline that reads some data from /dev/urandom,
-# and does some transformations on it.
+   pytest-workflow is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as
+   published by the Free Software Foundation, either version 3 of the
+   License, or (at your option) any later version.
+
+   pytest-workflow is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+*/
+
+/* Nextflow using the Snakemake test file as example.
+   Just a simple dummy pipeline that reads some data from /dev/urandom,
+  and does some transformations on it. */
 
 params.N_LINES_TO_READ = 5
 
 process read_random {
 	publishDir = [
-                path: { "${params.outdir}/rand'}
+                path: { "${params.outdir}/rand" }
         ]
 		
 	input:
@@ -40,7 +41,7 @@ process read_random {
 
 process base64_random {
 	publishDir = [
-                path: { "${params.outdir}/b64'}
+                path: { "${params.outdir}/b64" }
         ]
 
 	input:
@@ -57,7 +58,7 @@ process base64_random {
 
 process gzip_b64 {
 	publishDir = [
-                path: { "${params.outdir}/randgz'}
+                path: { "${params.outdir}/randgz" }
         ]
 
 	input:
@@ -73,7 +74,7 @@ process gzip_b64 {
 
 process concat_gzip {
 	publishDir = [
-                path: { "${params.outdir}'}
+                path: { "${params.outdir}" }
         ]
 
 	input:
