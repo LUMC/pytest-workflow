@@ -25,7 +25,7 @@ params.N_LINES_TO_READ = 5
 
 process read_random {
 	publishDir = [
-                path: { "${params.outdir}/rand'}
+                path: { "${params.outdir}/rand" }
         ]
 		
 	input:
@@ -41,7 +41,7 @@ process read_random {
 
 process base64_random {
 	publishDir = [
-                path: { "${params.outdir}/b64'}
+                path: { "${params.outdir}/b64" }
         ]
 
 	input:
@@ -58,7 +58,7 @@ process base64_random {
 
 process gzip_b64 {
 	publishDir = [
-                path: { "${params.outdir}/randgz'}
+                path: { "${params.outdir}/randgz" }
         ]
 
 	input:
@@ -74,7 +74,7 @@ process gzip_b64 {
 
 process concat_gzip {
 	publishDir = [
-                path: { "${params.outdir}'}
+                path: { "${params.outdir}" }
         ]
 
 	input:
