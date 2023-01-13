@@ -18,6 +18,7 @@ import itertools
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -231,7 +232,11 @@ def test_duplicate_git_tree_submodule_symlinks(git_repo_with_submodules):
 
 
 @pytest.mark.parametrize(["offset", "encoding"],
-                         itertools.product(range(4),
-                                           ("utf-8", "utf-16", "utf-32")))
+                         list(itertools.product(
+                             range(4), (None, "utf-8", "utf-16", "utf-32"))
+                         ))
 def test_decode_unaligned(offset, encoding):
     string = "èèèèèèèèèèè"
+    data = string.encode(encoding or sys.getdefaultencoding())
+    decoded = decode_unaligned(data[offset:], encoding)
+    assert string.endswith(decoded)

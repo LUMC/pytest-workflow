@@ -212,6 +212,8 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
 
 
 def decode_unaligned(data: bytes, encoding: Optional[str] = None):
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
     for offset in range(4):
         try:
             decoded = data[offset:].decode(encoding=encoding, errors="strict")
