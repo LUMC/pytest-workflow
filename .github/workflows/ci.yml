@@ -62,7 +62,6 @@ jobs:
 
   test-functional-python-tools:
     runs-on: ubuntu-latest
-    needs: lint
     strategy:
       matrix:
         python-version: ["3.7"]
@@ -83,7 +82,6 @@ jobs:
 
   test-functional-other:
     runs-on: ubuntu-latest
-    needs: lint
     strategy:
       matrix:
         test-program: [ cromwell, nextflow ]
