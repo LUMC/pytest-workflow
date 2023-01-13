@@ -218,7 +218,7 @@ def decode_unaligned(data: bytes, encoding: Optional[str] = None):
         try:
             decoded = data[offset:].decode(encoding=encoding, errors="strict")
             return decoded
-        except UnicodeDecodeError as e:
+        except UnicodeDecodeError:
             continue
     # When no return happens in the loop, decode again. This will throw an
     # error that is not caught and shown to the user.
