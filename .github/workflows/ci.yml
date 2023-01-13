@@ -92,7 +92,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2.0.1 # https://github.com/conda-incubator/setup-miniconda.
         with:
           channels: conda-forge,defaults
-          mamba-version: "*"
+          installer-url: https://github.com/conda-forge/miniforge/releases/latest/download/Mambaforge-Linux-x86_64.sh
           channel-priority: true
 
       - name: Install test program and tox
