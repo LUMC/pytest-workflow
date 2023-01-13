@@ -16,7 +16,10 @@
 
 import textwrap
 
+from pytest import ExitCode
+
 from .test_success_messages import SIMPLE_ECHO
+
 
 def test_same_name_different_files(pytester):
     pytester.makefile(".yml", test_a=SIMPLE_ECHO)
@@ -37,5 +40,4 @@ def test_non_ascii_logs_stderr_bytes(pytester):
     """)
     pytester.makefile(".yml", test_non_ascii=test)
     result = pytester.runpytest("--stderr-bytes", "7")
-    assert result.ret != 0
-    assert not "DecodeError" in result.stdout.str()
+    assert result.ret == ExitCode.TESTS_FAILED
