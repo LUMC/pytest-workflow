@@ -240,3 +240,9 @@ def test_decode_unaligned(offset, encoding):
     data = string.encode(encoding or sys.getdefaultencoding())
     decoded = decode_unaligned(data[offset:], encoding)
     assert string.endswith(decoded)
+
+
+def test_decode_unaligned_wrong_encoding_throws_error():
+    data = "hello".encode("utf-8")
+    with pytest.raises(UnicodeDecodeError):
+        decode_unaligned(data, "utf-32-le")
