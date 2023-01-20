@@ -161,7 +161,7 @@ points to the folder where the named workflow was executed. This allows writing
 of advanced python tests for each file produced by the workflow.
 
 Custom tests must follow the `conventions for Python test discovery
-<https://docs.pytest.org/en/7.2.x/explanation/goodpractices.html#conventions-for-python-test-discovery>`_,
+<https://docs.pytest.org/en/latest/explanation/goodpractices.html#conventions-for-python-test-discovery>`_,
 which constrains the names of files and functions containing custom tests.
 
 .. note::
