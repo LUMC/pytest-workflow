@@ -20,6 +20,7 @@ import pytest
 SIMPLE_WDL_YAML = Path(__file__).parent / "simple_wdl_test_cases.yml"
 SNAKEFILE_YAML = Path(__file__).parent / "simple_snakefile_test_cases.yml"
 NEXTFLOW_YAML = Path(__file__).parent / "simple_nextflow_test_cases.yml"
+BASH_YAML = Path(__file__).parent / "simple_bash_test_cases.yml"
 PIPELINE_DIR = Path(__file__).parent.parent / "pipelines"
 SIMPLE_WDL = Path(PIPELINE_DIR, "wdl", "simple.wdl")
 SIMPLE_WDL_JSON = Path(PIPELINE_DIR, "wdl", "simple.json")
@@ -68,3 +69,22 @@ def test_nextflow(pytester):
     pytester.makefile(ext=".yml", test_nextflow=NEXTFLOW_YAML.read_text())
     result = pytester.runpytest("-v", "--keep-workflow-wd-on-fail")
     assert result.ret == 0
+
+
+@pytest.mark.functional
+def test_bash(pytester):
+    pytester.makefile(ext=".yml", test_bash=BASH_YAML.read_text())
+    pytester.maketxtfile(expected="some\nexpected\noutput")
+    result = pytester.runpytest("-v", "--keep-workflow-wd-on-fail")
+    assert result.ret == 0
+
+
+@pytest.mark.functional
+def test_bash_with_diff(pytester):
+    pytester.makefile(ext=".yml", test_bash=BASH_YAML.read_text())
+    pytester.maketxtfile(expected="some\nunexpected\noutput")
+    result = pytester.runpytest("-v", "--keep-workflow-wd-on-fail")
+    assert result.ret == 1
+    assert "differs from" in result.stdout.str()
+    assert "-unexpected" in result.stdout.str()
+    assert "+expected" in result.stdout.str()

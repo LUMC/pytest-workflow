@@ -1,3 +1,4 @@
+import difflib
 import functools
 import hashlib
 import os
@@ -200,7 +201,7 @@ def link_tree(src: Filepath, dest: Filepath) -> None:
 def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     """
     Generates a md5sum for a file. Reads file in blocks to save memory.
-    :param filepath: a pathlib. Path to the file
+    :param filepath: a pathlib.Path to the file
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
@@ -209,6 +210,38 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
         for block in iter(lambda: file_handler.read(block_size), b''):
             hasher.update(block)
     return hasher.hexdigest()
+
+
+def file_diff(first_filepath: Path, second_filepath: Path,
+              encoding: Optional[str] = None,
+              max_lines: int = 20) -> Optional[str]:
+    """
+    Generates a diff between two files.
+    :param first_filepath: a pathlib.Path to the first file
+    :param second_filepath: a pathlib.Path to the second file
+    :param encoding: a pathlib.Path to the second file.
+    :param max_lines: maximum number of diff lines to include
+    :return: a unified diff of the two files, or None if they are identical
+    """
+    if encoding is None:
+        encoding = sys.getdefaultencoding()
+
+    with first_filepath.open('r', encoding=encoding) as first_file_handler:
+        first_lines = first_file_handler.read().splitlines()
+    with second_filepath.open('r', encoding=encoding) as second_file_handler:
+        second_lines = second_file_handler.read().splitlines()
+
+    diff_lines = list(difflib.unified_diff(
+        first_lines, second_lines,
+        fromfile=str(first_filepath),
+        tofile=str(second_filepath),
+        lineterm=''
+    ))
+    if len(diff_lines) > max_lines:
+        diff_lines = diff_lines[:max_lines]
+        diff_lines.append('[...]')
+
+    return '\n'.join(diff_lines) if diff_lines else None
 
 
 def decode_unaligned(data: bytes, encoding: Optional[str] = None):

@@ -1,0 +1,5 @@
+- name: simple bash test case
+  command: bash -c "echo -e 'some\nexpected\noutput' > out.txt"
+  files:
+    - path: out.txt
+      diff: expected.txt

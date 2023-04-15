@@ -120,6 +120,9 @@
               "type": "string",
               "pattern": "^[a-f0-9]{32}$"
             },
+            "diff": {
+              "type": "string"
+            },
             "should_exist": {
               "type": "boolean"
             },

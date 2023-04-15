@@ -88,7 +88,8 @@ def validate_schema(instance):
                                               DEFAULT_FILE_SHOULD_EXIST)
 
             if not file_should_exist:
-                for check in ["md5sum", "contains", "must_not_contain"]:
+                for check in ["md5sum", "diff", "contains",
+                              "must_not_contain"]:
                     if check in keys:
                         raise jsonschema.ValidationError(
                             f"Content checking not allowed on non existing "
@@ -125,6 +126,7 @@ class ContentTest(object):
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
     def __init__(self, path: str, md5sum: Optional[str] = None,
+                 diff: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None,
@@ -135,6 +137,7 @@ class FileTest(ContentTest):
         A container object
         :param path: the path to the file
         :param md5sum: md5sum of the file contents
+        :param diff: the path to a file to diff against
         :param should_exist: whether the file should exist or not
         :param contains: a list of strings that should be present in the file
         :param must_not_contain: a list of strings that should not be present
@@ -150,6 +153,7 @@ class FileTest(ContentTest):
                          encoding=encoding)
         self.path = Path(path)
         self.md5sum = md5sum
+        self.diff = Path(diff) if diff else None
         self.should_exist = should_exist
 
 

@@ -20,12 +20,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 from pathlib import Path
 
 import pytest
 
 from pytest_workflow.util import decode_unaligned, duplicate_tree, \
-    file_md5sum, git_check_submodules_cloned, git_root, \
+    file_diff, file_md5sum, git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -161,6 +162,52 @@ def test_file_md5sum(hash_file: Path):
     whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5
+
+
+DIFF_FILE_DIR = Path(__file__).parent / "diff_files"
+
+
+@pytest.mark.parametrize("diff_file", DIFF_FILE_DIR.iterdir())
+def test_file_diff_identity(diff_file: Path):
+    # file should diff cleanly against itself
+    assert file_diff(diff_file, diff_file) is None
+
+
+HASH_README = HASH_FILE_DIR / "README.md"
+DIFF_README = DIFF_FILE_DIR / "README.md"
+# note there are meaningful whitespace characters in the diff here
+# disabling lints below for blank line and trailing whitespace
+DIFF_EXPECTED = f"""\
+--- {HASH_README}
++++ {DIFF_README}
+@@ -1,7 +1,8 @@
+-These are files that are used to test the internal hashing function of pytest-
++These are files that are used to test the internal diffing function of pytest-
+ workflow.
+
+ A link to the license is present because it contains ample text to check and
+ we do not need to distribute another file in the git repo.
+
+-The gzipped file tests the function on binary data.
++This README can be compared to the other READMEs in tests/*/README.md to
++test comparison of similar but non-identical files.\
+"""
+
+
+def test_file_diff_readmes():
+    # remove extra whitespace from the diff output with textwrap.dedent so
+    # we don't have to include hidden whitespace characters in DIFF_EXPECTED
+    diff_output = textwrap.dedent(file_diff(HASH_README, DIFF_README))
+    assert diff_output == DIFF_EXPECTED
+
+
+def test_file_diff_max_lines():
+    max_lines = 4
+
+    diff_output = file_diff(HASH_README, DIFF_README, max_lines=max_lines)
+    # for truncated diffs the output should be of length max_lines plus
+    # a line added to indicate the output was truncated
+    assert len(diff_output.splitlines()) == max_lines + 1
 
 
 def create_git_repo(path):

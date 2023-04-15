@@ -32,9 +32,9 @@ pytest-workflow
   :target: https://doi.org/10.5281/zenodo.3757727
   :alt: More information on how to cite pytest-workflow here.
 
-pytest-workflow is a workflow-system agnostic testing framework that aims 
-to make pipeline/workflow testing easy by using YAML files for the test 
-configuration. Whether you write your pipelines in WDL, snakemake, nextflow, 
+pytest-workflow is a workflow-system agnostic testing framework that aims
+to make pipeline/workflow testing easy by using YAML files for the test
+configuration. Whether you write your pipelines in WDL, snakemake, nextflow,
 bash or any other workflow framework, pytest-workflow makes testing easy.
 pytest-workflow is build on top of the pytest test framework.
 
@@ -54,12 +54,12 @@ Pytest-workflow requires Python 3.7 or higher. It is tested on Python 3.7,
 
 Pytest-workflow is also available as a `conda package on conda-forge
 <https://anaconda.org/conda-forge/pytest-workflow>`_. Follow
-`these instructions 
-<http://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge>`_ 
+`these instructions
+<http://conda-forge.org/docs/user/introduction.html#how-can-i-install-packages-from-conda-forge>`_
 to set up channels properly in order to use conda-forge. Alternatively,
-you can `set up the channels correctly for use with bioconda 
+you can `set up the channels correctly for use with bioconda
 <https://bioconda.github.io/index.html#set-up-channels>`_. After that ``conda
-install pytest-workflow`` can be used to install pytest-workflow. 
+install pytest-workflow`` can be used to install pytest-workflow.
 
 Quickstart
 ==========
@@ -144,6 +144,12 @@ predefined tests as well as custom tests are possible.
       must_not_contain_regex:          # A list of regex patterns that should not be in stdout (optional)
         - '^He.*'                      # This will fail, since the regex matches Hello, world
         - '^Hello .*'                  # Complex regexes will break yaml if double quotes are used
+
+  - name: diff tests
+    command: echo moo
+    files:
+      - path: "sound.txt"
+        diff: "cow.txt"                 # Path to another file to diff against (optional)
 
 For more information on how Python parses regular expressions, see the `Python
 documentation <https://docs.python.org/3/library/re.html>`_.

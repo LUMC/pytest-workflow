@@ -1,0 +1,5 @@
+- name: "Some random valid test"
+  command: "bla"
+  files:
+    - path: "bladiebla"
+      diff: "path/to/expected/contents"
