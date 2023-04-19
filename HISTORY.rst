@@ -9,7 +9,8 @@ Changelog
 
 version 2.1.0-dev
 ---------------------------
-* Document naming conventions for Python test discovery
++ Enable the checking of file diffs
++ Document naming conventions for Python test discovery
 
 version 2.0.1
 ---------------------------
