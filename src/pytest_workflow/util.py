@@ -214,14 +214,14 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
 
 def file_diff(first_filepath: Path, second_filepath: Path,
               encoding: Optional[str] = None,
-              max_lines: int = 20) -> Optional[str]:
+              max_lines: int = 20) -> str:
     """
     Generates a diff between two files.
     :param first_filepath: a pathlib.Path to the first file
     :param second_filepath: a pathlib.Path to the second file
     :param encoding: a pathlib.Path to the second file.
     :param max_lines: maximum number of diff lines to include
-    :return: a unified diff of the two files, or None if they are identical
+    :return: a unified diff of the two files
     """
     if encoding is None:
         encoding = sys.getdefaultencoding()
@@ -231,17 +231,20 @@ def file_diff(first_filepath: Path, second_filepath: Path,
     with second_filepath.open('r', encoding=encoding) as second_file_handler:
         second_lines = second_file_handler.read().splitlines()
 
-    diff_lines = list(difflib.unified_diff(
+    diff_lines = difflib.unified_diff(
         first_lines, second_lines,
         fromfile=str(first_filepath),
         tofile=str(second_filepath),
         lineterm=''
-    ))
-    if len(diff_lines) > max_lines:
-        diff_lines = diff_lines[:max_lines]
-        diff_lines.append('[...]')
+    )
+    shortened_diff_lines = [line for _, line in zip(range(max_lines), diff_lines)]
+    try:  # Check if the diff has more lines
+        next(diff_lines)
+        shortened_diff_lines.append('[...]')
+    except StopIteration:
+        pass
 
-    return '\n'.join(diff_lines) if diff_lines else None
+    return '\n'.join(shortened_diff_lines)
 
 
 def decode_unaligned(data: bytes, encoding: Optional[str] = None):

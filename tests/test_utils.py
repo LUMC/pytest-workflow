@@ -170,7 +170,7 @@ DIFF_FILE_DIR = Path(__file__).parent / "diff_files"
 @pytest.mark.parametrize("diff_file", DIFF_FILE_DIR.iterdir())
 def test_file_diff_identity(diff_file: Path):
     # file should diff cleanly against itself
-    assert file_diff(diff_file, diff_file) is None
+    assert not file_diff(diff_file, diff_file)
 
 
 HASH_README = HASH_FILE_DIR / "README.md"

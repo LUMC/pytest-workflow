@@ -194,7 +194,7 @@ class FileDiff(pytest.Item):
             self.expected_path, self.filepath,
             encoding=self.parent.filetest.encoding
         )
-        assert self.observed_diff is None
+        assert not self.observed_diff
 
     def repr_failure(self, excinfo, style=None):
         return (
