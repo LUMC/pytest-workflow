@@ -83,7 +83,7 @@ REGEX_FILE = textwrap.dedent("""\
 
 DIFF_FILE = textwrap.dedent("""\
 - name: diff
-  command: "bash -c 'echo moo > moo.txt'"
+  command: "bash -c 'echo -n moo > moo.txt'"
   files:
     - path: moo.txt
       diff: cow.txt
@@ -130,7 +130,7 @@ def succeeding_tests_output(tmp_path_factory: pytest.TempPathFactory):
         file_handler.write(SUCCEEDING_TESTS_YAML)
     diff_file = Path(tempdir, "cow.txt")
     with diff_file.open("w") as file_handler:
-        file_handler.writelines(["moo"])
+        file_handler.write("moo")
     process_out = subprocess.run(args=["pytest", "-v"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
@@ -151,6 +151,7 @@ def test_message_success_no_errors_or_fails(succeeding_tests_output):
 
 def test_message_directory_kept_no_errors_or_fails(pytester):
     pytester.makefile(".yml", test=SUCCEEDING_TESTS_YAML)
+    pytester.maketxtfile(cow="moo")
     result = pytester.runpytest("-v", "--keep-workflow-wd")
     assert "ERROR" not in result.stdout.str()
     assert "FAIL" not in result.stdout.str()
