@@ -171,7 +171,7 @@ class FileDiff(pytest.Item):
         :param expected_path: The path to diff filepath against
         :param workflow: The workflow running to generate the file
         """
-        name = "diff"
+        name = f"diffs against '{expected_path.name}'"
         super().__init__(name, parent)
         self.filepath = filepath
         self.expected_path = expected_path
