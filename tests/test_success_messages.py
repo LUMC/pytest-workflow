@@ -81,8 +81,16 @@ REGEX_FILE = textwrap.dedent("""\
       - "Hello.*world!"
 """)
 
+DIFF_FILE = textwrap.dedent("""\
+- name: diff
+  command: "bash -c 'echo moo > moo.txt'"
+  files:
+    - path: moo.txt
+      diff: cow.txt
+""")
+
 SUCCEEDING_TESTS_YAML = (MOO_FILE + SIMPLE_ECHO + FAILING_GREP + ZIPPED_FILE +
-                         REGEX_FILE)
+                         REGEX_FILE + DIFF_FILE)
 
 SUCCESS_MESSAGES = [
     ["test_succeeding.yml::moo file::exit code should be 0 PASSED"],
@@ -104,7 +112,8 @@ SUCCESS_MESSAGES = [
     ["test_succeeding.yml::regex::exit code should be 0 PASSED"],
     ["test_succeeding.yml::regex::stdout::contains 'ello' PASSED"],
     ["test_succeeding.yml::regex::stdout::contains '^H.*d$' PASSED"],
-    ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"]  # noqa: E501
+    ["test_succeeding.yml::regex::stdout::does not contain 'Hello.*world!' PASSED"],  # noqa: E501
+    ["test_succeeding.yml::diff::moo.txt::diffs against 'cow.txt' PASSED"]
 ]
 
 
@@ -119,6 +128,9 @@ def succeeding_tests_output(tmp_path_factory: pytest.TempPathFactory):
     test_file = Path(tempdir, "test_succeeding.yml")
     with test_file.open("w") as file_handler:
         file_handler.write(SUCCEEDING_TESTS_YAML)
+    diff_file = Path(tempdir, "cow.txt")
+    with diff_file.open("w") as file_handler:
+        file_handler.writelines(["moo"])
     process_out = subprocess.run(args=["pytest", "-v"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE,
