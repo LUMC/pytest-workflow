@@ -8,7 +8,8 @@ import subprocess
 import sys
 import warnings
 from pathlib import Path
-from typing import BinaryIO, Callable, Iterator, List, Optional, Set, Tuple, Union
+from typing import Callable, IO, Iterator, List, Optional, Set, Tuple, Union, \
+                   cast
 
 Filepath = Union[str, os.PathLike]
 
@@ -218,10 +219,10 @@ def gzip_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     :return: a md5sum as hexadecimal string.
     """
     with gzip.open(filepath) as file_handler:  # Read the file in bytes
-        return file_handle_md5sum(file_handler, block_size)
+        return file_handle_md5sum(cast(IO[bytes], file_handler), block_size)
 
 
-def file_handle_md5sum(file_handler: BinaryIO, block_size) -> str:
+def file_handle_md5sum(file_handler: IO[bytes], block_size) -> str:
     """
     Generates a md5sum for a file handle. Reads file in blocks to save memory.
     :param file_handler: a readable binary file handler
