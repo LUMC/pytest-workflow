@@ -22,7 +22,7 @@ import pytest
 
 from .content_tests import ContentTestCollector
 from .schema import FileTest
-from .util import file_md5sum
+from .util import file_md5sum, gzip_md5sum
 from .workflow import Workflow
 
 
@@ -76,7 +76,16 @@ class FileTestCollector(pytest.Collector):
                 parent=self,
                 filepath=filepath,
                 md5sum=self.filetest.md5sum,
-                workflow=self.workflow)]
+                workflow=self.workflow,
+                ungzip=False)]
+
+        if self.filetest.ungzip_md5sum:
+            tests += [FileMd5.from_parent(
+                parent=self,
+                filepath=filepath,
+                md5sum=self.filetest.ungzip_md5sum,
+                workflow=self.workflow,
+                ungzip=True)]
 
         return tests
 
@@ -119,20 +128,22 @@ class FileExists(pytest.Item):
 
 class FileMd5(pytest.Item):
     def __init__(self, parent: pytest.Collector, filepath: Path,
-                 md5sum: str, workflow: Workflow):
+                 md5sum: str, workflow: Workflow, ungzip: bool):
         """
         Create a tests for the file md5sum.
         :param parent: The collector that started this item
         :param filepath: The path to the file
         :param md5sum:  The expected md5sum
         :param workflow: The workflow running to generate the file
+        :param ungzip: Whether the file should be ungzipped before calculating
         """
-        name = "md5sum"
+        name = "unzip_md5sum" if ungzip else "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
         self.expected_md5sum = md5sum
         self.observed_md5sum = None
         self.workflow = workflow
+        self.ungzip = ungzip
 
     def runtest(self):
         # Wait for the workflow to finish before we check the md5sum of a file.
@@ -140,11 +151,14 @@ class FileMd5(pytest.Item):
         if not self.workflow.matching_exitcode():
             pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
                         f"desired exit code.")
-        self.observed_md5sum = file_md5sum(self.filepath)
+        sum_func = gzip_md5sum if self.ungzip else file_md5sum
+        self.observed_md5sum = sum_func(self.filepath)
         assert self.observed_md5sum == self.expected_md5sum
 
     def repr_failure(self, excinfo, style=None):
+        metric = "ungzip_md5sum" if self.ungzip else "md5sum"
         return (
-            f"Observed md5sum '{self.observed_md5sum}' not equal to expected "
-            f"md5sum '{self.expected_md5sum}' for file '{self.filepath}'"
-        )
+            f"Observed {metric} '{self.observed_md5sum}' not equal to "
+            f"expected {metric} '{self.expected_md5sum}' for file "
+            f"'{self.filepath}'"
+         )

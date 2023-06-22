@@ -9,7 +9,10 @@ Changelog
 
 version 2.1.0-dev
 ---------------------------
-* Document naming conventions for Python test discovery
++ Add md5sum checking on unzipped contents of gzipped output files. Gzipped
+  files contain a timestamp which makes it hard to directly compare the md5sums
+  of gzipped files.
++ Document naming conventions for Python test discovery
 
 version 2.0.1
 ---------------------------

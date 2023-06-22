@@ -1,4 +1,5 @@
 import functools
+import gzip
 import hashlib
 import os
 import re
@@ -7,7 +8,7 @@ import subprocess
 import sys
 import warnings
 from pathlib import Path
-from typing import Callable, Iterator, List, Optional, Set, Tuple, Union
+from typing import BinaryIO, Callable, Iterator, List, Optional, Set, Tuple, Union
 
 Filepath = Union[str, os.PathLike]
 
@@ -204,10 +205,32 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-    hasher = hashlib.md5()
     with filepath.open('rb') as file_handler:  # Read the file in bytes
-        for block in iter(lambda: file_handler.read(block_size), b''):
-            hasher.update(block)
+        return file_handle_md5sum(file_handler, block_size)
+
+
+def gzip_md5sum(filepath: Path, block_size=64 * 1024) -> str:
+    """
+    Generates a md5sum for the uncompressed contents of gzipped file.
+    Reads file in blocks to save memory.
+    :param filepath: a pathlib. Path to the gzipped file
+    :param block_size: Block size in bytes
+    :return: a md5sum as hexadecimal string.
+    """
+    with gzip.open(filepath) as file_handler:  # Read the file in bytes
+        return file_handle_md5sum(file_handler, block_size)
+
+
+def file_handle_md5sum(file_handler: BinaryIO, block_size) -> str:
+    """
+    Generates a md5sum for a file handle. Reads file in blocks to save memory.
+    :param file_handler: a readable binary file handler
+    :param block_size: Block size in bytes
+    :return: a md5sum as hexadecimal string.
+    """
+    hasher = hashlib.md5()
+    for block in iter(lambda: file_handler.read(block_size), b''):
+        hasher.update(block)
     return hasher.hexdigest()
 
 
