@@ -137,7 +137,7 @@ class FileMd5(pytest.Item):
         :param workflow: The workflow running to generate the file
         :param ungzip: Whether the file should be ungzipped before calculating
         """
-        name = "unzip_md5sum" if ungzip else "md5sum"
+        name = "ungzip_md5sum" if ungzip else "md5sum"
         super().__init__(name, parent)
         self.filepath = filepath
         self.expected_md5sum = md5sum

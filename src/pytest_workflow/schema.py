@@ -136,7 +136,7 @@ class FileTest(ContentTest):
         A container object
         :param path: the path to the file
         :param md5sum: md5sum of the file contents
-        :param unzip_md5sum: md5sum of the unzipped file contents
+        :param ungzip_md5sum: md5sum of the unzipped file contents
         :param should_exist: whether the file should exist or not
         :param contains: a list of strings that should be present in the file
         :param must_not_contain: a list of strings that should not be present
