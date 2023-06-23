@@ -171,7 +171,7 @@ def test_filetest_defaults():
     assert file_test.contains_regex == []
     assert file_test.must_not_contain_regex == []
     assert file_test.md5sum is None
-    assert file_test.ungzip_md5sum is None
+    assert file_test.extract_md5sum is None
     assert file_test.should_exist
 
 

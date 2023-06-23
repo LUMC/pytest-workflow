@@ -1,5 +1,4 @@
 import functools
-import gzip
 import hashlib
 import os
 import re
@@ -10,6 +9,8 @@ import warnings
 from pathlib import Path
 from typing import Callable, IO, Iterator, List, Optional, Set, Tuple, Union, \
                    cast
+
+from xopen import xopen
 
 Filepath = Union[str, os.PathLike]
 
@@ -210,15 +211,15 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
         return file_handle_md5sum(file_handler, block_size)
 
 
-def gzip_md5sum(filepath: Path, block_size=64 * 1024) -> str:
+def extract_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     """
-    Generates a md5sum for the uncompressed contents of gzipped file.
+    Generates a md5sum for the uncompressed contents of compressed file.
     Reads file in blocks to save memory.
-    :param filepath: a pathlib. Path to the gzipped file
+    :param filepath: a pathlib. Path to the compressed file
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-    with gzip.open(filepath) as file_handler:  # Read the file in bytes
+    with xopen(filepath, 'rb') as file_handler:  # Read the file in bytes
         return file_handle_md5sum(cast(IO[bytes], file_handler), block_size)
 
 
