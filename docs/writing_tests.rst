@@ -64,6 +64,7 @@ Test options
       - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
         contains:
           - "starring"
+        extract_md5sum: e27c52f6b5f8152aa3ef58be7bdacc4d   # Md5sum of the uncompressed file (optional)
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
@@ -88,6 +89,12 @@ The above YAML file contains all the possible options for a workflow test.
 Please see the `Python documentation on regular expressions
 <https://docs.python.org/3/library/re.html>`_ to see how Python handles escape
 sequences.
+
+The ``extract_md5sum`` option is used to uncompress a file and then compare
+the md5sum of the uncompressed file with the supplied md5sum. This option is
+particularly useful when testing gzipped files, which may contain a file
+creation timestamp in the gzip header. The supported compressed file
+formats for this option are gzip, bzip2, xz and Zstandard.
 
 .. note::
     Workflow names must be unique. Pytest workflow will crash when multiple

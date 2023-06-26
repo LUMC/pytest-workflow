@@ -54,7 +54,9 @@ setup(
     install_requires=[
         "pytest>=7.0.0",  # To use pathlib Path's in pytest
         "pyyaml",
-        "jsonschema"
+        "jsonschema",
+        "xopen>=1.4.0",
+        "zstandard",
     ],
     # This line makes sure the plugin is automatically loaded when it is
     # installed in the same environment as pytest. No need to configure
