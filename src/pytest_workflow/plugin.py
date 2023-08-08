@@ -21,7 +21,7 @@ import shutil
 import tempfile
 import warnings
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import pytest
 
@@ -474,6 +474,13 @@ class WorkflowTestsCollector(pytest.Collector):
             content_test=self.workflow_test.stderr,
             workflow=workflow,
             content_name=f"'{self.workflow_test.name}': stderr")]
+        
+        expected_files = {filetest.path for filetest in self.workflow_test.files}
+        tests += [
+            UnknownFilesTest.from_parent(
+                parent=self, workflow=workflow, directory=directory, expected_files=expected_files
+            ) for directory in self.workflow_test.fail_if_unknown
+        ]
 
         return tests
 
@@ -516,3 +523,29 @@ class ExitCodeTest(pytest.Item):
             f"'{self.workflow.desired_exit_code}'.\n"
             f"stderr: {stderr_text}\n"
             f"stdout: {stdout_text}")
+
+
+class UnknownFilesTest(pytest.Item):
+    def __init__(self, parent: pytest.Collector,
+                 workflow: Workflow,
+                 directory: Path,
+                 expected_files: Set[Path]):
+        name = f"there should be no unknown files in {directory}"
+        super().__init__(name, parent=parent)
+        self.directory = directory
+        self.workflow = workflow
+        self.expected_files = expected_files
+
+    def runtest(self):
+        # Wait for the workflow process to finish before checking if there are unknown files
+        self.workflow.wait()
+        if not self.workflow.matching_exitcode():
+            pytest.skip(f"'{self.parent.workflow.name}' did not exit with"
+                        f"desired exit code.")
+            
+        assert self.directory.exists(), f"directory to check for unknown files ('{self.directory}') does not exist"
+        assert self.directory.is_dir(), f"directory to check for unknown files ('{self.directory}') is not a directory"
+
+        observed_files = {Path(os.path.join(root, f)) for root, _, filenames in os.walk(self.directory) for f in filenames}
+        extra_files = observed_files - self.expected_files
+        assert extra_files == set(), f"Unknown files were found in '{self.directory}': {extra_files}"

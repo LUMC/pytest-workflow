@@ -164,7 +164,8 @@ class WorkflowTest(object):
                  exit_code: int = DEFAULT_EXIT_CODE,
                  stdout: ContentTest = ContentTest(),
                  stderr: ContentTest = ContentTest(),
-                 files: Optional[List[FileTest]] = None):
+                 files: Optional[List[FileTest]] = None,
+                 fail_if_unknown: Optional[List[str]] = None):
         """
         Create a WorkflowTest object.
         :param name: The name of the test
@@ -173,6 +174,7 @@ class WorkflowTest(object):
         :param stdout: a ContentTest object
         :param stderr: a ContentTest object
         :param files: a list of FileTest objects
+        :param fail_if_unknown: a list of directories which result in failure if they contain unknown files
         """
         self.name = name
         self.command = command
@@ -181,6 +183,7 @@ class WorkflowTest(object):
         self.stderr = stderr
         self.files = files or []
         self.tags = tags or []
+        self.fail_if_unknown = fail_if_unknown or []
 
     @classmethod
     def from_schema(cls, schema: dict):
@@ -195,5 +198,6 @@ class WorkflowTest(object):
             exit_code=schema.get("exit_code", DEFAULT_EXIT_CODE),
             stdout=ContentTest(**schema.get("stdout", {})),
             stderr=ContentTest(**schema.get("stderr", {})),
-            files=test_files
+            files=test_files,
+            fail_if_unknown=schema.get("fail_if_unknown")
         )
