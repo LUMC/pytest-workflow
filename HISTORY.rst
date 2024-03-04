@@ -2,6 +2,12 @@
 Changelog
 ==========
 
+version 2.0.2
+---------------------------
++ Fixed a bug where pytest 8.1+ would raise a ``PluginValidationError`` because
+  the hook ``pytest_collect_file()`` has finally dropped the deprecated
+  argument ``path`` from its specification.
+
 .. Newest changes should be on top.
 
 .. This document is user facing. Please word the changes in such a way
