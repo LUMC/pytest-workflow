@@ -121,7 +121,8 @@ def pytest_collect_file(file_path, parent):
     """Collection hook
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
-    if file_path.suffix in [".yml", ".yaml"] and file_path.name.startswith("test"):
+    if (file_path.suffix in [".yml", ".yaml"] and
+            file_path.name.startswith("test")):
         return YamlFile.from_parent(parent, path=file_path)
     return None
 
