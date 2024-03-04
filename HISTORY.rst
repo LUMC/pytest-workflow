@@ -13,6 +13,13 @@ version 2.0.2
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+version 2.1.0-dev
+---------------------------
++ Add extract_md5sum check on uncompressed contents of compressed output files.
+  Gzipped files contain a timestamp which makes it hard to directly compare the
+  md5sums of gzipped files.
++ Document naming conventions for Python test discovery
+
 version 2.0.1
 ---------------------------
 + Fixed a bug where pytest-workflow would crash on logs that used non-ASCII

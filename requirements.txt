@@ -1,3 +1,5 @@
 pyyaml
 pytest>=7.0.0
 jsonschema
+xopen>=1.7.0
+zstandard

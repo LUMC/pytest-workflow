@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with pytest-workflow.  If not, see <https://www.gnu.org/licenses/
+import gzip
 import hashlib
 import itertools
 import os
@@ -25,7 +26,7 @@ from pathlib import Path
 import pytest
 
 from pytest_workflow.util import decode_unaligned, duplicate_tree, \
-    file_md5sum, git_check_submodules_cloned, git_root, \
+    extract_md5sum, file_md5sum, git_check_submodules_cloned, git_root, \
     is_in_dir, link_tree, replace_whitespace
 
 WHITESPACE_TESTS = [
@@ -160,6 +161,14 @@ HASH_FILE_DIR = Path(__file__).parent / "hash_files"
 def test_file_md5sum(hash_file: Path):
     whole_file_md5 = hashlib.md5(hash_file.read_bytes()).hexdigest()
     per_line_md5 = file_md5sum(hash_file)
+    assert whole_file_md5 == per_line_md5
+
+
+def test_extract_md5sum():
+    hash_file = HASH_FILE_DIR / "LICENSE.gz"
+    with gzip.open(hash_file, "rb") as contents_fh:
+        whole_file_md5 = hashlib.md5(contents_fh.read()).hexdigest()
+    per_line_md5 = extract_md5sum(hash_file)
     assert whole_file_md5 == per_line_md5
 
 
