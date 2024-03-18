@@ -123,6 +123,10 @@
             "should_exist": {
               "type": "boolean"
             },
+            "extract_md5sum": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{32}$"
+            },
             "contains": {
               "type": "array",
               "items": {

@@ -7,7 +7,10 @@ import subprocess
 import sys
 import warnings
 from pathlib import Path
-from typing import Callable, Iterator, List, Optional, Set, Tuple, Union
+from typing import Callable, IO, Iterator, List, Optional, Set, Tuple, Union, \
+                   cast
+
+from xopen import xopen
 
 Filepath = Union[str, os.PathLike]
 
@@ -204,10 +207,32 @@ def file_md5sum(filepath: Path, block_size=64 * 1024) -> str:
     :param block_size: Block size in bytes
     :return: a md5sum as hexadecimal string.
     """
-    hasher = hashlib.md5()
     with filepath.open('rb') as file_handler:  # Read the file in bytes
-        for block in iter(lambda: file_handler.read(block_size), b''):
-            hasher.update(block)
+        return file_handle_md5sum(file_handler, block_size)
+
+
+def extract_md5sum(filepath: Path, block_size=64 * 1024) -> str:
+    """
+    Generates a md5sum for the uncompressed contents of compressed file.
+    Reads file in blocks to save memory.
+    :param filepath: a pathlib. Path to the compressed file
+    :param block_size: Block size in bytes
+    :return: a md5sum as hexadecimal string.
+    """
+    with xopen(filepath, 'rb') as file_handler:  # Read the file in bytes
+        return file_handle_md5sum(cast(IO[bytes], file_handler), block_size)
+
+
+def file_handle_md5sum(file_handler: IO[bytes], block_size) -> str:
+    """
+    Generates a md5sum for a file handle. Reads file in blocks to save memory.
+    :param file_handler: a readable binary file handler
+    :param block_size: Block size in bytes
+    :return: a md5sum as hexadecimal string.
+    """
+    hasher = hashlib.md5()
+    for block in iter(lambda: file_handler.read(block_size), b''):
+        hasher.update(block)
     return hasher.hexdigest()
 
 

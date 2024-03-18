@@ -117,11 +117,12 @@ def __pytest_workflow_cli():  # pragma: no cover
     return parser
 
 
-def pytest_collect_file(file_path, path, parent):
+def pytest_collect_file(file_path, parent):
     """Collection hook
     This collects the yaml files that start with "test" and end with
     .yaml or .yml"""
-    if path.ext in [".yml", ".yaml"] and path.basename.startswith("test"):
+    if (file_path.suffix in [".yml", ".yaml"] and
+            file_path.name.startswith("test")):
         return YamlFile.from_parent(parent, path=file_path)
     return None
 

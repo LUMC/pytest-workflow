@@ -20,7 +20,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="pytest-workflow",
-    version="2.0.1",
+    version="2.1.0",
     description="A pytest plugin for configuring workflow/pipeline tests "
                 "using YAML files",
     author="Leiden University Medical Center",
@@ -39,22 +39,24 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Development Status :: 5 - Production/Stable",
         "License :: OSI Approved :: "
         "GNU Affero General Public License v3 or later (AGPLv3+)",
         "Framework :: Pytest",
     ],
-    # Because we cannot test anymore on Python 3.6.
-    python_requires=">=3.7",
+    # Because we cannot test anymore on Python 3.8.
+    python_requires=">=3.8",
     install_requires=[
         "pytest>=7.0.0",  # To use pathlib Path's in pytest
         "pyyaml",
-        "jsonschema"
+        "jsonschema",
+        "xopen>=1.4.0",
+        "zstandard",
     ],
     # This line makes sure the plugin is automatically loaded when it is
     # installed in the same environment as pytest. No need to configure

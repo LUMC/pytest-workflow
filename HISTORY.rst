@@ -2,10 +2,23 @@
 Changelog
 ==========
 
+
 .. Newest changes should be on top.
 
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
+
+version 2.1.0
+---------------------------
++ Python version 3.7 support is dropped because it is deprecated. Python
+  version 3.12 was added.
++ Fixed a bug where pytest 8.1+ would raise a ``PluginValidationError`` because
+  the hook ``pytest_collect_file()`` has finally dropped the deprecated
+  argument ``path`` from its specification.
++ Add extract_md5sum check on uncompressed contents of compressed output files.
+  Gzipped files contain a timestamp which makes it hard to directly compare the
+  md5sums of gzipped files.
++ Document naming conventions for Python test discovery
 
 version 2.0.1
 ---------------------------

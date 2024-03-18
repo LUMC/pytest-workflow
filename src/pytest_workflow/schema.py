@@ -125,6 +125,7 @@ class ContentTest(object):
 class FileTest(ContentTest):
     """A class that contains all the properties of a to be tested file."""
     def __init__(self, path: str, md5sum: Optional[str] = None,
+                 extract_md5sum: Optional[str] = None,
                  should_exist: bool = DEFAULT_FILE_SHOULD_EXIST,
                  contains: Optional[List[str]] = None,
                  must_not_contain: Optional[List[str]] = None,
@@ -135,6 +136,7 @@ class FileTest(ContentTest):
         A container object
         :param path: the path to the file
         :param md5sum: md5sum of the file contents
+        :param extract_md5sum: md5sum of the extracted file contents
         :param should_exist: whether the file should exist or not
         :param contains: a list of strings that should be present in the file
         :param must_not_contain: a list of strings that should not be present
@@ -150,6 +152,7 @@ class FileTest(ContentTest):
                          encoding=encoding)
         self.path = Path(path)
         self.md5sum = md5sum
+        self.extract_md5sum = extract_md5sum
         self.should_exist = should_exist
 
 

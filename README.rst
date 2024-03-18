@@ -127,6 +127,7 @@ predefined tests as well as custom tests are possible.
       - path: "TomCruise.txt.gz"       # Gzipped files can also be searched, provided their extension is '.gz'
         contains:
           - "starring"
+        extract_md5sum: e27c52f6b5f8152aa3ef58be7bdacc4d   # Md5sum of the uncompressed file (optional)
     stderr:                            # Options for testing stderr (optional)
       contains:                        # A list of strings which should be in stderr (optional)
         - "BSOD error, please contact the IT crowd"
