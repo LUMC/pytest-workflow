@@ -8,7 +8,7 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
-version 2.1.0-dev
+version 2.1.0
 ---------------------------
 + Python version 3.7 support is dropped because it is deprecated. Python
   version 3.12 was added.
