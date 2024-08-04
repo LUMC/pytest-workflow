@@ -105,3 +105,17 @@ def test_workflow_matching_exit_code():
     workflow2 = Workflow("grep", desired_exit_code=2)
     workflow2.run()
     assert workflow2.matching_exitcode()
+
+
+def test_capture_unsupported():
+    with pytest.raises(ValueError) as error:
+        Workflow("echo moo", capture="tee-sys")
+    error.match("only capture methods")
+
+
+def test_capture_no():
+    workflow = Workflow("echo moo", capture="no")
+    workflow.run()
+    with pytest.raises(ValueError) as error:
+        workflow.stdout
+    error.match("Stdout not available")

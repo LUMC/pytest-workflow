@@ -8,6 +8,10 @@ Changelog
 .. This document is user facing. Please word the changes in such a way
 .. that users understand how the changes affect the new version.
 
+unreleased
+---------------------------
++ ``-s`` pytest flag is now supported, streaming stdout/stderr as the tests run
+
 version 2.1.0
 ---------------------------
 + Python version 3.7 support is dropped because it is deprecated. Python

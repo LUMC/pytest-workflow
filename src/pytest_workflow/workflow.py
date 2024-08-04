@@ -27,7 +27,11 @@ import tempfile
 import threading
 import time
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Literal, Optional
+
+
+# pytest does not export this type
+CaptureMethod = Literal["fd", "sys", "no", "tee-sys"]
 
 
 class Workflow(object):
@@ -36,7 +40,8 @@ class Workflow(object):
                  command: str,
                  cwd: Optional[Path] = None,
                  name: Optional[str] = None,
-                 desired_exit_code: int = 0):
+                 desired_exit_code: int = 0,
+                 capture: CaptureMethod = "fd"):
         """
         Initiates a workflow object
         :param command: The string that represents the command to be run
@@ -48,24 +53,35 @@ class Workflow(object):
         if command == "":
             raise ValueError("command can not be an empty string")
         self.command = command
+
         # Always ensure a name. command.split()[0] can't fail because we tested
         # for emptiness.
         self.name = name or command.split()[0]
         self.cwd = cwd or Path()
+
         # For long running workflows it is best to save the stdout and stderr
         # to a file which can be checked with ``tail -f``.
         # stdout and stderr will be written to a tempfile if no CWD is given
         # to prevent clutter created when testing.
-        self.stdout_file = (
-            Path(tempfile.NamedTemporaryFile(prefix=self.name,
-                                             suffix=".out").name)
-            if cwd is None
-            else self.cwd / Path("log.out"))
-        self.stderr_file = (
-            Path(tempfile.NamedTemporaryFile(prefix=self.name,
-                                             suffix=".err").name)
-            if cwd is None
-            else self.cwd / Path("log.err"))
+        supported_capture_methods = ["no", "fd"]
+        if capture not in supported_capture_methods:
+            raise ValueError("only capture methods "
+                             f"{supported_capture_methods} are supported, "
+                             f"found {capture}")
+        self.capture = capture
+        self.stdout_file = None
+        self.stderr_file = None
+        if self.capture != "no":
+            self.stdout_file = (
+                Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                                 suffix=".out").name)
+                if cwd is None
+                else self.cwd / Path("log.out"))
+            self.stderr_file = (
+                Path(tempfile.NamedTemporaryFile(prefix=self.name,
+                                                 suffix=".err").name)
+                if cwd is None
+                else self.cwd / Path("log.err"))
         self._popen: Optional[subprocess.Popen] = None
         self._started = False
         self.errors: List[Exception] = []
@@ -82,8 +98,9 @@ class Workflow(object):
                 stdout_h = None
                 stderr_h = None
                 try:
-                    stdout_h = self.stdout_file.open('wb')
-                    stderr_h = self.stderr_file.open('wb')
+                    if self.capture != "no":
+                        stdout_h = self.stdout_file.open('wb')
+                        stderr_h = self.stderr_file.open('wb')
                     sub_process_args = shlex.split(self.command)
                     self._popen = subprocess.Popen(
                         sub_process_args, stdout=stdout_h,
@@ -152,12 +169,20 @@ class Workflow(object):
     @property
     def stdout(self) -> bytes:
         self.wait()
+        if self.stdout_file is None:
+            raise ValueError(
+                f"Stdout not available with capture={self.capture}"
+            )
         with self.stdout_file.open('rb') as stdout:
             return stdout.read()
 
     @property
     def stderr(self) -> bytes:
         self.wait()
+        if self.stderr_file is None:
+            raise ValueError(
+                f"Stdout not available with capture={self.capture}"
+            )
         with self.stderr_file.open('rb') as stderr:
             return stderr.read()
 

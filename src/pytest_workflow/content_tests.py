@@ -72,7 +72,7 @@ def check_content(strings: Iterable[str],
 
 class ContentTestCollector(pytest.Collector):
     def __init__(self, name: str, parent: pytest.Collector,
-                 filepath: Path,
+                 filepath: Optional[Path],
                  content_test: ContentTest,
                  workflow: Workflow,
                  content_name: Optional[str] = None):
@@ -105,6 +105,11 @@ class ContentTestCollector(pytest.Collector):
         When a file we test is not produced, we save the FileNotFoundError so
         we can give an accurate repr_failure."""
         self.workflow.wait()
+
+        if self.filepath is None:
+            self.file_not_found = True
+            return
+
         strings_to_check = (self.content_test.contains +
                             self.content_test.must_not_contain)
         patterns_to_check = (self.content_test.contains_regex +
@@ -195,6 +200,10 @@ class ContentTestItem(pytest.Item):
         name = f"{contain} '{string}'"
         super().__init__(name, parent=parent)
         self.parent: ContentTestCollector = parent  # explicitly declare type
+        assert self.parent.filepath is not None, (
+            f"Invalid test {content_name}, unknown file to validate. "
+            "This can happen if you specify stdout/stderr tests while "
+            "specifying a different capture method.")
         self.should_contain = should_contain
         self.string = string
         self.content_name = content_name

@@ -179,3 +179,19 @@ def test_messages_exitcode(test: str, message: str, pytester):
     # possible due to multiple levels of process launching.
     result = pytester.runpytest("-v", "--sb", "5")
     assert message in result.stdout.str()
+
+
+def test_invalid_test_capture(pytester):
+    test_yml_contents = """\
+    - name: tee test
+      command: bash -c "echo foo"
+      stdout:
+        contains:
+          - foo
+    """
+    pytester.makefile(".yml", textwrap.dedent(test_yml_contents))
+    result = pytester.runpytest("-v", "-s")
+    assert (
+        "Invalid test 'tee test': stdout, unknown file to validate"
+        in result.stdout.str()
+    )

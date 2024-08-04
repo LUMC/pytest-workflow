@@ -409,7 +409,8 @@ class WorkflowTestsCollector(pytest.Collector):
         workflow = Workflow(command=self.workflow_test.command,
                             cwd=tempdir,
                             name=self.workflow_test.name,
-                            desired_exit_code=self.workflow_test.exit_code)
+                            desired_exit_code=self.workflow_test.exit_code,
+                            capture=self.config.getoption("capture"))
 
         # Add the workflow to the workflow queue.
         self.config.workflow_queue.put(workflow)
